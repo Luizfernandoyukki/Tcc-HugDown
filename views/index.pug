@@ -1,0 +1,64 @@
+extends layout
+
+block content
+  .feed-container
+    h2 Feed de Postagens
+    if posts && posts.length
+      each post in posts
+        .post
+          .post-header
+            img.post-avatar(src=post.foto_perfil || '/images/default-avatar.png', alt=post.nome_usuario, height='40')
+            .post-user-info
+              span.post-user= post.nome_usuario
+              if post.verificado
+                span.post-verified(title='Verificado') 🟢
+              span.post-date= post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao
+              if post.nome_categoria
+                span.post-category(style={color: post.cor_categoria})= post.nome_categoria
+          .post-content
+            if post.tipo_postagem === 'text'
+              p= post.conteudo
+            else if post.tipo_postagem === 'photo'
+              img.post-image(src=post.url_midia, alt='Foto')
+            else if post.tipo_postagem === 'video'
+              video.post-video(controls)
+                source(src=post.url_midia, type=post.tipo_midia)
+                | Seu navegador não suporta vídeo.
+            else if post.tipo_postagem === 'article'
+              h3 Artigo Científico
+              p= post.conteudo
+          .post-footer
+            span.post-likes
+              img.icon-like(src='/images/like.png', alt='Curtidas', height='20')
+              | #{post.total_curtidas || 0} Curtidas
+            span.post-comments
+              img.icon-comment(src='/images/comment.png', alt='Comentários', height='20')
+              | #{post.total_comentarios || 0} Comentários
+            span.post-shares
+              img.icon-share(src='/images/share.png', alt='Compartilhamentos', height='20')
+              | #{post.total_compartilhamentos || 0} Compartilhamentos
+    else
+      p Nenhuma postagem encontrada.
+
+  .sidebar
+    h3 Sugestões de Amigos
+    if amigos && amigos.length
+      ul.suggestions
+        each amigo in amigos
+          li
+            img(src=amigo.foto_perfil || '/images/default-avatar.png', alt=amigo.nome_usuario, height='32')
+            span= amigo.nome_usuario
+            button.adicionar-adicionar(type='button') Adicionar Amigo
+    else
+      p Nenhuma sugestão de amigo no momento.
+
+    h3 Grupos Populares
+    if grupos && grupos.length
+      ul.groups
+        each grupo in grupos
+          li
+            img(src=grupo.foto_grupo || '/images/logo.jpg', alt=grupo.nome_grupo, height='32')
+            span= grupo.nome_grupo
+            button.entrar-entrar(type='button') Entrar
+    else
+      p Nenhum grupo popular encontrado.

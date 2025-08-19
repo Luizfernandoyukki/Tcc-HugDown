@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  h1 Ocorreu um erro!
+  h2 Código do erro: #{error.status || 500}
+  p Desculpe, algo inesperado aconteceu. Nossa equipe já foi notificada.
+  if message
+    h3= message
+  if error && error.stack
+    h4

@@ -1,0 +1,32 @@
+doctype html
+html
+  head
+    title= HugDown
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body
+    // Cabeçalho
+    header.header
+      .header-content
+        a.logo(href='/')
+          img#logo-hugdown(src='/images/logo.jpg', alt='HugDown Logo', height='40')
+        .header-icons
+          a(href='/notifications', title='Notificações')
+            img#icon-notificacao(src='/images/notificação.png', alt='Notificações', height='28')
+          a(href='/search', title='Pesquisar')
+            img#icon-lupa(src='/images/lupa.png', alt='Pesquisar', height='28')
+          a(href='/post/new', title='Nova postagem')
+            img#icon-mais(src='/images/mais.png', alt='Nova postagem', height='28')
+
+    // Conteúdo principal
+    main
+      block content
+
+    // Rodapé fixo
+    footer.footer
+      .footer-content
+        a(href='/settings', title='Configurações')
+          img#icon-engrenagem(src='/images/engrenagem.png', alt='Configurações', height='28')
+        a(href='/chat', title='Chat')
+          img#icon-chat(src='/images/chat.png', alt='Chat', height='28')
