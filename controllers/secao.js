@@ -1,0 +1,70 @@
+const { Secao, SecaoTraducao } = require('../models');
+
+// Listar todas as seções
+exports.listar = async (req, res) => {
+  try {
+    const secoes = await Secao.findAll({
+      include: [
+        { model: SecaoTraducao, as: 'traducoes' }
+      ]
+    });
+    res.json(secoes);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Buscar seção por ID
+exports.buscarPorId = async (req, res) => {
+  try {
+    const secao = await Secao.findByPk(req.params.id, {
+      include: [
+        { model: SecaoTraducao, as: 'traducoes' }
+      ]
+    });
+    if (!secao) {
+      return res.status(404).json({ error: 'Seção não encontrada' });
+    }
+    res.json(secao);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Criar nova seção
+exports.criar = async (req, res) => {
+  try {
+    const novaSecao = await Secao.create(req.body);
+    res.status(201).json(novaSecao);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Atualizar seção
+exports.atualizar = async (req, res) => {
+  try {
+    const secao = await Secao.findByPk(req.params.id);
+    if (!secao) {
+      return res.status(404).json({ error: 'Seção não encontrada' });
+    }
+    await secao.update(req.body);
+    res.json(secao);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Remover seção
+exports.remover = async (req, res) => {
+  try {
+    const secao = await Secao.findByPk(req.params.id);
+    if (!secao) {
+      return res.status(404).json({ error: 'Seção não encontrada' });
+    }
+    await secao.destroy();
+    res.json({ mensagem: 'Seção removida com sucesso' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
