@@ -1,9 +1,11 @@
+require('dotenv').config();
+
 module.exports = {
   development: {
-    username: 'root',
-    password: '', 
-    database: 'HugDown_rede_social',
-    host: '127.0.0.1',
+    username: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'HugDown_rede_social',
+    host: process.env.DB_HOST || '127.0.0.1',
     dialect: 'mysql',
     logging: false,
     define: {
@@ -12,18 +14,18 @@ module.exports = {
     }
   },
   test: {
-    username: 'root',
-    password: '',
-    database: 'HugDown_rede_social_test',
-    host: '127.0.0.1',
+    username: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME_TEST || 'HugDown_rede_social_test',
+    host: process.env.DB_HOST || '127.0.0.1',
     dialect: 'mysql',
     logging: false
   },
   production: {
-    username: 'root',
-    password: '',
-    database: 'HugDown_rede_social',
-    host: '127.0.0.1',
+    username: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || '',
+    database: process.env.DB_NAME || 'HugDown_rede_social',
+    host: process.env.DB_HOST || '127.0.0.1',
     dialect: 'mysql',
     logging: false
   }

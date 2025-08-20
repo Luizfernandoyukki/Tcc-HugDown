@@ -1,13 +1,17 @@
 extends layout
 
+block styles
+  link(rel='stylesheet', href='/stylesheets/error.css')
+
 block content
-  .error-container(style="max-width: 600px; margin: 60px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px #0002; padding: 32px; text-align: center;")
-    h1(style="color: #d9534f; margin-bottom: 12px;") Ocorreu um erro!
-    h2(style="color: #555; margin-bottom: 24px;") Código do erro: #{error.status || 500}
-    p(style="color: #888; margin-bottom: 18px;") Desculpe, algo inesperado aconteceu. Nossa equipe já foi notificada.
-    if message
-      h3(style="color: #333; margin-bottom: 18px;")= message
-    if error && error.stack
-      details(style="text-align: left; margin-top: 24px;")
-        summary(style="cursor: pointer; color: #007bff; font-weight: bold;") Ver detalhes técnicos (log)
-        pre(style="background: #f8f8f8; color: #c7254e; padding: 16px; border-radius: 6px; overflow-x: auto;")= error.stack
+  .container.mt-5
+    #error-container.bg-white.rounded.shadow.p-4.mx-auto(style="max-width: 600px;")
+      h1#error-title.text-danger.mb-3 Ocorreu um erro!
+      h2#error-code.text-secondary.mb-4 Código do erro: #{error.status || 500}
+      p#error-message.text-muted.mb-3 Desculpe, algo inesperado aconteceu. Nossa equipe já foi notificada.
+      if message
+        h3#error-extra-message.text-dark.mb-3= message
+      if error && error.stack
+        details#error-details.mt-4
+          summary#error-details-summary.text-primary.fw-bold(style="cursor:pointer;") Ver detalhes técnicos (log)
+          pre#error-stack.bg-light.text-danger.p-3.rounded.mt-2= error.stack

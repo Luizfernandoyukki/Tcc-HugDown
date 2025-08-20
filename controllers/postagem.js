@@ -1,15 +1,14 @@
-const { Postagem, Usuario, Grupo } = require('../models');
+const { Postagem, Usuario } = require('../models');
 
 // Listar todas as postagens
 exports.listar = async (req, res) => {
   try {
-    const postagens = await Postagem.findAll({
+    const posts = await Postagem.findAll({
       include: [
-        { model: Usuario, as: 'usuario' },
-        { model: Grupo, as: 'grupo' }
+        { model: Usuario, as: 'autor' } // Use o mesmo alias do model!
       ]
     });
-    res.json(postagens);
+    res.json(posts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -20,8 +19,7 @@ exports.buscarPorId = async (req, res) => {
   try {
     const postagem = await Postagem.findByPk(req.params.id, {
       include: [
-        { model: Usuario, as: 'usuario' },
-        { model: Grupo, as: 'grupo' }
+        { model: Usuario, as: 'autor' }
       ]
     });
     if (!postagem) {

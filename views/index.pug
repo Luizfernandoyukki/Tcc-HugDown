@@ -1,71 +1,81 @@
 extends layout
 
+block styles
+  link(rel='stylesheet', href='/stylesheets/index.css')
+
 block content
-  .main-container(style="display: flex; gap: 32px; justify-content: center;")
+  .container.mt-4
+    // Categorias no topo, como botões
+    if categorias && categorias.length
+      .d-flex.flex-wrap.gap-2.justify-content-center.mb-4
+        each categoria in categorias
+          button.btn.btn-outline-success.categoria-btn(type='button')= categoria.nome_categoria
+    else
+      p.text-center.text-muted Nenhuma categoria encontrada.
+
     // Feed de postagens
-    .feed(style="flex: 2; max-width: 600px;")
-      h2 Feed de Postagens
-      if posts && posts.length
-        each post in posts
-          .post-card(style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; margin-bottom: 24px; padding: 20px;")
-            .post-header(style="display: flex; align-items: center; gap: 12px;")
-              img.post-avatar(src=post.foto_perfil || '/images/default-avatar.png', alt=post.nome_usuario, height='48', width='48', style="border-radius: 50%; border: 2px solid #eee;")
-              .post-user-info
-                span.post-user(style="font-weight: bold; font-size: 1.1em;")= post.nome_usuario
-                if post.verificado
-                  img(src='/images/verificado.png', alt='Verificado', title='Verificado', height='18', style="margin-left: 4px;")
-                br
-                span.post-date(style="color: #888; font-size: 0.9em;")= post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao
-                if post.nome_categoria
-                  br
-                  span.post-category(style={color: post.cor_categoria, 'font-size': '0.9em'})= post.nome_categoria
-            .post-content(style="margin-top: 12px;")
-              if post.tipo_postagem === 'text'
-                p= post.conteudo
-              else if post.tipo_postagem === 'photo'
-                img.post-image(src=post.url_midia, alt='Foto', style="max-width: 100%; border-radius: 8px;")
-              else if post.tipo_postagem === 'video'
-                video.post-video(controls, style="max-width: 100%; border-radius: 8px;")
-                  source(src=post.url_midia, type=post.tipo_midia)
-                  | Seu navegador não suporta vídeo.
-              else if post.tipo_postagem === 'article'
-                h3(style="margin-bottom: 6px;") Artigo Científico
-                p= post.conteudo
-            .post-footer(style="display: flex; gap: 24px; margin-top: 16px; color: #555; font-size: 1em;")
-              span.post-likes
-                img.icon-like(src='/images/like.png', alt='Curtidas', height='20', style="vertical-align: middle;")
-                |  #{post.total_curtidas || 0}
-              span.post-comments
-                img.icon-comment(src='/images/comment.png', alt='Comentários', height='20', style="vertical-align: middle;")
-                |  #{post.total_comentarios || 0}
-              span.post-shares
-                img.icon-share(src='/images/share.png', alt='Compartilhamentos', height='20', style="vertical-align: middle;")
-                |  #{post.total_compartilhamentos || 0}
-      else
-        p(style="color: #888; text-align: center; margin-top: 40px;") Nenhuma postagem encontrada.
-
-    // Sidebar
-    .sidebar(style="flex: 1; min-width: 260px; max-width: 320px;")
-      .sidebar-section(style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; margin-bottom: 24px; padding: 18px;")
-        h3(style="margin-top: 0;") Sugestões de Amigos
-        if amigos && amigos.length
-          ul.suggestions(style="list-style: none; padding: 0;")
-            each amigo in amigos
-              li(style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;")
-                img(src=amigo.foto_perfil || '/images/default-avatar.png', alt=amigo.nome_usuario, height='36', width='36', style="border-radius: 50%; border: 1px solid #eee;")
-                span= amigo.nome_usuario
-                button.adicionar-amigo(type='button', style="margin-left:auto; background: #007bff; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer;") Adicionar
+    .row.justify-content-center
+      .col-lg-7.col-md-9
+        h2.mb-4.text-center.text-success Feed de Postagens
+        if posts && posts.length
+          each post in posts
+            .card.mb-4.shadow-sm
+              .card-body
+                .d-flex.align-items-center.mb-2
+                  img.rounded-circle.me-2(src=post.foto_perfil || '/images/default-avatar.png', alt=post.nome_usuario, width='48', height='48', style="border:2px solid #eee;")
+                  .flex-grow-1
+                    span.fw-bold= post.nome_usuario
+                    if post.verificado
+                      img.ms-1(src='/images/verificado.png', alt='Verificado', title='Verificado', height='18')
+                    br
+                    span.text-muted.small= post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao
+                    if post.nome_categoria
+                      br
+                      span.badge.rounded-pill.text-bg-success.ms-1(style="background:rgba(0,180,120,0.13); color:#009e60;")= post.nome_categoria
+                .mt-2
+                  if post.tipo_postagem === 'text'
+                    p.mb-2= post.conteudo
+                  else if post.tipo_postagem === 'photo'
+                    img.img-fluid.rounded.mb-2(src=post.url_midia, alt='Foto')
+                  else if post.tipo_postagem === 'video'
+                    video.w-100.rounded.mb-2(controls)
+                      source(src=post.url_midia, type=post.tipo_midia)
+                      | Seu navegador não suporta vídeo.
+                  else if post.tipo_postagem === 'article'
+                    h6.text-success.mb-1 Artigo Científico
+                    p.mb-2= post.conteudo
+                .d-flex.justify-content-between.align-items-center.mt-3
+                  span
+                    img.me-1(src='/images/like.png', alt='Curtidas', height='20')
+                    | #{post.total_curtidas || 0}
+                  span
+                    img.me-1(src='/images/comment.png', alt='Comentários', height='20')
+                    | #{post.total_comentarios || 0}
+                  span
+                    img.me-1(src='/images/share.png', alt='Compartilhamentos', height='20')
+                    | #{post.total_compartilhamentos || 0}
         else
-          p Nenhuma sugestão de amigo no momento.
+          p.text-center.text-muted.mt-5 Nenhuma postagem encontrada.
 
-      .sidebar-section(style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 18px;")
-        h3(style="margin-top: 0;") Grupos Populares
-        if grupos && grupos.length
-          ul.groups(style="list-style: none; padding: 0;")
-            each grupo in grupos
-              li(style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;")
-                img(src=grupo.foto_grupo || '/images/logo.jpg', alt=grupo.nome_grupo, height='36', width='36', style="border-radius: 50%; border: 1px solid #eee;")
-                span= grupo.nome_grupo
-                button.entrar-grupo(type='button', style="margin-left:auto; background: #28a745; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer;") Entrar
-        else
-          p Nenhum grupo popular encontrado.
+        // Configurações e perfil (aparece embaixo no mobile)
+        .card.shadow-sm.mt-5.mb-4.d-block.d-md-none(style="background:rgba(0,180,120,0.13); border:none;")
+          .card-body.p-3.text-center
+            if usuario
+              img.rounded-circle.mb-2(src=usuario.foto_perfil || '/images/default-avatar.png', alt=usuario.nome_usuario, width='56', height='56', style="border:2px solid #eee;")
+              h6.mb-1= usuario.nome_usuario
+              a.btn.btn-outline-success.btn-sm.mt-2(href='/usuarios/' + usuario.id_usuario) Meu Perfil
+              br
+              a.btn.btn-outline-secondary.btn-sm.mt-2(href='/settings') Configurações
+            else
+              p.text-muted Faça login para acessar seu perfil.
+
+  // Configurações e perfil (aparece na lateral só em telas grandes)
+  if usuario
+    .position-fixed.top-50.end-0.translate-middle-y.d-none.d-md-block(style="width:220px; z-index:2; right:24px;")
+      .card.shadow-sm(style="background:rgba(0,180,120,0.13); border:none;")
+        .card-body.p-3.text-center
+          img.rounded-circle.mb-2(src=usuario.foto_perfil || '/images/default-avatar.png', alt=usuario.nome_usuario, width='56', height='56', style="border:2px solid #eee;")
+          h6.mb-1= usuario.nome_usuario
+          a.btn.btn-outline-success.btn-sm.mt-2(href='/usuarios/' + usuario.id_usuario) Meu Perfil
+          br
+          a.btn.btn-outline-secondary.btn-sm.mt-2(href='/settings') Configurações

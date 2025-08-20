@@ -21,9 +21,7 @@ const secaoController = require('./secao');
 const secaoTraducaoController = require('./secaoTraducao');
 const tagController = require('./tag');
 const tagTraducaoController = require('./tagTraducao');
-const userController = require('./usuario');
-const vendaController = require('./venda');
-const produtoController = require('./produto');
+const usuarioController = require('./usuario');
 
 module.exports = {
   administradorController,
@@ -49,7 +47,5 @@ module.exports = {
   secaoTraducaoController,
   tagController,
   tagTraducaoController,
-  userController,
-  vendaController,
-  produtoController,
+  usuarioController,
 };

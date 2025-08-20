@@ -1,0 +1,11 @@
+.categoria-btn {
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  border-color: #009e60;
+  color: #009e60;
+  background: rgba(0,180,120,0.07);
+}
+.categoria-btn:hover, .categoria-btn:focus {
+  background: #009e60;
+  color: #fff;
+  border-color: #009e60;
+}
