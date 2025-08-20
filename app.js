@@ -4,36 +4,74 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 
+// Importação de todas as rotas
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const usuariosRouter = require('./routes/usuarios');
+const categoriasRouter = require('./routes/categorias');
+const tagsRouter = require('./routes/tags');
+const postagensRouter = require('./routes/postagens');
+const comentariosRouter = require('./routes/comentarios');
+const gruposRouter = require('./routes/grupos');
+const amizadeRouter = require('./routes/amizade');
+const eventosRouter = require('./routes/eventos');
+const notificacoesRouter = require('./routes/notificacoes');
+const mensagensDiretasRouter = require('./routes/mensagensDiretas');
+const adminRouter = require('./routes/admin');
+const documentosVerificacaoRouter = require('./routes/documentosVerificacao');
+const curtidasRouter = require('./routes/curtidas');
+const compartilhamentosRouter = require('./routes/compartilhamentos');
+const participanteEventoRouter = require('./routes/participanteEvento');
+const membroGrupoRouter = require('./routes/membroGrupo');
+const filtrosUsuarioRouter = require('./routes/filtrosUsuario');
+const authRouter = require('./routes/auth');
+const cadastroRouter = require('./routes/cadastro');
+const loginRouter = require('./routes/login');
 
 const app = express();
 
-// view engine setup para Pug
+// Configuração da view engine Pug
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-// middlewares
+// Middlewares globais
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-// Serve arquivos estáticos corretamente da pasta public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// rotas principais
+// Rotas principais
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/usuarios', usuariosRouter);
+app.use('/categorias', categoriasRouter);
+app.use('/tags', tagsRouter);
+app.use('/postagens', postagensRouter);
+app.use('/comentarios', comentariosRouter);
+app.use('/grupos', gruposRouter);
+app.use('/amizade', amizadeRouter);
+app.use('/eventos', eventosRouter);
+app.use('/notificacoes', notificacoesRouter);
+app.use('/mensagensDiretas', mensagensDiretasRouter);
+app.use('/admin', adminRouter);
+app.use('/documentosVerificacao', documentosVerificacaoRouter);
+app.use('/curtidas', curtidasRouter);
+app.use('/compartilhamentos', compartilhamentosRouter);
+app.use('/participanteEvento', participanteEventoRouter);
+app.use('/membroGrupo', membroGrupoRouter);
+app.use('/filtrosUsuario', filtrosUsuarioRouter);
+app.use('/auth', authRouter);
+app.use('/cadastro', cadastroRouter);
+app.use('/login', loginRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  const err = new Error('Not Found');
+// 404 handler
+app.use((req, res, next) => {
+  const err = new Error('Página não encontrada');
   err.status = 404;
   next(err);
 });
 
-// error handler
-app.use(function(err, req, res, next) {
+// Error handler
+app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
