@@ -1,10 +1,13 @@
 extends layout
 
 block content
-  h1 Ocorreu um erro!
-  h2 Código do erro: #{error.status || 500}
-  p Desculpe, algo inesperado aconteceu. Nossa equipe já foi notificada.
-  if message
-    h3= message
-  if error && error.stack
-    h4
+  .error-container(style="max-width: 600px; margin: 60px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px #0002; padding: 32px; text-align: center;")
+    h1(style="color: #d9534f; margin-bottom: 12px;") Ocorreu um erro!
+    h2(style="color: #555; margin-bottom: 24px;") Código do erro: #{error.status || 500}
+    p(style="color: #888; margin-bottom: 18px;") Desculpe, algo inesperado aconteceu. Nossa equipe já foi notificada.
+    if message
+      h3(style="color: #333; margin-bottom: 18px;")= message
+    if error && error.stack
+      details(style="text-align: left; margin-top: 24px;")
+        summary(style="cursor: pointer; color: #007bff; font-weight: bold;") Ver detalhes técnicos (log)
+        pre(style="background: #f8f8f8; color: #c7254e; padding: 16px; border-radius: 6px; overflow-x: auto;")= error.stack

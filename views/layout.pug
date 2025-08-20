@@ -6,26 +6,27 @@ html
     meta(name='viewport', content='width=device-width, initial-scale=1')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
-    // Cabeçalho
-    header.header
-      .header-content
-        a.logo(href='/')
-          img#logo-hugdown(src='/images/logo.jpg', alt='HugDown Logo', height='40')
-        .header-icons
-          a(href='/notifications', title='Notificações')
-            img#icon-notificacao(src='/images/notificação.png', alt='Notificações', height='28')
-          a(href='/search', title='Pesquisar')
-            img#icon-lupa(src='/images/lupa.png', alt='Pesquisar', height='28')
-          a(href='/post/new', title='Nova postagem')
-            img#icon-mais(src='/images/mais.png', alt='Nova postagem', height='28')
+    // Cabeçalho fixo
+    header.header(style="background: #fff; box-shadow: 0 2px 8px #0001; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 10;")
+      .header-content(style="display: flex; align-items: center; gap: 24px;")
+        a.logo(href='/', style="display: flex; align-items: center; gap: 8px;")
+          img#logo-hugdown(src='/images/logo.jpg', alt='HugDown Logo', height='40', style="border-radius: 8px;")
+          span(style="font-size: 1.5em; font-weight: bold; color: #007bff;") HugDown
+      .header-icons(style="display: flex; align-items: center; gap: 20px;")
+        a(href='/notifications', title='Notificações')
+          img#icon-notificacao(src='/images/notificação.png', alt='Notificações', height='28')
+        a(href='/search', title='Pesquisar')
+          img#icon-lupa(src='/images/lupa.png', alt='Pesquisar', height='28')
+        a(href='/post/new', title='Nova postagem')
+          img#icon-mais(src='/images/mais.png', alt='Nova postagem', height='28')
 
     // Conteúdo principal
-    main
+    main(style="min-height: 80vh; background: #f4f6fa; padding: 32px 0;")
       block content
 
     // Rodapé fixo
-    footer.footer
-      .footer-content
+    footer.footer(style="background: #fff; box-shadow: 0 -2px 8px #0001; padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: flex-end; position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;")
+      .footer-content(style="display: flex; align-items: center; gap: 24px;")
         a(href='/settings', title='Configurações')
           img#icon-engrenagem(src='/images/engrenagem.png', alt='Configurações', height='28')
         a(href='/chat', title='Chat')
