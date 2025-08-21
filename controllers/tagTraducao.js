@@ -1,7 +1,7 @@
 const { TagTraducao, Tag, Idioma } = require('../models');
 
 // Listar todas as traduções de tags
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const traducoes = await TagTraducao.findAll({
       include: [
@@ -9,64 +9,58 @@ exports.listar = async (req, res) => {
         { model: Idioma, as: 'idioma' }
       ]
     });
-    res.json(traducoes);
+    return traducoes;
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw new Error('Erro ao buscar traduções de tags: ' + error.message);
   }
 };
 
 // Buscar tradução de tag por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const traducao = await TagTraducao.findByPk(req.params.id, {
+    const traducao = await TagTraducao.findByPk(id, {
       include: [
         { model: Tag, as: 'tag' },
         { model: Idioma, as: 'idioma' }
       ]
     });
-    if (!traducao) {
-      return res.status(404).json({ error: 'Tradução de tag não encontrada' });
-    }
-    res.json(traducao);
+    if (!traducao) throw new Error('Tradução de tag não encontrada');
+    return traducao;
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw new Error('Erro ao buscar tradução de tag: ' + error.message);
   }
 };
 
 // Criar nova tradução de tag
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const novaTraducao = await TagTraducao.create(req.body);
-    res.status(201).json(novaTraducao);
+    const novaTraducao = await TagTraducao.create(dados);
+    return novaTraducao;
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    throw new Error('Erro ao criar tradução de tag: ' + error.message);
   }
 };
 
 // Atualizar tradução de tag
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id, dados) => {
   try {
-    const traducao = await TagTraducao.findByPk(req.params.id);
-    if (!traducao) {
-      return res.status(404).json({ error: 'Tradução de tag não encontrada' });
-    }
-    await traducao.update(req.body);
-    res.json(traducao);
+    const traducao = await TagTraducao.findByPk(id);
+    if (!traducao) throw new Error('Tradução de tag não encontrada');
+    await traducao.update(dados);
+    return traducao;
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    throw new Error('Erro ao atualizar tradução de tag: ' + error.message);
   }
 };
 
 // Remover tradução de tag
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
-    const traducao = await TagTraducao.findByPk(req.params.id);
-    if (!traducao) {
-      return res.status(404).json({ error: 'Tradução de tag não encontrada' });
-    }
+    const traducao = await TagTraducao.findByPk(id);
+    if (!traducao) throw new Error('Tradução de tag não encontrada');
     await traducao.destroy();
-    res.json({ mensagem: 'Tradução de tag removida com sucesso' });
+    return { mensagem: 'Tradução de tag removida com sucesso' };
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw new Error('Erro ao remover tradução de tag: ' + error.message);
   }
 };

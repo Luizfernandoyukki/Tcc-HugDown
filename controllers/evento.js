@@ -1,7 +1,7 @@
 const { Evento, Usuario, Categoria, ParticipanteEvento } = require('../models');
 
 // Listar todos os eventos
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const eventos = await Evento.findAll({
       include: [
@@ -10,62 +10,62 @@ exports.listar = async (req, res) => {
         { model: ParticipanteEvento, as: 'participantes' }
       ]
     });
-    res.json(eventos);
+    return eventos;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar eventos', details: err.message });
+    throw new Error('Erro ao buscar eventos: ' + err.message);
   }
 };
 
 // Buscar evento por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const evento = await Evento.findByPk(req.params.id, {
+    const evento = await Evento.findByPk(id, {
       include: [
         { model: Usuario, as: 'organizador' },
         { model: Categoria, as: 'categoria' },
         { model: ParticipanteEvento, as: 'participantes' }
       ]
     });
-    if (!evento) return res.status(404).json({ error: 'Evento não encontrado' });
-    res.json(evento);
+    if (!evento) throw new Error('Evento não encontrado');
+    return evento;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar evento', details: err.message });
+    throw new Error('Erro ao buscar evento: ' + err.message);
   }
 };
 
 // Criar novo evento
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const novo = await Evento.create(req.body);
-    res.status(201).json(novo);
+    const novo = await Evento.create(dados);
+    return novo;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar evento', details: err.message });
+    throw new Error('Erro ao criar evento: ' + err.message);
   }
 };
 
 // Atualizar evento
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id, dados) => {
   try {
-    const [updated] = await Evento.update(req.body, {
-      where: { id_evento: req.params.id }
+    const [updated] = await Evento.update(dados, {
+      where: { id_evento: id }
     });
-    if (!updated) return res.status(404).json({ error: 'Evento não encontrado' });
-    const eventoAtualizado = await Evento.findByPk(req.params.id);
-    res.json(eventoAtualizado);
+    if (!updated) throw new Error('Evento não encontrado');
+    const eventoAtualizado = await Evento.findByPk(id);
+    return eventoAtualizado;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao atualizar evento', details: err.message });
+    throw new Error('Erro ao atualizar evento: ' + err.message);
   }
 };
 
 // Remover evento
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
     const deleted = await Evento.destroy({
-      where: { id_evento: req.params.id }
+      where: { id_evento: id }
     });
-    if (!deleted) return res.status(404).json({ error: 'Evento não encontrado' });
-    res.json({ message: 'Evento removido com sucesso' });
+    if (!deleted) throw new Error('Evento não encontrado');
+    return { message: 'Evento removido com sucesso' };
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao remover evento', details: err.message });
+    throw new Error('Erro ao remover evento: ' + err.message);
   }
 };

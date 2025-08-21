@@ -1,70 +1,67 @@
 const { Notificacao, Usuario } = require('../models');
 
 // Listar todas as notificações
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const notificacoes = await Notificacao.findAll({
       include: [
         { model: Usuario, as: 'usuario' }
       ]
     });
-    res.json(notificacoes);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    return notificacoes;
+  } catch (err) {
+    throw new Error('Erro ao buscar notificações: ' + err.message);
   }
 };
 
 // Buscar notificação por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const notificacao = await Notificacao.findByPk(req.params.id, {
+    const notificacao = await Notificacao.findByPk(id, {
       include: [
         { model: Usuario, as: 'usuario' }
       ]
     });
-    if (!notificacao) {
-      return res.status(404).json({ error: 'Notificação não encontrada' });
-    }
-    res.json(notificacao);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    if (!notificacao) throw new Error('Notificação não encontrada');
+    return notificacao;
+  } catch (err) {
+    throw new Error('Erro ao buscar notificação: ' + err.message);
   }
 };
 
 // Criar nova notificação
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const novaNotificacao = await Notificacao.create(req.body);
-    res.status(201).json(novaNotificacao);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+    const nova = await Notificacao.create(dados);
+    return nova;
+  } catch (err) {
+    throw new Error('Erro ao criar notificação: ' + err.message);
   }
 };
 
 // Atualizar notificação
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id, dados) => {
   try {
-    const notificacao = await Notificacao.findByPk(req.params.id);
-    if (!notificacao) {
-      return res.status(404).json({ error: 'Notificação não encontrada' });
-    }
-    await notificacao.update(req.body);
-    res.json(notificacao);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+    const [updated] = await Notificacao.update(dados, {
+      where: { id_notificacao: id }
+    });
+    if (!updated) throw new Error('Notificação não encontrada');
+    const notificacaoAtualizada = await Notificacao.findByPk(id);
+    return notificacaoAtualizada;
+  } catch (err) {
+    throw new Error('Erro ao atualizar notificação: ' + err.message);
   }
 };
 
 // Remover notificação
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
-    const notificacao = await Notificacao.findByPk(req.params.id);
-    if (!notificacao) {
-      return res.status(404).json({ error: 'Notificação não encontrada' });
-    }
-    await notificacao.destroy();
-    res.json({ mensagem: 'Notificação removida com sucesso' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const deleted = await Notificacao.destroy({
+      where: { id_notificacao: id }
+    });
+    if (!deleted) throw new Error('Notificação não encontrada');
+    return { message: 'Notificação removida com sucesso' };
+  } catch (err) {
+    throw new Error('Erro ao remover notificação: ' + err.message);
   }
 };

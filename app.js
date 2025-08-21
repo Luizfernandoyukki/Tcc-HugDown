@@ -3,6 +3,7 @@ const path = require('path');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const session = require('express-session');
 
 // Importação de todas as rotas
 const indexRouter = require('./routes/index');
@@ -39,6 +40,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+  secret: 'sua_chave_secreta',
+  resave: false,
+  saveUninitialized: false
+}));
 // Rotas principais
 app.use('/', indexRouter);
 app.use('/usuarios', usuariosRouter);
@@ -61,6 +67,7 @@ app.use('/filtrosUsuario', filtrosUsuarioRouter);
 app.use('/auth', authRouter);
 app.use('/cadastro', cadastroRouter);
 app.use('/login', loginRouter);
+app.get('/favicon.ico', (req, res) => res.status(204));
 
 // 404 handler
 app.use((req, res, next) => {
@@ -71,6 +78,9 @@ app.use((req, res, next) => {
 
 // Error handler
 app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,

@@ -1,16 +1,17 @@
-const { Usuario, Idioma } = require('../models');
+const { Usuario, Idioma, Amizade } = require('../models');
+const { Op } = require('sequelize');
 
 // Listar todos os usuários
-exports.listar = async (req, res) => {
+exports.listar = async (req, res, modoView) => {
   try {
     const usuarios = await Usuario.findAll({
       include: [
         { model: Idioma, as: 'idioma' }
       ]
     });
-    res.json(usuarios);
+    return usuarios; // Apenas retorna os dados!
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw error;
   }
 };
 
@@ -66,5 +67,47 @@ exports.remover = async (req, res) => {
     res.json({ mensagem: 'Usuário removido com sucesso' });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Exemplo de sugestão de amigos (ajuste conforme sua lógica)
+exports.sugestoesAmigos = async (id_usuario) => {
+  try {
+    // Busca todos os usuários que NÃO são o próprio usuário e NÃO são amigos já aceitos
+    // 1. Busca IDs dos amigos já aceitos
+    const amizades = await Amizade.findAll({
+      where: {
+        status_amizade: 'accepted',
+        [Op.or]: [
+          { id_solicitante: id_usuario },
+          { id_destinatario: id_usuario }
+        ]
+      }
+    });
+
+    // Extrai IDs dos amigos
+    const amigosIds = amizades.reduce((ids, amizade) => {
+      if (amizade.id_solicitante !== id_usuario) ids.push(amizade.id_solicitante);
+      if (amizade.id_destinatario !== id_usuario) ids.push(amizade.id_destinatario);
+      return ids;
+    }, []);
+
+    // Busca usuários que não são o próprio usuário e não estão na lista de amigos
+    const sugestoes = await Usuario.findAll({
+      where: {
+        id_usuario: {
+          [Op.notIn]: [id_usuario, ...amigosIds]
+        },
+        ativo: true
+      },
+      include: [
+        { model: Idioma, as: 'idioma' }
+      ],
+      limit: 10 // Limite de sugestões
+    });
+
+    return sugestoes;
+  } catch (error) {
+    throw error;
   }
 };

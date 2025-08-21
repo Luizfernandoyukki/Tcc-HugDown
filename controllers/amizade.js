@@ -1,7 +1,7 @@
 const { Amizade, Usuario } = require('../models');
 
 // Listar todas as amizades
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const amizades = await Amizade.findAll({
       include: [
@@ -9,61 +9,61 @@ exports.listar = async (req, res) => {
         { model: Usuario, as: 'destinatario' }
       ]
     });
-    res.json(amizades);
+    return amizades;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar amizades', details: err.message });
+    throw new Error('Erro ao buscar amizades: ' + err.message);
   }
 };
 
 // Buscar amizade por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const amizade = await Amizade.findByPk(req.params.id, {
+    const amizade = await Amizade.findByPk(id, {
       include: [
         { model: Usuario, as: 'solicitante' },
         { model: Usuario, as: 'destinatario' }
       ]
     });
-    if (!amizade) return res.status(404).json({ error: 'Amizade não encontrada' });
-    res.json(amizade);
+    if (!amizade) throw new Error('Amizade não encontrada');
+    return amizade;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar amizade', details: err.message });
+    throw new Error('Erro ao buscar amizade: ' + err.message);
   }
 };
 
 // Criar nova amizade
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const nova = await Amizade.create(req.body);
-    res.status(201).json(nova);
+    const nova = await Amizade.create(dados);
+    return nova;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar amizade', details: err.message });
+    throw new Error('Erro ao criar amizade: ' + err.message);
   }
 };
 
 // Atualizar amizade
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id, dados) => {
   try {
-    const [updated] = await Amizade.update(req.body, {
-      where: { id_amizade: req.params.id }
+    const [updated] = await Amizade.update(dados, {
+      where: { id_amizade: id }
     });
-    if (!updated) return res.status(404).json({ error: 'Amizade não encontrada' });
-    const amizadeAtualizada = await Amizade.findByPk(req.params.id);
-    res.json(amizadeAtualizada);
+    if (!updated) throw new Error('Amizade não encontrada');
+    const amizadeAtualizada = await Amizade.findByPk(id);
+    return amizadeAtualizada;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao atualizar amizade', details: err.message });
+    throw new Error('Erro ao atualizar amizade: ' + err.message);
   }
 };
 
 // Remover amizade
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
     const deleted = await Amizade.destroy({
-      where: { id_amizade: req.params.id }
+      where: { id_amizade: id }
     });
-    if (!deleted) return res.status(404).json({ error: 'Amizade não encontrada' });
-    res.json({ message: 'Amizade removida com sucesso' });
+    if (!deleted) throw new Error('Amizade não encontrada');
+    return { message: 'Amizade removida com sucesso' };
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao remover amizade', details: err.message});
+    throw new Error('Erro ao remover amizade: ' + err.message);
   }
 };

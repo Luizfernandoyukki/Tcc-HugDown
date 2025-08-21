@@ -1,7 +1,7 @@
 const { Curtida, Postagem, Usuario } = require('../models');
 
 // Listar todas as curtidas
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const curtidas = await Curtida.findAll({
       include: [
@@ -9,47 +9,47 @@ exports.listar = async (req, res) => {
         { model: Usuario, as: 'usuario' }
       ]
     });
-    res.json(curtidas);
+    return curtidas;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar curtidas', details: err.message });
+    throw new Error('Erro ao buscar curtidas: ' + err.message);
   }
 };
 
 // Buscar curtida por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const curtida = await Curtida.findByPk(req.params.id, {
+    const curtida = await Curtida.findByPk(id, {
       include: [
         { model: Postagem, as: 'postagem' },
         { model: Usuario, as: 'usuario' }
       ]
     });
-    if (!curtida) return res.status(404).json({ error: 'Curtida não encontrada' });
-    res.json(curtida);
+    if (!curtida) throw new Error('Curtida não encontrada');
+    return curtida;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar curtida', details: err.message });
+    throw new Error('Erro ao buscar curtida: ' + err.message);
   }
 };
 
 // Criar nova curtida
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const nova = await Curtida.create(req.body);
-    res.status(201).json(nova);
+    const nova = await Curtida.create(dados);
+    return nova;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar curtida', details: err.message });
+    throw new Error('Erro ao criar curtida: ' + err.message);
   }
 };
 
 // Remover curtida
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
     const deleted = await Curtida.destroy({
-      where: { id_curtida: req.params.id }
+      where: { id_curtida: id }
     });
-    if (!deleted) return res.status(404).json({ error: 'Curtida não encontrada' });
-    res.json({ message: 'Curtida removida com sucesso' });
+    if (!deleted) throw new Error('Curtida não encontrada');
+    return { message: 'Curtida removida com sucesso' };
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao remover curtida', details: err.message });
+    throw new Error('Erro ao remover curtida: ' + err.message);
   }
 };

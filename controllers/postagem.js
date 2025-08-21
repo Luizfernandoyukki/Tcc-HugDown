@@ -1,16 +1,17 @@
 const { Postagem, Usuario } = require('../models');
 
 // Listar todas as postagens
-exports.listar = async (req, res) => {
+exports.listar = async (req, res, modoView) => {
   try {
     const posts = await Postagem.findAll({
       include: [
         { model: Usuario, as: 'autor' } // Use o mesmo alias do model!
       ]
     });
-    res.json(posts);
+    return posts; // Apenas retorna os dados!
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // Em caso de erro, lance para ser tratado na rota
+    throw error;
   }
 };
 

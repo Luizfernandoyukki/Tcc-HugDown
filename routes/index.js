@@ -1,15 +1,25 @@
 const express = require('express');
 const router = express.Router();
 
-const { postagemController, grupoController, userController } = require('../controllers');
+const { postagemController, grupoController, usuarioController } = require('../controllers');
 
 // Página inicial - Feed
 router.get('/', async (req, res) => {
   try {
-    // Busca posts, sugestões de amigos e grupos populares
-    const posts = await postagemController.listar(req, res, true); // true para modo view, se necessário
-    const amigos = await userController.sugestoesAmigos ? await userController.sugestoesAmigos(req, res) : [];
-    const grupos = await grupoController.populares ? await grupoController.populares(req, res) : [];
+    // Busca posts
+    const posts = await postagemController.listar();
+
+    // Sugestões de amigos (se usuário logado)
+    let amigos = [];
+    if (req.session && req.session.userId) {
+      amigos = await usuarioController.sugestoesAmigos(req.session.userId);
+    }
+
+    // Grupos populares (exemplo: ajuste conforme seu controller)
+    let grupos = [];
+    if (grupoController.populares) {
+      grupos = await grupoController.populares();
+    }
 
     res.render('index', { posts, amigos, grupos });
   } catch (error) {

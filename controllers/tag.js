@@ -1,70 +1,64 @@
 const { Tag, TagTraducao } = require('../models');
 
 // Listar todas as tags
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const tags = await Tag.findAll({
       include: [
         { model: TagTraducao, as: 'traducoes' }
       ]
     });
-    res.json(tags);
+    return tags;
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw new Error('Erro ao buscar tags: ' + error.message);
   }
 };
 
 // Buscar tag por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const tag = await Tag.findByPk(req.params.id, {
+    const tag = await Tag.findByPk(id, {
       include: [
         { model: TagTraducao, as: 'traducoes' }
       ]
     });
-    if (!tag) {
-      return res.status(404).json({ error: 'Tag não encontrada' });
-    }
-    res.json(tag);
+    if (!tag) throw new Error('Tag não encontrada');
+    return tag;
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw new Error('Erro ao buscar tag: ' + error.message);
   }
 };
 
 // Criar nova tag
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const novaTag = await Tag.create(req.body);
-    res.status(201).json(novaTag);
+    const novaTag = await Tag.create(dados);
+    return novaTag;
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    throw new Error('Erro ao criar tag: ' + error.message);
   }
 };
 
 // Atualizar tag
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id, dados) => {
   try {
-    const tag = await Tag.findByPk(req.params.id);
-    if (!tag) {
-      return res.status(404).json({ error: 'Tag não encontrada' });
-    }
-    await tag.update(req.body);
-    res.json(tag);
+    const tag = await Tag.findByPk(id);
+    if (!tag) throw new Error('Tag não encontrada');
+    await tag.update(dados);
+    return tag;
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    throw new Error('Erro ao atualizar tag: ' + error.message);
   }
 };
 
 // Remover tag
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
-    const tag = await Tag.findByPk(req.params.id);
-    if (!tag) {
-      return res.status(404).json({ error: 'Tag não encontrada' });
-    }
+    const tag = await Tag.findByPk(id);
+    if (!tag) throw new Error('Tag não encontrada');
     await tag.destroy();
-    res.json({ mensagem: 'Tag removida com sucesso' });
+    return { mensagem: 'Tag removida com sucesso' };
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw new Error('Erro ao remover tag: ' + error.message);
   }
 };

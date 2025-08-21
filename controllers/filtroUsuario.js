@@ -1,67 +1,67 @@
 const { FiltroUsuario, Usuario } = require('../models');
 
 // Listar todos os filtros de usuário
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const filtros = await FiltroUsuario.findAll({
       include: [
         { model: Usuario, as: 'usuario' }
       ]
     });
-    res.json(filtros);
+    return filtros;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar filtros de usuário', details: err.message });
+    throw new Error('Erro ao buscar filtros de usuário: ' + err.message);
   }
 };
 
 // Buscar filtro por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const filtro = await FiltroUsuario.findByPk(req.params.id, {
+    const filtro = await FiltroUsuario.findByPk(id, {
       include: [
         { model: Usuario, as: 'usuario' }
       ]
     });
-    if (!filtro) return res.status(404).json({ error: 'Filtro não encontrado' });
-    res.json(filtro);
+    if (!filtro) throw new Error('Filtro não encontrado');
+    return filtro;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar filtro', details: err.message });
+    throw new Error('Erro ao buscar filtro: ' + err.message);
   }
 };
 
 // Criar novo filtro de usuário
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const novo = await FiltroUsuario.create(req.body);
-    res.status(201).json(novo);
+    const novo = await FiltroUsuario.create(dados);
+    return novo;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar filtro', details: err.message });
+    throw new Error('Erro ao criar filtro: ' + err.message);
   }
 };
 
 // Atualizar filtro de usuário
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id, dados) => {
   try {
-    const [updated] = await FiltroUsuario.update(req.body, {
-      where: { id_filtro: req.params.id }
+    const [updated] = await FiltroUsuario.update(dados, {
+      where: { id_filtro: id }
     });
-    if (!updated) return res.status(404).json({ error: 'Filtro não encontrado' });
-    const filtroAtualizado = await FiltroUsuario.findByPk(req.params.id);
-    res.json(filtroAtualizado);
+    if (!updated) throw new Error('Filtro não encontrado');
+    const filtroAtualizado = await FiltroUsuario.findByPk(id);
+    return filtroAtualizado;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao atualizar filtro', details: err.message });
+    throw new Error('Erro ao atualizar filtro: ' + err.message);
   }
 };
 
 // Remover filtro de usuário
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
     const deleted = await FiltroUsuario.destroy({
-      where: { id_filtro: req.params.id }
+      where: { id_filtro: id }
     });
-    if (!deleted) return res.status(404).json({ error: 'Filtro não encontrado' });
-    res.json({ message: 'Filtro removido com sucesso' });
+    if (!deleted) throw new Error('Filtro não encontrado');
+    return { message: 'Filtro removido com sucesso' };
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao remover filtro', details: err.message });
+    throw new Error('Erro ao remover filtro: ' + err.message);
   }
 };

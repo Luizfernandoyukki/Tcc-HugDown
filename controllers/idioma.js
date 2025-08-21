@@ -1,7 +1,7 @@
 const { Idioma, CategoriaTraducao, SecaoTraducao, TagTraducao } = require('../models');
 
 // Listar todos os idiomas
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const idiomas = await Idioma.findAll({
       include: [
@@ -10,62 +10,62 @@ exports.listar = async (req, res) => {
         { model: TagTraducao, as: 'tagsTraducoes' }
       ]
     });
-    res.json(idiomas);
+    return idiomas;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar idiomas', details: err.message });
+    throw new Error('Erro ao buscar idiomas: ' + err.message);
   }
 };
 
 // Buscar idioma por código
-exports.buscarPorCodigo = async (req, res) => {
+exports.buscarPorCodigo = async (codigo) => {
   try {
-    const idioma = await Idioma.findByPk(req.params.codigo, {
+    const idioma = await Idioma.findByPk(codigo, {
       include: [
         { model: CategoriaTraducao, as: 'categoriasTraducoes' },
         { model: SecaoTraducao, as: 'secoesTraducoes' },
         { model: TagTraducao, as: 'tagsTraducoes' }
       ]
     });
-    if (!idioma) return res.status(404).json({ error: 'Idioma não encontrado' });
-    res.json(idioma);
+    if (!idioma) throw new Error('Idioma não encontrado');
+    return idioma;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar idioma', details: err.message });
+    throw new Error('Erro ao buscar idioma: ' + err.message);
   }
 };
 
 // Criar novo idioma
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const novo = await Idioma.create(req.body);
-    res.status(201).json(novo);
+    const novo = await Idioma.create(dados);
+    return novo;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar idioma', details: err.message });
+    throw new Error('Erro ao criar idioma: ' + err.message);
   }
 };
 
 // Atualizar idioma
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (codigo, dados) => {
   try {
-    const [updated] = await Idioma.update(req.body, {
-      where: { codigo_idioma: req.params.codigo }
+    const [updated] = await Idioma.update(dados, {
+      where: { codigo_idioma: codigo }
     });
-    if (!updated) return res.status(404).json({ error: 'Idioma não encontrado' });
-    const idiomaAtualizado = await Idioma.findByPk(req.params.codigo);
-    res.json(idiomaAtualizado);
+    if (!updated) throw new Error('Idioma não encontrado');
+    const idiomaAtualizado = await Idioma.findByPk(codigo);
+    return idiomaAtualizado;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao atualizar idioma', details: err.message });
+    throw new Error('Erro ao atualizar idioma: ' + err.message);
   }
 };
 
 // Remover idioma
-exports.remover = async (req, res) => {
+exports.remover = async (codigo) => {
   try {
     const deleted = await Idioma.destroy({
-      where: { codigo_idioma: req.params.codigo }
+      where: { codigo_idioma: codigo }
     });
-    if (!deleted) return res.status(404).json({ error: 'Idioma não encontrado' });
-    res.json({ message: 'Idioma removido com sucesso' });
+    if (!deleted) throw new Error('Idioma não encontrado');
+    return { message: 'Idioma removido com sucesso' };
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao remover idioma', details: err.message });
+    throw new Error('Erro ao remover idioma: ' + err.message);
   }
 };

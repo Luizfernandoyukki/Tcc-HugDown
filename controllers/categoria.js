@@ -1,7 +1,7 @@
 const { Categoria, CategoriaTraducao, Postagem } = require('../models');
 
 // Listar todas as categorias
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const categorias = await Categoria.findAll({
       include: [
@@ -9,61 +9,61 @@ exports.listar = async (req, res) => {
         { model: Postagem, as: 'postagens' }
       ]
     });
-    res.json(categorias);
+    return categorias;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar categorias', details: err.message });
+    throw new Error('Erro ao buscar categorias: ' + err.message);
   }
 };
 
 // Buscar categoria por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const categoria = await Categoria.findByPk(req.params.id, {
+    const categoria = await Categoria.findByPk(id, {
       include: [
         { model: CategoriaTraducao, as: 'traducoes' },
         { model: Postagem, as: 'postagens' }
       ]
     });
-    if (!categoria) return res.status(404).json({ error: 'Categoria não encontrada' });
-    res.json(categoria);
+    if (!categoria) throw new Error('Categoria não encontrada');
+    return categoria;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar categoria', details: err.message });
+    throw new Error('Erro ao buscar categoria: ' + err.message);
   }
 };
 
 // Criar nova categoria
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const nova = await Categoria.create(req.body);
-    res.status(201).json(nova);
+    const nova = await Categoria.create(dados);
+    return nova;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar categoria', details: err.message });
+    throw new Error('Erro ao criar categoria: ' + err.message);
   }
 };
 
 // Atualizar categoria
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id, dados) => {
   try {
-    const [updated] = await Categoria.update(req.body, {
-      where: { id_categoria: req.params.id }
+    const [updated] = await Categoria.update(dados, {
+      where: { id_categoria: id }
     });
-    if (!updated) return res.status(404).json({ error: 'Categoria não encontrada' });
-    const categoriaAtualizada = await Categoria.findByPk(req.params.id);
-    res.json(categoriaAtualizada);
+    if (!updated) throw new Error('Categoria não encontrada');
+    const categoriaAtualizada = await Categoria.findByPk(id);
+    return categoriaAtualizada;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao atualizar categoria', details: err.message });
+    throw new Error('Erro ao atualizar categoria: ' + err.message);
   }
 };
 
 // Remover categoria
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
     const deleted = await Categoria.destroy({
-      where: { id_categoria: req.params.id }
+      where: { id_categoria: id }
     });
-    if (!deleted) return res.status(404).json({ error: 'Categoria não encontrada' });
-    res.json({ message: 'Categoria removida com sucesso' });
+    if (!deleted) throw new Error('Categoria não encontrada');
+    return { message: 'Categoria removida com sucesso' };
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao remover categoria', details: err.message });
-    }
+    throw new Error('Erro ao remover categoria: ' + err.message);
+  }
 };

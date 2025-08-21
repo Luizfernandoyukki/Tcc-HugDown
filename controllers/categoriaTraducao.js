@@ -1,7 +1,7 @@
 const { CategoriaTraducao, Categoria, Idioma } = require('../models');
 
 // Listar todas as traduções de categorias
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const traducoes = await CategoriaTraducao.findAll({
       include: [
@@ -9,16 +9,15 @@ exports.listar = async (req, res) => {
         { model: Idioma, as: 'idioma' }
       ]
     });
-    res.json(traducoes);
+    return traducoes;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar traduções de categoria', details: err.message });
+    throw new Error('Erro ao buscar traduções de categoria: ' + err.message);
   }
 };
 
 // Buscar tradução por categoria e idioma
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id_categoria, codigo_idioma) => {
   try {
-    const { id_categoria, codigo_idioma } = req.params;
     const traducao = await CategoriaTraducao.findOne({
       where: { id_categoria, codigo_idioma },
       include: [
@@ -26,48 +25,46 @@ exports.buscarPorId = async (req, res) => {
         { model: Idioma, as: 'idioma' }
       ]
     });
-    if (!traducao) return res.status(404).json({ error: 'Tradução não encontrada' });
-    res.json(traducao);
+    if (!traducao) throw new Error('Tradução não encontrada');
+    return traducao;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar tradução', details: err.message });
+    throw new Error('Erro ao buscar tradução: ' + err.message);
   }
 };
 
 // Criar nova tradução
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const nova = await CategoriaTraducao.create(req.body);
-    res.status(201).json(nova);
+    const nova = await CategoriaTraducao.create(dados);
+    return nova;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar tradução', details: err.message });
+    throw new Error('Erro ao criar tradução: ' + err.message);
   }
 };
 
 // Atualizar tradução
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id_categoria, codigo_idioma, dados) => {
   try {
-    const { id_categoria, codigo_idioma } = req.params;
-    const [updated] = await CategoriaTraducao.update(req.body, {
+    const [updated] = await CategoriaTraducao.update(dados, {
       where: { id_categoria, codigo_idioma }
     });
-    if (!updated) return res.status(404).json({ error: 'Tradução não encontrada' });
+    if (!updated) throw new Error('Tradução não encontrada');
     const traducaoAtualizada = await CategoriaTraducao.findOne({ where: { id_categoria, codigo_idioma } });
-    res.json(traducaoAtualizada);
+    return traducaoAtualizada;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao atualizar tradução', details: err.message });
+    throw new Error('Erro ao atualizar tradução: ' + err.message);
   }
 };
 
 // Remover tradução
-exports.remover = async (req, res) => {
+exports.remover = async (id_categoria, codigo_idioma) => {
   try {
-    const { id_categoria, codigo_idioma } = req.params;
     const deleted = await CategoriaTraducao.destroy({
       where: { id_categoria, codigo_idioma }
     });
-    if (!deleted) return res.status(404).json({ error: 'Tradução não encontrada' });
-    res.json({ message: 'Tradução removida com sucesso' });
+    if (!deleted) throw new Error('Tradução não encontrada');
+    return { message: 'Tradução removida com sucesso' };
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao remover tradução', details: err.message });
+    throw new Error('Erro ao remover tradução: ' + err.message);
   }
 };

@@ -1,70 +1,64 @@
 const { Secao, SecaoTraducao } = require('../models');
 
 // Listar todas as seções
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const secoes = await Secao.findAll({
       include: [
         { model: SecaoTraducao, as: 'traducoes' }
       ]
     });
-    res.json(secoes);
+    return secoes;
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw new Error('Erro ao buscar seções: ' + error.message);
   }
 };
 
 // Buscar seção por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const secao = await Secao.findByPk(req.params.id, {
+    const secao = await Secao.findByPk(id, {
       include: [
         { model: SecaoTraducao, as: 'traducoes' }
       ]
     });
-    if (!secao) {
-      return res.status(404).json({ error: 'Seção não encontrada' });
-    }
-    res.json(secao);
+    if (!secao) throw new Error('Seção não encontrada');
+    return secao;
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw new Error('Erro ao buscar seção: ' + error.message);
   }
 };
 
 // Criar nova seção
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const novaSecao = await Secao.create(req.body);
-    res.status(201).json(novaSecao);
+    const novaSecao = await Secao.create(dados);
+    return novaSecao;
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    throw new Error('Erro ao criar seção: ' + error.message);
   }
 };
 
 // Atualizar seção
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id, dados) => {
   try {
-    const secao = await Secao.findByPk(req.params.id);
-    if (!secao) {
-      return res.status(404).json({ error: 'Seção não encontrada' });
-    }
-    await secao.update(req.body);
-    res.json(secao);
+    const secao = await Secao.findByPk(id);
+    if (!secao) throw new Error('Seção não encontrada');
+    await secao.update(dados);
+    return secao;
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    throw new Error('Erro ao atualizar seção: ' + error.message);
   }
 };
 
 // Remover seção
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
-    const secao = await Secao.findByPk(req.params.id);
-    if (!secao) {
-      return res.status(404).json({ error: 'Seção não encontrada' });
-    }
+    const secao = await Secao.findByPk(id);
+    if (!secao) throw new Error('Seção não encontrada');
     await secao.destroy();
-    res.json({ mensagem: 'Seção removida com sucesso' });
+    return { mensagem: 'Seção removida com sucesso' };
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw new Error('Erro ao remover seção: ' + error.message);
   }
 };

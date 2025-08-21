@@ -1,7 +1,7 @@
 const { DocumentoVerificacao, Usuario, Administrador } = require('../models');
 
 // Listar todos os documentos de verificação
-exports.listar = async (req, res) => {
+exports.listar = async () => {
   try {
     const docs = await DocumentoVerificacao.findAll({
       include: [
@@ -9,61 +9,61 @@ exports.listar = async (req, res) => {
         { model: Administrador, as: 'adminVerificador' }
       ]
     });
-    res.json(docs);
+    return docs;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar documentos de verificação', details: err.message });
+    throw new Error('Erro ao buscar documentos de verificação: ' + err.message);
   }
 };
 
 // Buscar documento por ID
-exports.buscarPorId = async (req, res) => {
+exports.buscarPorId = async (id) => {
   try {
-    const doc = await DocumentoVerificacao.findByPk(req.params.id, {
+    const doc = await DocumentoVerificacao.findByPk(id, {
       include: [
         { model: Usuario, as: 'usuario' },
         { model: Administrador, as: 'adminVerificador' }
       ]
     });
-    if (!doc) return res.status(404).json({ error: 'Documento não encontrado' });
-    res.json(doc);
+    if (!doc) throw new Error('Documento não encontrado');
+    return doc;
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar documento', details: err.message });
+    throw new Error('Erro ao buscar documento: ' + err.message);
   }
 };
 
 // Criar novo documento de verificação
-exports.criar = async (req, res) => {
+exports.criar = async (dados) => {
   try {
-    const novo = await DocumentoVerificacao.create(req.body);
-    res.status(201).json(novo);
+    const novo = await DocumentoVerificacao.create(dados);
+    return novo;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao criar documento', details: err.message });
+    throw new Error('Erro ao criar documento: ' + err.message);
   }
 };
 
 // Atualizar documento de verificação
-exports.atualizar = async (req, res) => {
+exports.atualizar = async (id, dados) => {
   try {
-    const [updated] = await DocumentoVerificacao.update(req.body, {
-      where: { id_documento: req.params.id }
+    const [updated] = await DocumentoVerificacao.update(dados, {
+      where: { id_documento: id }
     });
-    if (!updated) return res.status(404).json({ error: 'Documento não encontrado' });
-    const docAtualizado = await DocumentoVerificacao.findByPk(req.params.id);
-    res.json(docAtualizado);
+    if (!updated) throw new Error('Documento não encontrado');
+    const docAtualizado = await DocumentoVerificacao.findByPk(id);
+    return docAtualizado;
   } catch (err) {
-    res.status(400).json({ error: 'Erro ao atualizar documento', details: err.message });
+    throw new Error('Erro ao atualizar documento: ' + err.message);
   }
 };
 
 // Remover documento de verificação
-exports.remover = async (req, res) => {
+exports.remover = async (id) => {
   try {
     const deleted = await DocumentoVerificacao.destroy({
-      where: { id_documento: req.params.id }
+      where: { id_documento: id }
     });
-    if (!deleted) return res.status(404).json({ error: 'Documento não encontrado' });
-    res.json({ message: 'Documento removido com sucesso' });
+    if (!deleted) throw new Error('Documento não encontrado');
+    return { message: 'Documento removido com sucesso' };
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao remover documento', details: err.message });
+    throw new Error('Erro ao remover documento: ' + err.message);
   }
 };
