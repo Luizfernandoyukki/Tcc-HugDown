@@ -1,13 +1,20 @@
 const express = require('express');
 const router = express.Router();
 
-const { postagemController, grupoController, usuarioController } = require('../controllers');
+const { postagemController, usuarioController, categoriaController, tagController } = require('../controllers');
+const grupoController = require('../controllers/grupo');
 
 // Página inicial - Feed
 router.get('/', async (req, res) => {
   try {
     // Busca posts
     const posts = await postagemController.listar();
+
+    // Busca categorias
+    const categorias = await categoriaController.listar();
+
+    // Busca tags
+    const tags = await tagController.listar();
 
     // Sugestões de amigos (se usuário logado)
     let amigos = [];
@@ -19,9 +26,17 @@ router.get('/', async (req, res) => {
     let grupos = [];
     if (grupoController.populares) {
       grupos = await grupoController.populares();
+    } else {
+      grupos = await grupoController.listar();
     }
 
-    res.render('index', { posts, amigos, grupos });
+    // Usuário logado (se houver)
+    let usuario = null;
+    if (req.session && req.session.userId) {
+      usuario = await usuarioController.buscarPorId(req.session.userId);
+    }
+
+    res.render('index', { posts, amigos, grupos, categorias, tags, usuario });
   } catch (error) {
     res.status(500).render('error', { error });
   }

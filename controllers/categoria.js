@@ -9,6 +9,8 @@ exports.listar = async () => {
         { model: Postagem, as: 'postagens' }
       ]
     });
+    // Ordena por nome_categoria (ou pelo campo que preferir)
+    categorias.sort((a, b) => a.nome_categoria.localeCompare(b.nome_categoria));
     return categorias;
   } catch (err) {
     throw new Error('Erro ao buscar categorias: ' + err.message);

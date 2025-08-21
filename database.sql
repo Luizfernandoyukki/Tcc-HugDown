@@ -1,7 +1,6 @@
 CREATE DATABASE HugDown_rede_social CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE HugDown_rede_social;
 
-
 CREATE TABLE usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -27,24 +26,20 @@ CREATE TABLE usuarios (
     fuso_horario VARCHAR(50),
     provider_oauth VARCHAR(50),
     id_oauth VARCHAR(100),
-    
     INDEX idx_email (email),
     INDEX idx_nome_usuario (nome_usuario),
     INDEX idx_verificado (verificado),
     INDEX idx_ativo (ativo)
 );
 
-
 CREATE TABLE administradores (
     id_admin INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     nivel_admin ENUM('super_admin', 'moderator', 'verifier') NOT NULL,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX idx_nivel (nivel_admin)
 );
-
 
 CREATE TABLE documentos_verificacao (
     id_documento INT AUTO_INCREMENT PRIMARY KEY,
@@ -58,13 +53,11 @@ CREATE TABLE documentos_verificacao (
     data_verificacao TIMESTAMP NULL,
     verificado_por_admin INT,
     observacoes TEXT,
-    
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (verificado_por_admin) REFERENCES administradores(id_admin),
     INDEX idx_status (status),
     INDEX idx_usuario (id_usuario)
 );
-
 
 CREATE TABLE categorias (
     id_categoria INT AUTO_INCREMENT PRIMARY KEY,
@@ -73,10 +66,8 @@ CREATE TABLE categorias (
     cor_categoria VARCHAR(7) DEFAULT '#007bff',
     icone VARCHAR(50),
     ativo BOOLEAN DEFAULT TRUE,
-    
     INDEX idx_ativo (ativo)
 );
-
 
 CREATE TABLE secoes (
     id_secao INT AUTO_INCREMENT PRIMARY KEY,
@@ -85,11 +76,9 @@ CREATE TABLE secoes (
     icone_secao VARCHAR(50),
     ordem_exibicao INT DEFAULT 0,
     ativo BOOLEAN DEFAULT TRUE,
-    
     INDEX idx_ordem (ordem_exibicao),
     INDEX idx_ativo (ativo)
 );
-
 
 CREATE TABLE tags (
     id_tag INT AUTO_INCREMENT PRIMARY KEY,
@@ -97,11 +86,9 @@ CREATE TABLE tags (
     descricao_tag TEXT,
     uso_contador INT DEFAULT 0,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     INDEX idx_nome_tag (nome_tag),
     INDEX idx_uso_contador (uso_contador)
 );
-
 
 CREATE TABLE postagens (
     id_postagem INT AUTO_INCREMENT PRIMARY KEY,
@@ -119,7 +106,6 @@ CREATE TABLE postagens (
     privacidade ENUM('public', 'friends', 'private') DEFAULT 'public',
     latitude DECIMAL(10,7),
     longitude DECIMAL(10,7),
-    
     FOREIGN KEY (id_autor) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
     INDEX idx_autor (id_autor),
@@ -130,26 +116,21 @@ CREATE TABLE postagens (
     INDEX idx_ativo (ativo)
 );
 
-
 CREATE TABLE postagens_tags (
     id_postagem INT NOT NULL,
     id_tag INT NOT NULL,
-    
     PRIMARY KEY (id_postagem, id_tag),
     FOREIGN KEY (id_postagem) REFERENCES postagens(id_postagem) ON DELETE CASCADE,
     FOREIGN KEY (id_tag) REFERENCES tags(id_tag) ON DELETE CASCADE
 );
 
-
 CREATE TABLE postagens_secoes (
     id_postagem INT NOT NULL,
     id_secao INT NOT NULL,
-    
     PRIMARY KEY (id_postagem, id_secao),
     FOREIGN KEY (id_postagem) REFERENCES postagens(id_postagem) ON DELETE CASCADE,
     FOREIGN KEY (id_secao) REFERENCES secoes(id_secao) ON DELETE CASCADE
 );
-
 
 CREATE TABLE comentarios (
     id_comentario INT AUTO_INCREMENT PRIMARY KEY,
@@ -159,7 +140,6 @@ CREATE TABLE comentarios (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     ativo BOOLEAN DEFAULT TRUE,
-    
     FOREIGN KEY (id_postagem) REFERENCES postagens(id_postagem) ON DELETE CASCADE,
     FOREIGN KEY (id_autor) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX idx_postagem (id_postagem),
@@ -167,13 +147,11 @@ CREATE TABLE comentarios (
     INDEX idx_data_criacao (data_criacao)
 );
 
-
 CREATE TABLE curtidas (
     id_curtida INT AUTO_INCREMENT PRIMARY KEY,
     id_postagem INT NOT NULL,
     id_usuario INT NOT NULL,
     data_curtida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     UNIQUE KEY unique_curtida (id_postagem, id_usuario),
     FOREIGN KEY (id_postagem) REFERENCES postagens(id_postagem) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
@@ -181,21 +159,18 @@ CREATE TABLE curtidas (
     INDEX idx_usuario (id_usuario)
 );
 
-
 CREATE TABLE compartilhamentos (
     id_compartilhamento INT AUTO_INCREMENT PRIMARY KEY,
     id_postagem INT NOT NULL,
     id_usuario INT NOT NULL,
     mensagem_compartilhamento TEXT,
     data_compartilhamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (id_postagem) REFERENCES postagens(id_postagem) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX idx_postagem (id_postagem),
     INDEX idx_usuario (id_usuario),
     INDEX idx_data (data_compartilhamento)
 );
-
 
 CREATE TABLE amizades (
     id_amizade INT AUTO_INCREMENT PRIMARY KEY,
@@ -204,7 +179,6 @@ CREATE TABLE amizades (
     status_amizade ENUM('pending', 'accepted', 'rejected', 'blocked') DEFAULT 'pending',
     data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
     UNIQUE KEY unique_friendship (id_solicitante, id_destinatario),
     FOREIGN KEY (id_solicitante) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_destinatario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
@@ -212,7 +186,6 @@ CREATE TABLE amizades (
     INDEX idx_destinatario (id_destinatario),
     INDEX idx_status (status_amizade)
 );
-
 
 CREATE TABLE mensagens_diretas (
     id_mensagem INT AUTO_INCREMENT PRIMARY KEY,
@@ -223,7 +196,6 @@ CREATE TABLE mensagens_diretas (
     tipo_midia VARCHAR(50),
     lida BOOLEAN DEFAULT FALSE,
     data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (id_remetente) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_destinatario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX idx_remetente (id_remetente),
@@ -231,7 +203,6 @@ CREATE TABLE mensagens_diretas (
     INDEX idx_lida (lida),
     INDEX idx_data_envio (data_envio)
 );
-
 
 CREATE TABLE eventos (
     id_evento INT AUTO_INCREMENT PRIMARY KEY,
@@ -251,7 +222,6 @@ CREATE TABLE eventos (
     ativo BOOLEAN DEFAULT TRUE,
     latitude DECIMAL(10,7),
     longitude DECIMAL(10,7),
-    
     FOREIGN KEY (id_organizador) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
     INDEX idx_organizador (id_organizador),
@@ -260,14 +230,12 @@ CREATE TABLE eventos (
     INDEX idx_ativo (ativo)
 );
 
-
 CREATE TABLE participantes_evento (
     id_participante INT AUTO_INCREMENT PRIMARY KEY,
     id_evento INT NOT NULL,
     id_usuario INT NOT NULL,
     status_participacao ENUM('confirmed', 'maybe', 'not_going', 'canceled') DEFAULT 'confirmed',
     data_inscricao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     UNIQUE KEY unique_participation (id_evento, id_usuario),
     FOREIGN KEY (id_evento) REFERENCES eventos(id_evento) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
@@ -275,7 +243,6 @@ CREATE TABLE participantes_evento (
     INDEX idx_usuario (id_usuario),
     INDEX idx_status (status_participacao)
 );
-
 
 CREATE TABLE grupos (
     id_grupo INT AUTO_INCREMENT PRIMARY KEY,
@@ -286,13 +253,11 @@ CREATE TABLE grupos (
     tipo_privacidade ENUM('public', 'private', 'secret') DEFAULT 'public',
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ativo BOOLEAN DEFAULT TRUE,
-    
     FOREIGN KEY (id_administrador) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX idx_administrador (id_administrador),
     INDEX idx_tipo_privacidade (tipo_privacidade),
     INDEX idx_ativo (ativo)
 );
-
 
 CREATE TABLE membros_grupo (
     id_membro INT AUTO_INCREMENT PRIMARY KEY,
@@ -301,7 +266,6 @@ CREATE TABLE membros_grupo (
     papel_membro ENUM('admin', 'moderator', 'member') DEFAULT 'member',
     data_entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ativo BOOLEAN DEFAULT TRUE,
-    
     UNIQUE KEY unique_membership (id_grupo, id_usuario),
     FOREIGN KEY (id_grupo) REFERENCES grupos(id_grupo) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
@@ -310,7 +274,6 @@ CREATE TABLE membros_grupo (
     INDEX idx_papel (papel_membro)
 );
 
-
 CREATE TABLE filtros_usuario (
     id_filtro INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
@@ -318,12 +281,10 @@ CREATE TABLE filtros_usuario (
     configuracao_filtro JSON NOT NULL,
     filtro_ativo BOOLEAN DEFAULT TRUE,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX idx_usuario (id_usuario),
     INDEX idx_ativo (filtro_ativo)
 );
-
 
 CREATE TABLE notificacoes (
     id_notificacao INT AUTO_INCREMENT PRIMARY KEY,
@@ -334,7 +295,6 @@ CREATE TABLE notificacoes (
     url_relacionada VARCHAR(500),
     lida BOOLEAN DEFAULT FALSE,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX idx_usuario (id_usuario),
     INDEX idx_tipo (tipo_notificacao),
@@ -342,16 +302,11 @@ CREATE TABLE notificacoes (
     INDEX idx_data_criacao (data_criacao)
 );
 
-
 -- 1. Tabela de idiomas suportados
 CREATE TABLE idiomas (
     codigo_idioma VARCHAR(10) PRIMARY KEY, -- ex: 'pt-BR', 'en-US'
     nome_idioma VARCHAR(100) NOT NULL
 );
-
-INSERT INTO idiomas (codigo_idioma, nome_idioma) VALUES
-('pt-BR', 'Português (Brasil)'),
-('en-US', 'English (US)');
 
 -- 2. Tradução de categorias
 CREATE TABLE categorias_traducao (
@@ -403,7 +358,6 @@ BEGIN
     UPDATE tags SET uso_contador = uso_contador - 1 WHERE id_tag = OLD.id_tag AND uso_contador > 0;
 END//
 DELIMITER ;
-
 
 CREATE VIEW vw_postagens_completas AS
 SELECT 

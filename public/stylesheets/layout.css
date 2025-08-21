@@ -1,0 +1,49 @@
+/* Layout CSS for HugDown application*/
+/* MENU */
+.menu-icon {
+  height: 45px;
+  width: auto;
+}
+@media (min-width: 576px) and (max-width: 991.98px) { /* médio */
+  .menu-icon {
+    height: 40px !important;
+  }
+}
+@media (max-width: 575.98px) { /* pequeno */
+  .menu-icon {
+    height: 35px !important;
+  }
+}
+
+/* RODAPÉ */
+.footer-icon {
+  height: 40px;
+  width: auto;
+}
+@media (min-width: 576px) and (max-width: 991.98px) { /* médio */
+  .footer-icon {
+    height: 37px !important;
+  }
+}
+@media (max-width: 575.98px) { /* pequeno */
+  .footer-icon {
+    height: 35px !important;
+  }
+}
+
+/* LOGO */
+.logo-hugdown {
+  padding: 0 !important;
+  height: 75px;
+  width: auto;
+}
+@media (min-width: 576px) and (max-width: 991.98px) { /* médio */
+  .logo-hugdown {
+    height: 65px !important;
+  }
+}
+@media (max-width: 575.98px) { /* pequeno */
+  .logo-hugdown {
+    height: 55px !important;
+  }
+}
