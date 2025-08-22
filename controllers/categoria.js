@@ -69,3 +69,19 @@ exports.remover = async (id) => {
     throw new Error('Erro ao remover categoria: ' + err.message);
   }
 };
+
+// Buscar categoria por nome
+exports.buscarPorNome = async (nome) => {
+  try {
+    const categoria = await Categoria.findOne({
+      where: { nome_categoria: nome },
+      include: [
+        { model: CategoriaTraducao, as: 'traducoes' },
+        { model: Postagem, as: 'postagens' }
+      ]
+    });
+    return categoria;
+  } catch (err) {
+    throw new Error('Erro ao buscar categoria por nome: ' + err.message);
+  }
+};

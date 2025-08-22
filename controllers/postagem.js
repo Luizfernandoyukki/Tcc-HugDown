@@ -69,3 +69,32 @@ exports.remover = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// Listar postagens por categoria
+exports.listarPorCategoria = async (id_categoria) => {
+  try {
+    return await Postagem.findAll({
+      where: { id_categoria },
+      include: [/* seus includes padrão */]
+    });
+  } catch (err) {
+    throw new Error('Erro ao buscar postagens por categoria: ' + err.message);
+  }
+};
+
+// Listar postagens por tag
+exports.listarPorTag = async (id_tag) => {
+  try {
+    return await Postagem.findAll({
+      include: [
+        {
+          association: 'tags',
+          where: { id_tag }
+        },
+        /* seus includes padrão */
+      ]
+    });
+  } catch (err) {
+    throw new Error('Erro ao buscar postagens por tag: ' + err.message);
+  }
+};

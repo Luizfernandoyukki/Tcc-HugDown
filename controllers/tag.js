@@ -62,3 +62,18 @@ exports.remover = async (id) => {
     throw new Error('Erro ao remover tag: ' + error.message);
   }
 };
+
+// Buscar tag por slug
+exports.buscarPorSlug = async (slug) => {
+  try {
+    const tag = await Tag.findOne({
+      where: { slug },
+      include: [
+        { model: TagTraducao, as: 'traducoes' }
+      ]
+    });
+    return tag;
+  } catch (error) {
+    throw new Error('Erro ao buscar tag por slug: ' + error.message);
+  }
+};
