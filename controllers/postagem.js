@@ -1,34 +1,24 @@
 const { Postagem, Usuario } = require('../models');
 
 // Listar todas as postagens
-exports.listar = async (req, res, modoView) => {
-  try {
-    const posts = await Postagem.findAll({
-      include: [
-        { model: Usuario, as: 'autor' } // Use o mesmo alias do model!
-      ]
-    });
-    return posts; // Apenas retorna os dados!
-  } catch (error) {
-    // Em caso de erro, lance para ser tratado na rota
-    throw error;
-  }
+exports.listar = async (req, resOrOptions) => {
+  const posts = await Postagem.findAll({
+    include: [{ model: Usuario, as: 'autor' }]
+  });
+  if (resOrOptions && resOrOptions.raw) return posts;
+  return resOrOptions.json(posts);
 };
 
 // Buscar postagem por ID
 exports.buscarPorId = async (req, res) => {
   try {
     const postagem = await Postagem.findByPk(req.params.id, {
-      include: [
-        { model: Usuario, as: 'autor' }
-      ]
+      include: [{ model: Usuario, as: 'autor' }]
     });
-    if (!postagem) {
-      return res.status(404).json({ error: 'Postagem não encontrada' });
-    }
+    if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
     res.json(postagem);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Erro ao buscar postagem: ' + error.message });
   }
 };
 
@@ -38,7 +28,7 @@ exports.criar = async (req, res) => {
     const novaPostagem = await Postagem.create(req.body);
     res.status(201).json(novaPostagem);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Erro ao criar postagem: ' + error.message });
   }
 };
 
@@ -46,13 +36,11 @@ exports.criar = async (req, res) => {
 exports.atualizar = async (req, res) => {
   try {
     const postagem = await Postagem.findByPk(req.params.id);
-    if (!postagem) {
-      return res.status(404).json({ error: 'Postagem não encontrada' });
-    }
+    if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
     await postagem.update(req.body);
     res.json(postagem);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Erro ao atualizar postagem: ' + error.message });
   }
 };
 
@@ -60,41 +48,38 @@ exports.atualizar = async (req, res) => {
 exports.remover = async (req, res) => {
   try {
     const postagem = await Postagem.findByPk(req.params.id);
-    if (!postagem) {
-      return res.status(404).json({ error: 'Postagem não encontrada' });
-    }
+    if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
     await postagem.destroy();
-    res.json({ mensagem: 'Postagem removida com sucesso' });
+    res.json({ message: 'Postagem removida com sucesso' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Erro ao remover postagem: ' + error.message });
   }
 };
 
 // Listar postagens por categoria
-exports.listarPorCategoria = async (id_categoria) => {
+exports.listarPorCategoria = async (req, res) => {
   try {
-    return await Postagem.findAll({
-      where: { id_categoria },
-      include: [/* seus includes padrão */]
+    const postagens = await Postagem.findAll({
+      where: { id_categoria: req.params.id_categoria },
+      include: [{ model: Usuario, as: 'autor' }]
     });
-  } catch (err) {
-    throw new Error('Erro ao buscar postagens por categoria: ' + err.message);
+    res.json(postagens);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar postagens por categoria: ' + error.message });
   }
 };
 
 // Listar postagens por tag
-exports.listarPorTag = async (id_tag) => {
+exports.listarPorTag = async (req, res) => {
   try {
-    return await Postagem.findAll({
+    const postagens = await Postagem.findAll({
       include: [
-        {
-          association: 'tags',
-          where: { id_tag }
-        },
-        /* seus includes padrão */
+        { association: 'tags', where: { id_tag: req.params.id_tag } },
+        { model: Usuario, as: 'autor' }
       ]
     });
-  } catch (err) {
-    throw new Error('Erro ao buscar postagens por tag: ' + err.message);
+    res.json(postagens);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar postagens por tag: ' + error.message });
   }
 };

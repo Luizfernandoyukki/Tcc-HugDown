@@ -1,7 +1,7 @@
 const { SecaoTraducao, Secao, Idioma } = require('../models');
 
 // Listar todas as traduções de seções
-exports.listar = async () => {
+exports.listar = async (req, res) => {
   try {
     const traducoes = await SecaoTraducao.findAll({
       include: [
@@ -9,15 +9,16 @@ exports.listar = async () => {
         { model: Idioma, as: 'idioma' }
       ]
     });
-    return traducoes;
+    res.json(traducoes);
   } catch (err) {
-    throw new Error('Erro ao buscar traduções de seções: ' + err.message);
+    res.status(500).json({ error: 'Erro ao buscar traduções de seções: ' + err.message });
   }
 };
 
 // Buscar tradução por seção e idioma
-exports.buscarPorId = async (id_secao, codigo_idioma) => {
+exports.buscarPorId = async (req, res) => {
   try {
+    const { id_secao, codigo_idioma } = req.params;
     const traducao = await SecaoTraducao.findOne({
       where: { id_secao, codigo_idioma },
       include: [
@@ -25,46 +26,56 @@ exports.buscarPorId = async (id_secao, codigo_idioma) => {
         { model: Idioma, as: 'idioma' }
       ]
     });
-    if (!traducao) throw new Error('Tradução não encontrada');
-    return traducao;
+    if (!traducao) return res.status(404).json({ error: 'Tradução não encontrada' });
+    res.json(traducao);
   } catch (err) {
-    throw new Error('Erro ao buscar tradução: ' + err.message);
+    res.status(500).json({ error: 'Erro ao buscar tradução: ' + err.message });
   }
 };
 
 // Criar nova tradução
-exports.criar = async (dados) => {
+exports.criar = async (req, res) => {
   try {
-    const nova = await SecaoTraducao.create(dados);
-    return nova;
+    const nova = await SecaoTraducao.create(req.body);
+    res.status(201).json(nova);
   } catch (err) {
-    throw new Error('Erro ao criar tradução: ' + err.message);
+    res.status(500).json({ error: 'Erro ao criar tradução: ' + err.message });
   }
 };
 
 // Atualizar tradução
-exports.atualizar = async (id_secao, codigo_idioma, dados) => {
+exports.atualizar = async (req, res) => {
   try {
-    const [updated] = await SecaoTraducao.update(dados, {
+    const { id_secao, codigo_idioma } = req.params;
+    const [updated] = await SecaoTraducao.update(req.body, {
       where: { id_secao, codigo_idioma }
     });
-    if (!updated) throw new Error('Tradução não encontrada');
-    const traducaoAtualizada = await SecaoTraducao.findOne({ where: { id_secao, codigo_idioma } });
-    return traducaoAtualizada;
+    if (!updated) return res.status(404).json({ error: 'Tradução não encontrada' });
+
+    const traducaoAtualizada = await SecaoTraducao.findOne({
+      where: { id_secao, codigo_idioma },
+      include: [
+        { model: Secao, as: 'secao' },
+        { model: Idioma, as: 'idioma' }
+      ]
+    });
+
+    res.json(traducaoAtualizada);
   } catch (err) {
-    throw new Error('Erro ao atualizar tradução: ' + err.message);
+    res.status(500).json({ error: 'Erro ao atualizar tradução: ' + err.message });
   }
 };
 
 // Remover tradução
-exports.remover = async (id_secao, codigo_idioma) => {
+exports.remover = async (req, res) => {
   try {
+    const { id_secao, codigo_idioma } = req.params;
     const deleted = await SecaoTraducao.destroy({
       where: { id_secao, codigo_idioma }
     });
-    if (!deleted) throw new Error('Tradução não encontrada');
-    return { message: 'Tradução removida com sucesso' };
+    if (!deleted) return res.status(404).json({ error: 'Tradução não encontrada' });
+    res.json({ message: 'Tradução removida com sucesso' });
   } catch (err) {
-    throw new Error('Erro ao remover tradução: ' + err.message);
+    res.status(500).json({ error: 'Erro ao remover tradução: ' + err.message });
   }
 };

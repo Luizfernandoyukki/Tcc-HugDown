@@ -1,7 +1,7 @@
 const { MensagemDireta, Usuario } = require('../models');
 
 // Listar todas as mensagens diretas
-exports.listar = async () => {
+exports.listar = async (req, res) => {
   try {
     const mensagens = await MensagemDireta.findAll({
       include: [
@@ -9,58 +9,66 @@ exports.listar = async () => {
         { model: Usuario, as: 'destinatario' }
       ]
     });
-    return mensagens;
+    res.json(mensagens);
   } catch (error) {
-    throw new Error('Erro ao buscar mensagens diretas: ' + error.message);
+    res.status(500).json({ error: 'Erro ao buscar mensagens diretas: ' + error.message });
   }
 };
 
 // Buscar mensagem direta por ID
-exports.buscarPorId = async (id) => {
+exports.buscarPorId = async (req, res) => {
   try {
+    const id = req.params.id;
     const mensagem = await MensagemDireta.findByPk(id, {
       include: [
         { model: Usuario, as: 'remetente' },
         { model: Usuario, as: 'destinatario' }
       ]
     });
-    if (!mensagem) throw new Error('Mensagem não encontrada');
-    return mensagem;
+    if (!mensagem) return res.status(404).json({ error: 'Mensagem não encontrada' });
+    res.json(mensagem);
   } catch (error) {
-    throw new Error('Erro ao buscar mensagem direta: ' + error.message);
+    res.status(500).json({ error: 'Erro ao buscar mensagem direta: ' + error.message });
   }
 };
 
 // Criar nova mensagem direta
-exports.criar = async (dados) => {
+exports.criar = async (req, res) => {
   try {
-    const novaMensagem = await MensagemDireta.create(dados);
-    return novaMensagem;
+    const novaMensagem = await MensagemDireta.create(req.body);
+    res.status(201).json(novaMensagem);
   } catch (error) {
-    throw new Error('Erro ao criar mensagem direta: ' + error.message);
+    res.status(500).json({ error: 'Erro ao criar mensagem direta: ' + error.message });
   }
 };
 
 // Atualizar mensagem direta
-exports.atualizar = async (id, dados) => {
+exports.atualizar = async (req, res) => {
   try {
-    const mensagem = await MensagemDireta.findByPk(id);
-    if (!mensagem) throw new Error('Mensagem não encontrada');
-    await mensagem.update(dados);
-    return mensagem;
+    const id = req.params.id;
+    const mensagem = await MensagemDireta.findByPk(id, {
+      include: [
+        { model: Usuario, as: 'remetente' },
+        { model: Usuario, as: 'destinatario' }
+      ]
+    });
+    if (!mensagem) return res.status(404).json({ error: 'Mensagem não encontrada' });
+    await mensagem.update(req.body);
+    res.json(mensagem);
   } catch (error) {
-    throw new Error('Erro ao atualizar mensagem direta: ' + error.message);
+    res.status(500).json({ error: 'Erro ao atualizar mensagem direta: ' + error.message });
   }
 };
 
 // Remover mensagem direta
-exports.remover = async (id) => {
+exports.remover = async (req, res) => {
   try {
+    const id = req.params.id;
     const mensagem = await MensagemDireta.findByPk(id);
-    if (!mensagem) throw new Error('Mensagem não encontrada');
+    if (!mensagem) return res.status(404).json({ error: 'Mensagem não encontrada' });
     await mensagem.destroy();
-    return { mensagem: 'Mensagem removida com sucesso' };
+    res.json({ message: 'Mensagem removida com sucesso' });
   } catch (error) {
-    throw new Error('Erro ao remover mensagem direta: ' + error.message);
+    res.status(500).json({ error: 'Erro ao remover mensagem direta: ' + error.message });
   }
 };

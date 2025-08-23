@@ -1,7 +1,7 @@
 const { PostagemSecao, Postagem, Secao } = require('../models');
 
 // Listar todas as seções de postagens
-exports.listar = async () => {
+exports.listar = async (req, res) => {
   try {
     const secoes = await PostagemSecao.findAll({
       include: [
@@ -9,58 +9,58 @@ exports.listar = async () => {
         { model: Secao, as: 'secao' }
       ]
     });
-    return secoes;
+    res.json(secoes);
   } catch (error) {
-    throw new Error('Erro ao buscar seções de postagens: ' + error.message);
+    res.status(500).json({ error: 'Erro ao buscar seções de postagens: ' + error.message });
   }
 };
 
 // Buscar seção de postagem por ID
-exports.buscarPorId = async (id) => {
+exports.buscarPorId = async (req, res) => {
   try {
-    const secao = await PostagemSecao.findByPk(id, {
+    const secao = await PostagemSecao.findByPk(req.params.id, {
       include: [
         { model: Postagem, as: 'postagem' },
         { model: Secao, as: 'secao' }
       ]
     });
-    if (!secao) throw new Error('Seção de postagem não encontrada');
-    return secao;
+    if (!secao) return res.status(404).json({ error: 'Seção de postagem não encontrada' });
+    res.json(secao);
   } catch (error) {
-    throw new Error('Erro ao buscar seção de postagem: ' + error.message);
+    res.status(500).json({ error: 'Erro ao buscar seção de postagem: ' + error.message });
   }
 };
 
 // Criar nova seção de postagem
-exports.criar = async (dados) => {
+exports.criar = async (req, res) => {
   try {
-    const novaSecao = await PostagemSecao.create(dados);
-    return novaSecao;
+    const novaSecao = await PostagemSecao.create(req.body);
+    res.status(201).json(novaSecao);
   } catch (error) {
-    throw new Error('Erro ao criar seção de postagem: ' + error.message);
+    res.status(500).json({ error: 'Erro ao criar seção de postagem: ' + error.message });
   }
 };
 
 // Atualizar seção de postagem
-exports.atualizar = async (id, dados) => {
+exports.atualizar = async (req, res) => {
   try {
-    const secao = await PostagemSecao.findByPk(id);
-    if (!secao) throw new Error('Seção de postagem não encontrada');
-    await secao.update(dados);
-    return secao;
+    const secao = await PostagemSecao.findByPk(req.params.id);
+    if (!secao) return res.status(404).json({ error: 'Seção de postagem não encontrada' });
+    await secao.update(req.body);
+    res.json(secao);
   } catch (error) {
-    throw new Error('Erro ao atualizar seção de postagem: ' + error.message);
+    res.status(500).json({ error: 'Erro ao atualizar seção de postagem: ' + error.message });
   }
 };
 
 // Remover seção de postagem
-exports.remover = async (id) => {
+exports.remover = async (req, res) => {
   try {
-    const secao = await PostagemSecao.findByPk(id);
-    if (!secao) throw new Error('Seção de postagem não encontrada');
+    const secao = await PostagemSecao.findByPk(req.params.id);
+    if (!secao) return res.status(404).json({ error: 'Seção de postagem não encontrada' });
     await secao.destroy();
-    return { mensagem: 'Seção de postagem removida com sucesso' };
+    res.json({ message: 'Seção de postagem removida com sucesso' });
   } catch (error) {
-    throw new Error('Erro ao remover seção de postagem: ' + error.message);
+    res.status(500).json({ error: 'Erro ao remover seção de postagem: ' + error.message });
   }
 };

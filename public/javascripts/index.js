@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const maxCount = getGrupoMaxCount();
     for (let i = 0; i < Math.min(maxCount, grupos.length); i++) {
       const card = document.createElement('div');
-      card.className = 'grupo-feed-card d-flex flex-column align-items-center me-2';
+      card.className = 'grupo-feed-card d-flex flex-column align-items-center me-2 acao-restrita';
       card.style.width = '90px';
       card.innerHTML = `
         <img src="${grupos[i].foto_grupo || '/images/default-group.png'}" alt="${grupos[i].nome_grupo}" class="rounded-circle mb-1" width="48" height="48">
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
     container.innerHTML = '';
     grupos.forEach(grupo => {
       const card = document.createElement('div');
-      card.className = 'grupo-feed-card d-flex flex-column align-items-center m-2';
+      card.className = 'grupo-feed-card d-flex flex-column align-items-center m-2 acao-restrita';
       card.style.width = '90px';
       card.innerHTML = `
         <img src="${grupo.foto_grupo || '/images/default-group.png'}" alt="${grupo.nome_grupo}" class="rounded-circle mb-1" width="48" height="48">

@@ -1,69 +1,74 @@
 const { Grupo, Usuario, MembroGrupo } = require('../models');
 
 // Listar todos os grupos
-exports.listar = async () => {
-  try {
-    const grupos = await Grupo.findAll({
-      include: [
-        { model: Usuario, as: 'administrador' },
-        { model: MembroGrupo, as: 'membros' }
-      ]
-    });
-    return grupos;
-  } catch (err) {
-    throw new Error('Erro ao buscar grupos: ' + err.message);
-  }
+exports.listar = async (req, resOrOptions) => {
+  const grupos = await Grupo.findAll({
+    include: [
+      { model: Usuario, as: 'administrador' },
+      { model: MembroGrupo, as: 'membros' }
+    ]
+  });
+  if (resOrOptions && resOrOptions.raw) return grupos;
+  return resOrOptions.json(grupos);
 };
 
 // Buscar grupo por ID
-exports.buscarPorId = async (id) => {
+exports.buscarPorId = async (req, res) => {
   try {
+    const id = req.params.id;
     const grupo = await Grupo.findByPk(id, {
       include: [
         { model: Usuario, as: 'administrador' },
         { model: MembroGrupo, as: 'membros' }
       ]
     });
-    if (!grupo) throw new Error('Grupo não encontrado');
-    return grupo;
+    if (!grupo) return res.status(404).json({ error: 'Grupo não encontrado' });
+    res.json(grupo);
   } catch (err) {
-    throw new Error('Erro ao buscar grupo: ' + err.message);
+    res.status(500).json({ error: err.message || 'Erro ao buscar grupo' });
   }
 };
 
 // Criar novo grupo
-exports.criar = async (dados) => {
+exports.criar = async (req, res) => {
   try {
-    const novo = await Grupo.create(dados);
-    return novo;
+    const novo = await Grupo.create(req.body);
+    res.status(201).json(novo);
   } catch (err) {
-    throw new Error('Erro ao criar grupo: ' + err.message);
+    res.status(500).json({ error: err.message || 'Erro ao criar grupo' });
   }
 };
 
 // Atualizar grupo
-exports.atualizar = async (id, dados) => {
+exports.atualizar = async (req, res) => {
   try {
-    const [updated] = await Grupo.update(dados, {
+    const id = req.params.id;
+    const [updated] = await Grupo.update(req.body, {
       where: { id_grupo: id }
     });
-    if (!updated) throw new Error('Grupo não encontrado');
-    const grupoAtualizado = await Grupo.findByPk(id);
-    return grupoAtualizado;
+    if (!updated) return res.status(404).json({ error: 'Grupo não encontrado' });
+    const grupoAtualizado = await Grupo.findByPk(id, {
+      include: [
+        { model: Usuario, as: 'administrador' },
+        { model: MembroGrupo, as: 'membros' }
+      ]
+    });
+    res.json(grupoAtualizado);
   } catch (err) {
-    throw new Error('Erro ao atualizar grupo: ' + err.message);
+    res.status(500).json({ error: err.message || 'Erro ao atualizar grupo' });
   }
 };
 
 // Remover grupo
-exports.remover = async (id) => {
+exports.remover = async (req, res) => {
   try {
+    const id = req.params.id;
     const deleted = await Grupo.destroy({
       where: { id_grupo: id }
     });
-    if (!deleted) throw new Error('Grupo não encontrado');
-    return { message: 'Grupo removido com sucesso' };
+    if (!deleted) return res.status(404).json({ error: 'Grupo não encontrado' });
+    res.json({ message: 'Grupo removido com sucesso' });
   } catch (err) {
-    throw new Error('Erro ao remover grupo: ' + err.message);
+    res.status(500).json({ error: err.message || 'Erro ao remover grupo' });
   }
 };

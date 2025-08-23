@@ -1,0 +1,135 @@
+extends layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/index.css")
+  style.
+    .step-section { display: none; }
+    .step-section.active { display: block; }
+    .step-buttons { margin-top: 1.5rem; }
+    .form-check-label { cursor: pointer; }
+
+block content
+  .container.mt-5.mb-5
+    .row.justify-content-center
+      .col-12.col-md-8.col-lg-6
+        .card.shadow-sm
+          .card-body.p-4
+            h2.text-center.mb-4 Cadastro
+
+            // Passo 1: Dados Pessoais
+            form#form-cadastro
+              .step-section.active#step-1
+                h5.mb-3.text-success Dados Pessoais
+                .mb-3
+                  label.form-label(for="nome_real") Nome
+                  input.form-control(type="text", id="nome_real", name="nome_real", required, maxlength="100")
+                .mb-3
+                  label.form-label(for="sobrenome_real") Sobrenome
+                  input.form-control(type="text", id="sobrenome_real", name="sobrenome_real", required, maxlength="100")
+                .mb-3
+                  label.form-label(for="data_nascimento") Data de Nascimento
+                  input.form-control(type="date", id="data_nascimento", name="data_nascimento", required)
+                .mb-3
+                  label.form-label(for="genero") Gênero
+                  select.form-select(id="genero", name="genero")
+                    option(value="") Selecione
+                    option(value="masculino") Masculino
+                    option(value="feminino") Feminino
+                    option(value="outro") Outro
+                .step-buttons.d-flex.justify-content-end
+                  button.btn.btn-primary(type="button", id="btn-avancar-1") Avançar
+
+              // Passo 2: Dados de Conta
+              .step-section#step-2
+                h5.mb-3.text-primary Dados de Conta
+                .mb-3
+                  label.form-label(for="email") E-mail
+                  input.form-control(type="email", id="email", name="email", required, maxlength="255")
+                .mb-3
+                  label.form-label(for="senha") Senha
+                  input.form-control(type="password", id="senha", name="senha", required, minlength="6")
+                .mb-3
+                  label.form-label(for="nome_usuario") Nome de Usuário
+                  input.form-control(type="text", id="nome_usuario", name="nome_usuario", required, maxlength="50")
+                .step-buttons.d-flex.justify-content-between
+                  button.btn.btn-outline-secondary(type="button", id="btn-voltar-2") Voltar
+                  button.btn.btn-primary(type="button", id="btn-avancar-2") Avançar
+
+              // Passo 3: Endereço e Contato
+              .step-section#step-3
+                h5.mb-3.text-info Endereço e Contato
+                .mb-3
+                  label.form-label(for="telefone") Telefone
+                  input.form-control(type="text", id="telefone", name="telefone", required, maxlength="20")
+                .mb-3
+                  label.form-label(for="endereco") Endereço
+                  input.form-control(type="text", id="endereco", name="endereco", required, maxlength="255")
+                .mb-3
+                  label.form-label(for="cidade") Cidade
+                  input.form-control(type="text", id="cidade", name="cidade", required, maxlength="100")
+                .mb-3
+                  label.form-label(for="estado") Estado
+                  input.form-control(type="text", id="estado", name="estado", required, maxlength="50")
+                .mb-3
+                  label.form-label(for="cep") CEP
+                  input.form-control(type="text", id="cep", name="cep", required, maxlength="20")
+                .mb-3
+                  label.form-label(for="pais") País
+                  input.form-control(type="text", id="pais", name="pais", value="Brasil", required, maxlength="100")
+                .step-buttons.d-flex.justify-content-between
+                  button.btn.btn-outline-secondary(type="button", id="btn-voltar-3") Voltar
+                  button.btn.btn-primary(type="button", id="btn-avancar-3") Avançar
+
+              // Passo 4: Profissional da Saúde
+              .step-section#step-4
+                h5.mb-3.text-warning Profissional da Saúde
+                .mb-3
+                  .form-check
+                    input.form-check-input(type="checkbox", id="profissional_saude", name="profissional_saude")
+                    label.form-check-label(for="profissional_saude") Sou profissional da saúde
+                // Campos extras só aparecem se marcado
+                .mt-3#saude-extra(style="display:none;")
+                  .mb-3
+                    label.form-label(for="tipo_documento") Tipo de Documento
+                    select.form-select(id="tipo_documento", name="tipo_documento")
+                      option(value="") Selecione
+                      option(value="graduacao") Graduação
+                      option(value="pos_graduacao") Pós-graduação
+                      option(value="crm") CRM
+                      option(value="crefito") CREFITO
+                      option(value="coren") COREN
+                      option(value="other") Outro
+                  .mb-3
+                    label.form-label(for="numero_documento") Número do Documento
+                    input.form-control(type="text", id="numero_documento", name="numero_documento", maxlength="100")
+                  .mb-3
+                    label.form-label(for="instituicao") Instituição
+                    input.form-control(type="text", id="instituicao", name="instituicao", maxlength="200")
+                  .mb-3
+                    label.form-label(for="caminho_arquivo") Anexar Arquivo
+                    input.form-control(type="file", id="caminho_arquivo", name="caminho_arquivo")
+                .step-buttons.d-flex.justify-content-between
+                  button.btn.btn-outline-secondary(type="button", id="btn-voltar-4") Voltar
+                  button.btn.btn-success(type="submit") Finalizar Cadastro
+
+block scripts
+  script.
+    // Controle dos passos
+    const steps = Array.from(document.querySelectorAll('.step-section'));
+    let currentStep = 0;
+    function showStep(idx) {
+      steps.forEach((el, i) => el.classList.toggle('active', i === idx));
+      currentStep = idx;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    document.getElementById('btn-avancar-1').onclick = () => showStep(1);
+    document.getElementById('btn-voltar-2').onclick = () => showStep(0);
+    document.getElementById('btn-avancar-2').onclick = () => showStep(2);
+    document.getElementById('btn-voltar-3').onclick = () => showStep(1);
+    document.getElementById('btn-avancar-3').onclick = () => showStep(3);
+    document.getElementById('btn-voltar-4').onclick = () => showStep(2);
+
+    // Profissional da saúde: mostrar campos extras
+    document.getElementById('profissional_saude').onchange = function() {
+      document.getElementById('saude-extra').style.display = this.checked ? '' : 'none';
+    };

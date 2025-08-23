@@ -1,63 +1,65 @@
 const { Administrador, Usuario } = require('../models');
 
-// Listar todos os administradores
-exports.listar = async () => {
-  try {
-    const admins = await Administrador.findAll({
-      include: [{ model: Usuario, as: 'usuario' }]
-    });
-    return admins;
-  } catch (err) {
-    throw new Error('Erro ao buscar administradores: ' + err.message);
+const administradorController = {
+  listar: async (req, res) => {
+    try {
+      const admins = await Administrador.findAll({
+        include: [{ model: Usuario, as: 'usuario' }]
+      });
+      res.json(admins);
+    } catch (err) {
+      res.status(500).json({ error: 'Erro ao buscar administradores: ' + err.message });
+    }
+  },
+
+  buscarPorId: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const admin = await Administrador.findByPk(id, {
+        include: [{ model: Usuario, as: 'usuario' }]
+      });
+      if (!admin) return res.status(404).json({ error: 'Administrador não encontrado' });
+      res.json(admin);
+    } catch (err) {
+      res.status(500).json({ error: 'Erro ao buscar administrador: ' + err.message });
+    }
+  },
+
+  criar: async (req, res) => {
+    try {
+      const novo = await Administrador.create(req.body);
+      res.status(201).json(novo);
+    } catch (err) {
+      res.status(500).json({ error: 'Erro ao criar administrador: ' + err.message });
+    }
+  },
+
+  atualizar: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const [updated] = await Administrador.update(req.body, {
+        where: { id_admin: id }
+      });
+      if (!updated) return res.status(404).json({ error: 'Administrador não encontrado' });
+      const adminAtualizado = await Administrador.findByPk(id);
+      res.json(adminAtualizado);
+    } catch (err) {
+      res.status(500).json({ error: 'Erro ao atualizar administrador: ' + err.message });
+    }
+  },
+
+  remover: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const deleted = await Administrador.destroy({
+        where: { id_admin: id }
+      });
+      if (!deleted) return res.status(404).json({ error: 'Administrador não encontrado' });
+      res.json({ message: 'Administrador removido com sucesso' });
+    } catch (err) {
+      res.status(500).json({ error: 'Erro ao remover administrador: ' + err.message });
+    }
   }
 };
 
-// Buscar um administrador por ID
-exports.buscarPorId = async (id) => {
-  try {
-    const admin = await Administrador.findByPk(id, {
-      include: [{ model: Usuario, as: 'usuario' }]
-    });
-    if (!admin) throw new Error('Administrador não encontrado');
-    return admin;
-  } catch (err) {
-    throw new Error('Erro ao buscar administrador: ' + err.message);
-  }
-};
-
-// Criar novo administrador
-exports.criar = async (dados) => {
-  try {
-    const novo = await Administrador.create(dados);
-    return novo;
-  } catch (err) {
-    throw new Error('Erro ao criar administrador: ' + err.message);
-  }
-};
-
-// Atualizar administrador
-exports.atualizar = async (id, dados) => {
-  try {
-    const [updated] = await Administrador.update(dados, {
-      where: { id_admin: id }
-    });
-    if (!updated) throw new Error('Administrador não encontrado');
-    const adminAtualizado = await Administrador.findByPk(id);
-    return adminAtualizado;
-  } catch (err) {
-    throw new Error('Erro ao atualizar administrador: ' + err.message);
-  }
-};
-
-// Remover administrador
-exports.remover = async (id) => {
-  try {
-    const deleted = await Administrador.destroy({
-      where: { id_admin: id }
-    });
-    if (!deleted) throw new Error('Administrador não encontrado');
-    return { message: 'Administrador removido com sucesso' };
-  } catch (err) {
-    throw new Error('Erro ao remover administrador: ' + err.message);
-  }
-};
+module.exports = administradorController;

@@ -2,71 +2,50 @@ const express = require('express');
 const path = require('path');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
 const session = require('express-session');
+const helmet = require('helmet');
+const cors = require('cors');
 
-// Importação de todas as rotas
+// Banco de dados (Sequelize)
+const sequelize = require('./database/database');
+
+// Importação das rotas
 const indexRouter = require('./routes/index');
-const usuariosRouter = require('./routes/usuarios');
-const categoriasRouter = require('./routes/categorias');
-const tagsRouter = require('./routes/tags');
-const postagensRouter = require('./routes/postagens');
-const comentariosRouter = require('./routes/comentarios');
-const gruposRouter = require('./routes/grupos');
-const amizadeRouter = require('./routes/amizade');
-const eventosRouter = require('./routes/eventos');
-const notificacoesRouter = require('./routes/notificacoes');
-const mensagensDiretasRouter = require('./routes/mensagensDiretas');
-const adminRouter = require('./routes/admin');
-const documentosVerificacaoRouter = require('./routes/documentosVerificacao');
-const curtidasRouter = require('./routes/curtidas');
-const compartilhamentosRouter = require('./routes/compartilhamentos');
-const participanteEventoRouter = require('./routes/participanteEvento');
-const membroGrupoRouter = require('./routes/membroGrupo');
-const filtrosUsuarioRouter = require('./routes/filtrosUsuario');
-const authRouter = require('./routes/auth');
-const cadastroRouter = require('./routes/cadastro');
-const loginRouter = require('./routes/login');
 
 const app = express();
+
+// Testa conexão com o banco na inicialização
+sequelize.authenticate()
+  .then(() => console.log('✅ Conexão com banco estabelecida com sucesso!'))
+  .catch(err => console.error('❌ Erro ao conectar no banco:', err));
 
 // Configuração da view engine Pug
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 // Middlewares globais
+app.use(helmet()); // segurança
+app.use(cors()); // habilita CORS (se necessário)
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Configuração de sessão
 app.use(session({
-  secret: 'sua_chave_secreta',
+  secret: process.env.SESSION_SECRET || 'sua_chave_secreta',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // só https em prod
+    maxAge: 1000 * 60 * 60 * 24 // 1 dia
+  }
 }));
-// Rotas principais
+
+// Rotas
 app.use('/', indexRouter);
-app.use('/usuarios', usuariosRouter);
-app.use('/categorias', categoriasRouter);
-app.use('/tags', tagsRouter);
-app.use('/postagens', postagensRouter);
-app.use('/comentarios', comentariosRouter);
-app.use('/grupos', gruposRouter);
-app.use('/amizade', amizadeRouter);
-app.use('/eventos', eventosRouter);
-app.use('/notificacoes', notificacoesRouter);
-app.use('/mensagensDiretas', mensagensDiretasRouter);
-app.use('/admin', adminRouter);
-app.use('/documentosVerificacao', documentosVerificacaoRouter);
-app.use('/curtidas', curtidasRouter);
-app.use('/compartilhamentos', compartilhamentosRouter);
-app.use('/participanteEvento', participanteEventoRouter);
-app.use('/membroGrupo', membroGrupoRouter);
-app.use('/filtrosUsuario', filtrosUsuarioRouter);
-app.use('/auth', authRouter);
-app.use('/cadastro', cadastroRouter);
-app.use('/login', loginRouter);
 app.get('/favicon.ico', (req, res) => res.status(204));
 
 // 404 handler

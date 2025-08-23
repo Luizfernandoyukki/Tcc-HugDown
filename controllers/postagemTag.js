@@ -1,7 +1,7 @@
 const { PostagemTag, Postagem, Tag } = require('../models');
 
 // Listar todas as tags de postagens
-exports.listar = async () => {
+exports.listar = async (req, res) => {
   try {
     const postagemTags = await PostagemTag.findAll({
       include: [
@@ -9,58 +9,58 @@ exports.listar = async () => {
         { model: Tag, as: 'tag' }
       ]
     });
-    return postagemTags;
+    res.json(postagemTags);
   } catch (error) {
-    throw new Error('Erro ao buscar tags de postagens: ' + error.message);
+    res.status(500).json({ error: 'Erro ao buscar tags de postagens: ' + error.message });
   }
 };
 
 // Buscar tag de postagem por ID
-exports.buscarPorId = async (id) => {
+exports.buscarPorId = async (req, res) => {
   try {
-    const postagemTag = await PostagemTag.findByPk(id, {
+    const postagemTag = await PostagemTag.findByPk(req.params.id, {
       include: [
         { model: Postagem, as: 'postagem' },
         { model: Tag, as: 'tag' }
       ]
     });
-    if (!postagemTag) throw new Error('Tag de postagem não encontrada');
-    return postagemTag;
+    if (!postagemTag) return res.status(404).json({ error: 'Tag de postagem não encontrada' });
+    res.json(postagemTag);
   } catch (error) {
-    throw new Error('Erro ao buscar tag de postagem: ' + error.message);
+    res.status(500).json({ error: 'Erro ao buscar tag de postagem: ' + error.message });
   }
 };
 
 // Criar nova tag de postagem
-exports.criar = async (dados) => {
+exports.criar = async (req, res) => {
   try {
-    const novaPostagemTag = await PostagemTag.create(dados);
-    return novaPostagemTag;
+    const novaPostagemTag = await PostagemTag.create(req.body);
+    res.status(201).json(novaPostagemTag);
   } catch (error) {
-    throw new Error('Erro ao criar tag de postagem: ' + error.message);
+    res.status(500).json({ error: 'Erro ao criar tag de postagem: ' + error.message });
   }
 };
 
 // Atualizar tag de postagem
-exports.atualizar = async (id, dados) => {
+exports.atualizar = async (req, res) => {
   try {
-    const postagemTag = await PostagemTag.findByPk(id);
-    if (!postagemTag) throw new Error('Tag de postagem não encontrada');
-    await postagemTag.update(dados);
-    return postagemTag;
+    const postagemTag = await PostagemTag.findByPk(req.params.id);
+    if (!postagemTag) return res.status(404).json({ error: 'Tag de postagem não encontrada' });
+    await postagemTag.update(req.body);
+    res.json(postagemTag);
   } catch (error) {
-    throw new Error('Erro ao atualizar tag de postagem: ' + error.message);
+    res.status(500).json({ error: 'Erro ao atualizar tag de postagem: ' + error.message });
   }
 };
 
 // Remover tag de postagem
-exports.remover = async (id) => {
+exports.remover = async (req, res) => {
   try {
-    const postagemTag = await PostagemTag.findByPk(id);
-    if (!postagemTag) throw new Error('Tag de postagem não encontrada');
+    const postagemTag = await PostagemTag.findByPk(req.params.id);
+    if (!postagemTag) return res.status(404).json({ error: 'Tag de postagem não encontrada' });
     await postagemTag.destroy();
-    return { mensagem: 'Tag de postagem removida com sucesso' };
+    res.json({ message: 'Tag de postagem removida com sucesso' });
   } catch (error) {
-    throw new Error('Erro ao remover tag de postagem: ' + error.message);
+    res.status(500).json({ error: 'Erro ao remover tag de postagem: ' + error.message });
   }
 };

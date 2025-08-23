@@ -1,17 +1,10 @@
 const { Tag, TagTraducao } = require('../models');
 
 // Listar todas as tags
-exports.listar = async () => {
-  try {
-    const tags = await Tag.findAll({
-      include: [
-        { model: TagTraducao, as: 'traducoes' }
-      ]
-    });
-    return tags;
-  } catch (error) {
-    throw new Error('Erro ao buscar tags: ' + error.message);
-  }
+exports.listar = async (req, resOrOptions) => {
+  const tags = await Tag.findAll({ include: [{ model: TagTraducao, as: 'traducoes' }] });
+  if (resOrOptions && resOrOptions.raw) return tags;
+  return resOrOptions.json(tags);
 };
 
 // Buscar tag por ID

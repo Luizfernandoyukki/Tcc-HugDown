@@ -1,105 +1,146 @@
 const express = require('express');
 const router = express.Router();
-
-const { postagemController, usuarioController, categoriaController, tagController } = require('../controllers');
-const grupoController = require('../controllers/grupo');
-const controllers = require('../controllers');
-const comentarioController = controllers.comentarioController;
 const requireLogin = require('../middlewares/auth');
+const controllers = require('../controllers');
 
-// Página inicial - Feed
-router.get('/', async (req, res) => {
-  try {
-    // Busca posts
-    const posts = await postagemController.listar();
+const {
+  administradorController,
+  amizadeController,
+  categoriaController,
+  categoriaTraducaoController,
+  comentarioController,
+  compartilhamentoController,
+  curtidaController,
+  documentoVerificacaoController,
+  eventoController,
+  filtroUsuarioController,
+  grupoController,
+  idiomaController,
+  membroGrupoController,
+  mensagemDiretaController,
+  notificacaoController,
+  participanteEventoController,
+  postagemController,
+  postagemSecaoController,
+  postagemTagController,
+  secaoController,
+  secaoTraducaoController,
+  tagController,
+  tagTraducaoController,
+  usuarioController,
+} = controllers;
 
-    // Busca categorias
-    const categorias = await categoriaController.listar();
+// Wrapper para async/await
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
 
-    // Busca tags
-    const tags = await tagController.listar();
+// ROTAS PÁGINA (renderizam HTML)
+router.get('/', asyncHandler(async (req, res) => {
+  const [posts, categorias, tags, grupos] = await Promise.all([
+    postagemController.listar(req, { raw: true }),
+    categoriaController.listar(req, { raw: true }),
+    tagController.listar(req, { raw: true }),
+    grupoController.listar(req, { raw: true }),
+  ]);
 
-    // Sugestões de amigos (se usuário logado)
-    let amigos = [];
-    if (req.session && req.session.userId) {
-      amigos = await usuarioController.sugestoesAmigos(req.session.userId);
-    }
+  res.render('index', {
+    posts,
+    categorias,
+    tags,
+    grupos,
+    usuario: req.user || null,
+    usuarioLogado: !!req.user,
+  });
+}));
 
-    // Grupos populares (exemplo: ajuste conforme seu controller)
-    let grupos = [];
-    if (grupoController.populares) {
-      grupos = await grupoController.populares();
-    } else {
-      grupos = await grupoController.listar();
-    }
+router.get('/categorias', asyncHandler(async (req, res) => {
+  const categorias = await categoriaController.listarCategoriasArray
+    ? await categoriaController.listarCategoriasArray()
+    : [];
+  res.render('categorias/index', { categorias });
+}));
 
-    // Usuário logado (se houver)
-    let usuario = null;
-    if (req.session && req.session.userId) {
-      usuario = await usuarioController.buscarPorId(req.session.userId);
-    }
+router.get('/categorias/:id', asyncHandler(async (req, res) => {
+  const categoria = await categoriaController.buscarCategoriaPorId
+    ? await categoriaController.buscarCategoriaPorId(req.params.id)
+    : null;
+  if (!categoria) return res.status(404).render('error', { error: 'Categoria não encontrada' });
+  res.render('categorias/show', { categoria });
+}));
 
-    res.render('index', { posts, amigos, grupos, categorias, tags, usuario, usuarioLogado: !!usuario });
-  } catch (error) {
-    res.status(500).render('error', { error });
-  }
-});
+router.get('/cadastro', (req, res) => res.render('cadastro'));
+router.get('/login', (req, res) => res.render('login'));
 
-// Filtro por categoria
-router.get('/categoria/:nome', async (req, res) => {
-  try {
-    const nome = req.params.nome;
-    const categoria = await categoriaController.buscarPorNome(nome);
-    if (!categoria) return res.status(404).render('error', { error: 'Categoria não encontrada' });
+// ROTAS DE API (JSON)
+router.post('/cadastro', asyncHandler(usuarioController.criar));
+router.post('/login', asyncHandler(usuarioController.login)); // se existir login
 
-    const posts = await postagemController.listarPorCategoria(categoria.id_categoria);
-    const categorias = await categoriaController.listar();
-    const tags = await tagController.listar();
-    let usuario = null;
-    if (req.session && req.session.userId) {
-      usuario = await usuarioController.buscarPorId(req.session.userId);
-    }
-    let grupos = [];
-    if (grupoController.populares) {
-      grupos = await grupoController.populares();
-    } else {
-      grupos = await grupoController.listar();
-    }
-    res.render('index', { posts, categorias, tags, usuario, grupos, categoriaSelecionada: categoria });
-  } catch (error) {
-    res.status(500).render('error', { error });
-  }
-});
+// ROTAS PROTEGIDAS (requireLogin)
+router.get('/administradores', requireLogin, asyncHandler(administradorController.listar));
+router.post('/administradores', requireLogin, asyncHandler(administradorController.criar));
 
-// Filtro por tag
-router.get('/tag/:slug', async (req, res) => {
-  try {
-    const slug = req.params.slug;
-    const tag = await tagController.buscarPorSlug(slug);
-    if (!tag) return res.status(404).render('error', { error: 'Tag não encontrada' });
+router.get('/amizades', requireLogin, asyncHandler(amizadeController.listar));
+router.post('/amizades', requireLogin, asyncHandler(amizadeController.criar));
 
-    const posts = await postagemController.listarPorTag(tag.id_tag);
-    const categorias = await categoriaController.listar();
-    const tags = await tagController.listar();
-    let usuario = null;
-    if (req.session && req.session.userId) {
-      usuario = await usuarioController.buscarPorId(req.session.userId);
-    }
-    let grupos = [];
-    if (grupoController.populares) {
-      grupos = await grupoController.populares();
-    } else {
-      grupos = await grupoController.listar();
-    }
-    res.render('index', { posts, categorias, tags, usuario, grupos, tagSelecionada: tag });
-  } catch (error) {
-    res.status(500).render('error', { error });
-  }
-});
+router.get('/categorias-traducao', requireLogin, asyncHandler(categoriaTraducaoController.listar));
 
-// Exemplo de uso
-router.post('/criar', requireLogin, postagemController.criar);
-router.post('/comentar', requireLogin, comentarioController.criar);
-// Adicione requireLogin em todas rotas de ação (curtir, compartilhar, etc)
+router.get('/comentarios', requireLogin, asyncHandler(comentarioController.listar));
+router.post('/comentarios', requireLogin, asyncHandler(comentarioController.criar));
+
+router.get('/compartilhamentos', requireLogin, asyncHandler(compartilhamentoController.listar));
+router.post('/compartilhamentos', requireLogin, asyncHandler(compartilhamentoController.criar));
+
+router.get('/curtidas', requireLogin, asyncHandler(curtidaController.listar));
+router.post('/curtidas', requireLogin, asyncHandler(curtidaController.criar));
+
+router.get('/documentos-verificacao', requireLogin, asyncHandler(documentoVerificacaoController.listar));
+router.post('/documentos-verificacao', requireLogin, asyncHandler(documentoVerificacaoController.criar));
+
+router.get('/eventos', requireLogin, asyncHandler(eventoController.listar));
+router.post('/eventos', requireLogin, asyncHandler(eventoController.criar));
+
+router.get('/filtros-usuario', requireLogin, asyncHandler(filtroUsuarioController.listar));
+router.post('/filtros-usuario', requireLogin, asyncHandler(filtroUsuarioController.criar));
+
+router.get('/grupos', requireLogin, asyncHandler(grupoController.listar));
+router.post('/grupos', requireLogin, asyncHandler(grupoController.criar));
+
+router.get('/idiomas', requireLogin, asyncHandler(idiomaController.listar));
+
+router.get('/membros-grupo', requireLogin, asyncHandler(membroGrupoController.listar));
+router.post('/membros-grupo', requireLogin, asyncHandler(membroGrupoController.criar));
+
+router.get('/mensagens-diretas', requireLogin, asyncHandler(mensagemDiretaController.listar));
+router.post('/mensagens-diretas', requireLogin, asyncHandler(mensagemDiretaController.criar));
+
+router.get('/notificacoes', requireLogin, asyncHandler(notificacaoController.listar));
+router.post('/notificacoes', requireLogin, asyncHandler(notificacaoController.criar));
+
+router.get('/participantes-evento', requireLogin, asyncHandler(participanteEventoController.listar));
+router.post('/participantes-evento', requireLogin, asyncHandler(participanteEventoController.criar));
+
+router.get('/postagens', requireLogin, asyncHandler(postagemController.listar));
+router.get('/postagens/:id', requireLogin, asyncHandler(postagemController.buscarPorId));
+router.post('/postagens', requireLogin, asyncHandler(postagemController.criar));
+router.put('/postagens/:id', requireLogin, asyncHandler(postagemController.atualizar));
+router.delete('/postagens/:id', requireLogin, asyncHandler(postagemController.remover));
+
+router.get('/postagens-secoes', requireLogin, asyncHandler(postagemSecaoController.listar));
+router.get('/postagens-tags', requireLogin, asyncHandler(postagemTagController.listar));
+
+router.get('/secoes', requireLogin, asyncHandler(secaoController.listar));
+router.get('/secoes-traducao', requireLogin, asyncHandler(secaoTraducaoController.listar));
+
+router.get('/tags', requireLogin, asyncHandler(tagController.listar));
+router.post('/tags', requireLogin, asyncHandler(tagController.criar));
+
+router.get('/tags-traducao', requireLogin, asyncHandler(tagTraducaoController.listar));
+
+router.get('/usuarios', requireLogin, asyncHandler(usuarioController.listar));
+router.get('/usuarios/:id', requireLogin, asyncHandler(usuarioController.buscarPorId));
+router.post('/usuarios', requireLogin, asyncHandler(usuarioController.criar));
+router.put('/usuarios/:id', requireLogin, asyncHandler(usuarioController.atualizar));
+router.delete('/usuarios/:id', requireLogin, asyncHandler(usuarioController.remover));
 
 module.exports = router;
