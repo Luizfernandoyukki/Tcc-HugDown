@@ -37,7 +37,19 @@ const categoriaController = {
 
   criar: async (req, res) => {
     try {
-      const nova = await Categoria.create(req.body);
+      const { nome_categoria, descricao, cor_categoria, icone, ativo } = req.body;
+      // Validação do campo obrigatório
+      if (!nome_categoria) {
+        return res.status(400).json({ error: 'Preencha o nome da categoria.' });
+      }
+      // Cria a categoria
+      const nova = await Categoria.create({
+        nome_categoria,
+        descricao,
+        cor_categoria,
+        icone,
+        ativo: ativo !== undefined ? ativo : true
+      });
       res.status(201).json(nova);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar categoria: ' + err.message });
@@ -71,21 +83,19 @@ const categoriaController = {
     }
   },
 
-  buscarPorNome: async (req, res) => {
-    try {
-      const nome = req.params.nome;
-      const categoria = await Categoria.findOne({
-        where: { nome_categoria: nome },
-        include: [
-          { model: CategoriaTraducao, as: 'traducoes' },
-          { model: Postagem, as: 'postagens' }
-        ]
-      });
-      if (!categoria) return res.status(404).json({ error: 'Categoria não encontrada' });
-      res.json(categoria);
-    } catch (err) {
-      res.status(500).json({ error: 'Erro ao buscar categoria por nome: ' + err.message });
-    }
+  buscarPorNome: async (nome, options) => {
+    const categoria = await Categoria.findOne({
+      where: { nome_categoria: nome },
+      include: [
+        { model: CategoriaTraducao, as: 'traducoes' },
+        { model: Postagem, as: 'postagens' }
+      ]
+    });
+    // Se chamado para view, retorna objeto
+    if (options && options.raw) return categoria;
+    // Se chamado por rota API, responde JSON
+    if (!categoria) return options && options.status ? options.status(404).json({ error: 'Categoria não encontrada' }) : null;
+    return options && options.json ? options.json(categoria) : categoria;
   }
 };
 

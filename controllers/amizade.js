@@ -33,7 +33,17 @@ const amizadeController = {
 
   criar: async (req, res) => {
     try {
-      const nova = await Amizade.create(req.body);
+      const { id_solicitante, id_destinatario, status_amizade } = req.body;
+      // Validação dos campos obrigatórios
+      if (!id_solicitante || !id_destinatario) {
+        return res.status(400).json({ error: 'Preencha id_solicitante e id_destinatario.' });
+      }
+      // Cria a amizade
+      const nova = await Amizade.create({
+        id_solicitante,
+        id_destinatario,
+        status_amizade: status_amizade || 'pending'
+      });
       res.status(201).json(nova);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar amizade: ' + err.message });

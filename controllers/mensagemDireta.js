@@ -35,7 +35,19 @@ exports.buscarPorId = async (req, res) => {
 // Criar nova mensagem direta
 exports.criar = async (req, res) => {
   try {
-    const novaMensagem = await MensagemDireta.create(req.body);
+    const { id_remetente, id_destinatario, conteudo, url_midia, tipo_midia, lida } = req.body;
+    // Validação dos campos obrigatórios
+    if (!id_remetente || !id_destinatario) {
+      return res.status(400).json({ error: 'Preencha id_remetente e id_destinatario.' });
+    }
+    const novaMensagem = await MensagemDireta.create({
+      id_remetente,
+      id_destinatario,
+      conteudo,
+      url_midia,
+      tipo_midia,
+      lida: lida !== undefined ? lida : false
+    });
     res.status(201).json(novaMensagem);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar mensagem direta: ' + error.message });

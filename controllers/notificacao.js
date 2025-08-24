@@ -29,7 +29,19 @@ exports.buscarPorId = async (req, res) => {
 // Criar nova notificação
 exports.criar = async (req, res) => {
   try {
-    const nova = await Notificacao.create(req.body);
+    const { id_usuario, tipo_notificacao, titulo, mensagem, url_relacionada, lida } = req.body;
+    // Validação dos campos obrigatórios
+    if (!id_usuario || !tipo_notificacao || !titulo) {
+      return res.status(400).json({ error: 'Preencha id_usuario, tipo_notificacao e titulo.' });
+    }
+    const nova = await Notificacao.create({
+      id_usuario,
+      tipo_notificacao,
+      titulo,
+      mensagem,
+      url_relacionada,
+      lida: lida !== undefined ? lida : false
+    });
     res.status(201).json(nova);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao criar notificação: ' + err.message });

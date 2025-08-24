@@ -35,7 +35,23 @@ exports.buscarPorId = async (req, res) => {
 // Criar novo participante de evento
 exports.criar = async (req, res) => {
   try {
-    const novoParticipante = await ParticipanteEvento.create(req.body);
+    const { id_evento, id_usuario, status_participacao } = req.body;
+    // Validação dos campos obrigatórios
+    if (!id_evento || !id_usuario) {
+      return res.status(400).json({ error: 'Preencha id_evento e id_usuario.' });
+    }
+    // Verifica se já existe participação
+    const existente = await ParticipanteEvento.findOne({
+      where: { id_evento, id_usuario }
+    });
+    if (existente) {
+      return res.status(409).json({ error: 'Usuário já é participante deste evento.' });
+    }
+    const novoParticipante = await ParticipanteEvento.create({
+      id_evento,
+      id_usuario,
+      status_participacao: status_participacao || 'confirmed'
+    });
     res.status(201).json(novoParticipante);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar participante de evento: ' + error.message });

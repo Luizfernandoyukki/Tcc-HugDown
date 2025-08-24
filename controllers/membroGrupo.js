@@ -35,7 +35,24 @@ exports.buscarPorId = async (req, res) => {
 // Criar novo membro de grupo
 exports.criar = async (req, res) => {
   try {
-    const novo = await MembroGrupo.create(req.body);
+    const { id_grupo, id_usuario, papel_membro, ativo } = req.body;
+    // Validação dos campos obrigatórios
+    if (!id_grupo || !id_usuario) {
+      return res.status(400).json({ error: 'Preencha id_grupo e id_usuario.' });
+    }
+    // Verifica se já existe membro
+    const existente = await MembroGrupo.findOne({
+      where: { id_grupo, id_usuario }
+    });
+    if (existente) {
+      return res.status(409).json({ error: 'Usuário já é membro deste grupo.' });
+    }
+    const novo = await MembroGrupo.create({
+      id_grupo,
+      id_usuario,
+      papel_membro: papel_membro || 'member',
+      ativo: ativo !== undefined ? ativo : true
+    });
     res.status(201).json(novo);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao criar membro: ' + err.message });

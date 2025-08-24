@@ -37,7 +37,12 @@ exports.buscarPorCodigo = async (req, res) => {
 // Criar novo idioma
 exports.criar = async (req, res) => {
   try {
-    const novo = await Idioma.create(req.body);
+    const { codigo_idioma, nome_idioma } = req.body;
+    // Validação dos campos obrigatórios
+    if (!codigo_idioma || !nome_idioma) {
+      return res.status(400).json({ error: 'Preencha codigo_idioma e nome_idioma.' });
+    }
+    const novo = await Idioma.create({ codigo_idioma, nome_idioma });
     res.status(201).json(novo);
   } catch (err) {
     res.status(500).json({ error: err.message || 'Erro ao criar idioma' });

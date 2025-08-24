@@ -36,7 +36,22 @@ const curtidaController = {
   // Criar nova curtida
   criar: async (req, res) => {
     try {
-      const nova = await Curtida.create(req.body);
+      const { id_postagem, id_usuario } = req.body;
+      // Validação dos campos obrigatórios
+      if (!id_postagem || !id_usuario) {
+        return res.status(400).json({ error: 'Preencha id_postagem e id_usuario.' });
+      }
+      // Verifica se já existe curtida
+      const existente = await Curtida.findOne({
+        where: { id_postagem, id_usuario }
+      });
+      if (existente) {
+        return res.status(409).json({ error: 'Usuário já curtiu esta postagem.' });
+      }
+      const nova = await Curtida.create({
+        id_postagem,
+        id_usuario
+      });
       res.status(201).json(nova);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar curtida: ' + err.message });

@@ -36,7 +36,32 @@ const documentoVerificacaoController = {
   // Criar novo documento de verificação
   criar: async (req, res) => {
     try {
-      const novo = await DocumentoVerificacao.create(req.body);
+      const {
+        id_usuario,
+        caminho_arquivo,
+        tipo_documento,
+        numero_documento,
+        instituicao,
+        status,
+        data_verificacao,
+        verificado_por_admin,
+        observacoes
+      } = req.body;
+      // Validação dos campos obrigatórios
+      if (!id_usuario || !caminho_arquivo) {
+        return res.status(400).json({ error: 'Preencha id_usuario e caminho_arquivo.' });
+      }
+      const novo = await DocumentoVerificacao.create({
+        id_usuario,
+        caminho_arquivo,
+        tipo_documento,
+        numero_documento,
+        instituicao,
+        status: status || 'pending',
+        data_verificacao,
+        verificado_por_admin,
+        observacoes
+      });
       res.status(201).json(novo);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar documento: ' + err.message });

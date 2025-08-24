@@ -7,7 +7,6 @@ const compartilhamentoController = require('./compartilhamento');
 const curtidaController = require('./curtida');
 const documentoVerificacaoController = require('./documentoVerificacao');
 const eventoController = require('./evento');
-const filtroUsuarioController = require('./filtroUsuario');
 const grupoController = require('./grupo');
 const idiomaController = require('./idioma');
 const membroGrupoController = require('./membroGrupo');
@@ -15,8 +14,6 @@ const mensagemDiretaController = require('./mensagemDireta');
 const notificacaoController = require('./notificacao');
 const participanteEventoController = require('./participanteEvento');
 const postagemController = require('./postagem');
-const postagemSecaoController = require('./postagemSecao');
-const postagemTagController = require('./postagemTag');
 const secaoController = require('./secao');
 const secaoTraducaoController = require('./secaoTraducao');
 const tagController = require('./tag');
@@ -33,7 +30,6 @@ module.exports = {
   curtidaController,
   documentoVerificacaoController,
   eventoController,
-  filtroUsuarioController,
   grupoController,
   idiomaController,
   membroGrupoController,
@@ -41,8 +37,6 @@ module.exports = {
   notificacaoController,
   participanteEventoController,
   postagemController,
-  postagemSecaoController,
-  postagemTagController,
   secaoController,
   secaoTraducaoController,
   tagController,

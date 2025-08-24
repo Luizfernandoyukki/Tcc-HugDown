@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const requireLogin = require('../middlewares/auth');
 const controllers = require('../controllers');
+const requireLogin = require('../middlewares/auth');
 
 const {
   administradorController,
@@ -13,7 +13,6 @@ const {
   curtidaController,
   documentoVerificacaoController,
   eventoController,
-  filtroUsuarioController,
   grupoController,
   idiomaController,
   membroGrupoController,
@@ -21,8 +20,6 @@ const {
   notificacaoController,
   participanteEventoController,
   postagemController,
-  postagemSecaoController,
-  postagemTagController,
   secaoController,
   secaoTraducaoController,
   tagController,
@@ -43,7 +40,6 @@ router.get('/', asyncHandler(async (req, res) => {
     tagController.listar(req, { raw: true }),
     grupoController.listar(req, { raw: true }),
   ]);
-
   res.render('index', {
     posts,
     categorias,
@@ -55,16 +51,12 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 router.get('/categorias', asyncHandler(async (req, res) => {
-  const categorias = await categoriaController.listarCategoriasArray
-    ? await categoriaController.listarCategoriasArray()
-    : [];
+  const categorias = await categoriaController.listar(req, { raw: true });
   res.render('categorias/index', { categorias });
 }));
 
 router.get('/categorias/:id', asyncHandler(async (req, res) => {
-  const categoria = await categoriaController.buscarCategoriaPorId
-    ? await categoriaController.buscarCategoriaPorId(req.params.id)
-    : null;
+  const categoria = await categoriaController.buscarPorId(req.params.id);
   if (!categoria) return res.status(404).render('error', { error: 'Categoria não encontrada' });
   res.render('categorias/show', { categoria });
 }));
@@ -100,9 +92,6 @@ router.post('/documentos-verificacao', requireLogin, asyncHandler(documentoVerif
 router.get('/eventos', requireLogin, asyncHandler(eventoController.listar));
 router.post('/eventos', requireLogin, asyncHandler(eventoController.criar));
 
-router.get('/filtros-usuario', requireLogin, asyncHandler(filtroUsuarioController.listar));
-router.post('/filtros-usuario', requireLogin, asyncHandler(filtroUsuarioController.criar));
-
 router.get('/grupos', requireLogin, asyncHandler(grupoController.listar));
 router.post('/grupos', requireLogin, asyncHandler(grupoController.criar));
 
@@ -126,9 +115,6 @@ router.post('/postagens', requireLogin, asyncHandler(postagemController.criar));
 router.put('/postagens/:id', requireLogin, asyncHandler(postagemController.atualizar));
 router.delete('/postagens/:id', requireLogin, asyncHandler(postagemController.remover));
 
-router.get('/postagens-secoes', requireLogin, asyncHandler(postagemSecaoController.listar));
-router.get('/postagens-tags', requireLogin, asyncHandler(postagemTagController.listar));
-
 router.get('/secoes', requireLogin, asyncHandler(secaoController.listar));
 router.get('/secoes-traducao', requireLogin, asyncHandler(secaoTraducaoController.listar));
 
@@ -142,5 +128,51 @@ router.get('/usuarios/:id', requireLogin, asyncHandler(usuarioController.buscarP
 router.post('/usuarios', requireLogin, asyncHandler(usuarioController.criar));
 router.put('/usuarios/:id', requireLogin, asyncHandler(usuarioController.atualizar));
 router.delete('/usuarios/:id', requireLogin, asyncHandler(usuarioController.remover));
+
+// Filtro por categoria (exibe postagens da categoria)
+router.get('/categoria/:nome', asyncHandler(async (req, res) => {
+  const categoria = await categoriaController.buscarPorNome(req.params.nome);
+  if (!categoria) return res.status(404).render('error', { error: 'Categoria não encontrada' });
+  const posts = await postagemController.listarPorCategoria(req, { raw: true, id_categoria: categoria.id_categoria });
+  const [categorias, tags, grupos] = await Promise.all([
+    categoriaController.listar(req, { raw: true }),
+    tagController.listar(req, { raw: true }),
+    grupoController.listar(req, { raw: true }),
+  ]);
+  res.render('index', {
+    posts,
+    categorias,
+    tags,
+    grupos,
+    usuario: req.user || null,
+    usuarioLogado: !!req.user,
+  });
+}));
+
+// Filtro por tag (exibe postagens da tag)
+router.get('/tag/:nome', asyncHandler(async (req, res) => {
+  // Busca a tag pelo nome
+  const tag = await tagController.buscarPorNome(req.params.nome);
+  if (!tag) return res.status(404).render('error', { error: 'Tag não encontrada' });
+
+  // Busca as postagens dessa tag
+  const posts = await postagemController.listarPorTag(req, { raw: true, id_tag: tag.id_tag });
+
+  // Busca categorias, tags e grupos para o topo
+  const [categorias, tags, grupos] = await Promise.all([
+    categoriaController.listar(req, { raw: true }),
+    tagController.listar(req, { raw: true }),
+    grupoController.listar(req, { raw: true }),
+  ]);
+
+  res.render('index', {
+    posts,
+    categorias,
+    tags,
+    grupos,
+    usuario: req.user || null,
+    usuarioLogado: !!req.user,
+  });
+}));
 
 module.exports = router;

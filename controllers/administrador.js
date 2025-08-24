@@ -27,7 +27,13 @@ const administradorController = {
 
   criar: async (req, res) => {
     try {
-      const novo = await Administrador.create(req.body);
+      const { id_usuario, nivel_admin } = req.body;
+      // Validação dos campos obrigatórios
+      if (!id_usuario || !nivel_admin) {
+        return res.status(400).json({ error: 'Preencha id_usuario e nivel_admin.' });
+      }
+      // Cria o administrador
+      const novo = await Administrador.create({ id_usuario, nivel_admin });
       res.status(201).json(novo);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar administrador: ' + err.message });

@@ -36,7 +36,17 @@ exports.buscarPorId = async (req, res) => {
 // Criar nova tradução
 exports.criar = async (req, res) => {
   try {
-    const nova = await SecaoTraducao.create(req.body);
+    const { id_secao, codigo_idioma, nome_secao, descricao_secao } = req.body;
+    // Validação dos campos obrigatórios
+    if (!id_secao || !codigo_idioma || !nome_secao) {
+      return res.status(400).json({ error: 'Preencha id_secao, codigo_idioma e nome_secao.' });
+    }
+    const nova = await SecaoTraducao.create({
+      id_secao,
+      codigo_idioma,
+      nome_secao,
+      descricao_secao
+    });
     res.status(201).json(nova);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao criar tradução: ' + err.message });

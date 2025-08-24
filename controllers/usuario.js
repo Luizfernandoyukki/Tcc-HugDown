@@ -1,5 +1,6 @@
 const { Usuario, Idioma, Amizade } = require('../models');
 const { Op } = require('sequelize');
+const bcrypt = require('bcrypt');
 
 // Listar todos os usuários
 exports.listar = async (req, res) => {
@@ -30,7 +31,49 @@ exports.buscarPorId = async (req, res) => {
 // Criar novo usuário
 exports.criar = async (req, res) => {
   try {
-    const novoUsuario = await Usuario.create(req.body);
+    // Extrai os dados do body
+    const {
+      email,
+      nome_real,
+      sobrenome_real,
+      nome_usuario,
+      telefone,
+      endereco,
+      cidade,
+      estado,
+      cep,
+      pais,
+      genero,
+      data_nascimento,
+      senha // <-- agora espera o campo senha
+    } = req.body;
+
+    // Validação básica dos campos obrigatórios
+    if (!email || !nome_real || !sobrenome_real || !nome_usuario || !telefone || !endereco || !cidade || !estado || !cep || !senha) {
+      return res.status(400).json({ error: 'Preencha todos os campos obrigatórios.' });
+    }
+
+    // Criptografa a senha antes de salvar
+    const saltRounds = 10;
+    const senha_hash = await bcrypt.hash(senha, saltRounds);
+
+    // Cria o usuário
+    const novoUsuario = await Usuario.create({
+      email,
+      nome_real,
+      sobrenome_real,
+      nome_usuario,
+      telefone,
+      endereco,
+      cidade,
+      estado,
+      cep,
+      pais: pais || 'Brasil',
+      genero,
+      data_nascimento,
+      senha_hash // salva o hash da senha
+    });
+
     res.status(201).json(novoUsuario);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao criar usuário: ' + err.message });

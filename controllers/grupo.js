@@ -32,7 +32,26 @@ exports.buscarPorId = async (req, res) => {
 // Criar novo grupo
 exports.criar = async (req, res) => {
   try {
-    const novo = await Grupo.create(req.body);
+    const {
+      id_administrador,
+      nome_grupo,
+      descricao_grupo,
+      foto_grupo,
+      tipo_privacidade,
+      ativo
+    } = req.body;
+    // Validação dos campos obrigatórios
+    if (!id_administrador || !nome_grupo) {
+      return res.status(400).json({ error: 'Preencha id_administrador e nome_grupo.' });
+    }
+    const novo = await Grupo.create({
+      id_administrador,
+      nome_grupo,
+      descricao_grupo,
+      foto_grupo,
+      tipo_privacidade: tipo_privacidade || 'public',
+      ativo: ativo !== undefined ? ativo : true
+    });
     res.status(201).json(novo);
   } catch (err) {
     res.status(500).json({ error: err.message || 'Erro ao criar grupo' });

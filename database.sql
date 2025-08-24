@@ -3,7 +3,7 @@ USE HugDown_rede_social;
 
 CREATE TABLE usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255)  NOT NULL,
     senha_hash VARCHAR(255) NOT NULL,
     nome_real VARCHAR(100) NOT NULL,
     sobrenome_real VARCHAR(100) NOT NULL,
@@ -44,9 +44,9 @@ CREATE TABLE administradores (
 CREATE TABLE documentos_verificacao (
     id_documento INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
-    tipo_documento ENUM('graduacao', 'pos_graduacao', 'crm', 'crefito', 'coren', 'other') NOT NULL,
+    tipo_documento ENUM('graduacao', 'pos_graduacao', 'crm', 'crefito', 'coren', 'other'),
     numero_documento VARCHAR(100),
-    instituicao VARCHAR(200) NOT NULL,
+    instituicao VARCHAR(200) ,
     caminho_arquivo VARCHAR(500) NOT NULL,
     status ENUM('pending', 'approved', 'rejected', 'under_review') DEFAULT 'pending',
     data_submissao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -94,10 +94,13 @@ CREATE TABLE postagens (
     id_postagem INT AUTO_INCREMENT PRIMARY KEY,
     id_autor INT NOT NULL,
     id_categoria INT,
+    id_tag INT,
     tipo_postagem ENUM('text', 'photo', 'video', 'article') NOT NULL,
     conteudo TEXT,
     url_midia VARCHAR(500),
     tipo_midia VARCHAR(50),
+    titulo VARCHAR(200),
+    resumo TEXT,
     artigo_cientifico BOOLEAN DEFAULT FALSE,
     visualizacoes INT DEFAULT 0,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -108,6 +111,7 @@ CREATE TABLE postagens (
     longitude DECIMAL(10,7),
     FOREIGN KEY (id_autor) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
+    FOREIGN KEY (id_tag) REFERENCES tags(id_tag),
     INDEX idx_autor (id_autor),
     INDEX idx_categoria (id_categoria),
     INDEX idx_tipo (tipo_postagem),
@@ -115,15 +119,6 @@ CREATE TABLE postagens (
     INDEX idx_data_criacao (data_criacao),
     INDEX idx_ativo (ativo)
 );
-
-CREATE TABLE postagens_tags (
-    id_postagem INT NOT NULL,
-    id_tag INT NOT NULL,
-    PRIMARY KEY (id_postagem, id_tag),
-    FOREIGN KEY (id_postagem) REFERENCES postagens(id_postagem) ON DELETE CASCADE,
-    FOREIGN KEY (id_tag) REFERENCES tags(id_tag) ON DELETE CASCADE
-);
-
 CREATE TABLE postagens_secoes (
     id_postagem INT NOT NULL,
     id_secao INT NOT NULL,
@@ -273,19 +268,6 @@ CREATE TABLE membros_grupo (
     INDEX idx_usuario (id_usuario),
     INDEX idx_papel (papel_membro)
 );
-
-CREATE TABLE filtros_usuario (
-    id_filtro INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    nome_filtro VARCHAR(200) NOT NULL,
-    configuracao_filtro JSON NOT NULL,
-    filtro_ativo BOOLEAN DEFAULT TRUE,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-    INDEX idx_usuario (id_usuario),
-    INDEX idx_ativo (filtro_ativo)
-);
-
 CREATE TABLE notificacoes (
     id_notificacao INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,

@@ -1,0 +1,5 @@
+.step-section { display: none; }
+.step-section.active { display: block; }
+.step-buttons { margin-top: 1.5rem; }
+.form-check-label { cursor: pointer; }
+#cadastro-feedback { min-height: 40px; }

@@ -226,6 +226,5 @@ document.addEventListener('DOMContentLoaded', function () {
       mostrarCardFlutuante();
     }
   });
-
   window.usuarioLogado = !!window.usuarioLogado;
 });

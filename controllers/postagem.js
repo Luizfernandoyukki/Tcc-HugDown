@@ -1,4 +1,4 @@
-const { Postagem, Usuario } = require('../models');
+const { Postagem, Usuario, Categoria, Tag } = require('../models');
 
 // Listar todas as postagens
 exports.listar = async (req, resOrOptions) => {
@@ -25,7 +25,38 @@ exports.buscarPorId = async (req, res) => {
 // Criar nova postagem
 exports.criar = async (req, res) => {
   try {
-    const novaPostagem = await Postagem.create(req.body);
+    const {
+      id_autor,
+      tipo_postagem,
+      id_categoria,
+      id_tag,
+      conteudo,
+      url_midia,
+      tipo_midia,
+      artigo_cientifico,
+      visualizacoes,
+      privacidade,
+      latitude,
+      longitude
+    } = req.body;
+    // Validação dos campos obrigatórios
+    if (!id_autor || !tipo_postagem) {
+      return res.status(400).json({ error: 'Preencha id_autor e tipo_postagem.' });
+    }
+    const novaPostagem = await Postagem.create({
+      id_autor,
+      tipo_postagem,
+      id_categoria,
+      id_tag,
+      conteudo,
+      url_midia,
+      tipo_midia,
+      artigo_cientifico,
+      visualizacoes,
+      privacidade,
+      latitude,
+      longitude
+    });
     res.status(201).json(novaPostagem);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar postagem: ' + error.message });
@@ -57,29 +88,28 @@ exports.remover = async (req, res) => {
 };
 
 // Listar postagens por categoria
-exports.listarPorCategoria = async (req, res) => {
-  try {
-    const postagens = await Postagem.findAll({
-      where: { id_categoria: req.params.id_categoria },
-      include: [{ model: Usuario, as: 'autor' }]
-    });
-    res.json(postagens);
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao buscar postagens por categoria: ' + error.message });
-  }
+exports.listarPorCategoria = async (req, options) => {
+  const posts = await Postagem.findAll({
+    where: { id_categoria: options.id_categoria },
+    include: [
+      { model: Usuario, as: 'autor' },
+      { model: Categoria, as: 'categoria' }
+    ]
+  });
+  if (options && options.raw) return posts;
+  return req.res.json(posts);
 };
 
 // Listar postagens por tag
-exports.listarPorTag = async (req, res) => {
-  try {
-    const postagens = await Postagem.findAll({
-      include: [
-        { association: 'tags', where: { id_tag: req.params.id_tag } },
-        { model: Usuario, as: 'autor' }
-      ]
-    });
-    res.json(postagens);
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao buscar postagens por tag: ' + error.message });
-  }
+exports.listarPorTag = async (req, options) => {
+  const posts = await Postagem.findAll({
+    where: { id_tag: options.id_tag },
+    include: [
+      { model: Usuario, as: 'autor' },
+      { model: Categoria, as: 'categoria' },
+      { model: Tag, as: 'tag' }
+    ]
+  });
+  if (options && options.raw) return posts;
+  return req.res.json(posts);
 };

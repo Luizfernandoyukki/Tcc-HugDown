@@ -36,7 +36,16 @@ const compartilhamentoController = {
   // Criar novo compartilhamento
   criar: async (req, res) => {
     try {
-      const novo = await Compartilhamento.create(req.body);
+      const { id_postagem, id_usuario, mensagem_compartilhamento } = req.body;
+      // Validação dos campos obrigatórios
+      if (!id_postagem || !id_usuario) {
+        return res.status(400).json({ error: 'Preencha id_postagem e id_usuario.' });
+      }
+      const novo = await Compartilhamento.create({
+        id_postagem,
+        id_usuario,
+        mensagem_compartilhamento
+      });
       res.status(201).json(novo);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar compartilhamento: ' + err.message });

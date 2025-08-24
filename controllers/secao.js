@@ -32,7 +32,18 @@ exports.buscarPorId = async (req, res) => {
 // Criar nova seção
 exports.criar = async (req, res) => {
   try {
-    const novaSecao = await Secao.create(req.body);
+    const { nome_secao, descricao_secao, icone_secao, ordem_exibicao, ativo } = req.body;
+    // Validação do campo obrigatório
+    if (!nome_secao) {
+      return res.status(400).json({ error: 'Preencha o nome da seção.' });
+    }
+    const novaSecao = await Secao.create({
+      nome_secao,
+      descricao_secao,
+      icone_secao,
+      ordem_exibicao,
+      ativo: ativo !== undefined ? ativo : true
+    });
     res.status(201).json(novaSecao);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar seção: ' + error.message });

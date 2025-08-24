@@ -17,7 +17,7 @@ block content
             h5.mb-0.text-success Categorias
             a#link-fechar-categorias(href="javascript:void(0)", style="color:#d9534f; text-decoration:underline; font-weight:500;") Fechar
           each categoria in categorias
-            button.categoria-btn.mb-2(type='button')= categoria.nome_categoria
+            button.categoria-btn.mb-2.acao-restrita(type='button')= categoria.nome_categoria
       else
         p.text-center.text-muted Nenhuma categoria encontrada.
 
@@ -33,7 +33,7 @@ block content
             a#link-fechar-tags(href="javascript:void(0)", style="color:#d9534f; text-decoration:underline; font-weight:500;") Fechar
           each tag in tags
             - const traducao = tag.traducoes && tag.traducoes[0];
-            button.tag-btn.mb-2(type='button', data-href=`/tag/${tag.slug || tag.id}`)= traducao ? traducao.nome_tag : (tag.nome_tag || tag.nome)
+            button.tag-btn.mb-2.acao-restrita(type='button', data-href=`/tag/${tag.nome_tag}`)= traducao ? traducao.nome_tag : (tag.nome_tag || tag.nome)
 
     // FEED DE POSTAGENS
     .row.justify-content-center
@@ -124,6 +124,8 @@ block content
           button#link-fechar-grupos-feed.btn.btn-outline-danger.btn-sm Fechar
         .d-flex.flex-wrap#grupos-feed-panel-list
           // Todos os grupos renderizados pelo JS
+          each grupo in grupos
+            button.grupo-btn.mb-2.acao-restrita(type='button')= grupo.nome_grupo
 
     // Configurações e perfil (aparece embaixo no mobile)
     .card.shadow-sm.mt-5.mb-4.d-block.d-md-none(style="background:rgba(0,180,120,0.13); border:none;")
@@ -163,14 +165,23 @@ block content
           a.btn.btn-outline-secondary.btn-sm.mt-2(href='/settings') Configurações
 
   // Card flutuante para login/cadastro
-  #card-flutuante-login(style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2000;min-width:320px;max-width:90vw;")
-    .card.shadow-lg.p-4.text-center
-      h5.mb-3.text-danger Ação não permitida!
-      p.mb-3 Você precisa estar logado para usar esta função.
-      .d-flex.justify-content-center.gap-2
-        a.btn.btn-success(href="/login") Login
-        a.btn.btn-primary(href="/cadastro") Cadastro
-      button.btn.btn-outline-secondary.mt-3#fechar-card-flutuante Fechar
-block scripts
-  window.usuarioLogado = !#{!usuarioLogado};
-  script(src="/javascripts/index.js")
+  if telaProtegida
+    #card-flutuante-login(style="display:block;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2000;min-width:320px;max-width:90vw;")
+      .card.shadow-lg.p-4.text-center
+        h5.mb-3.text-danger Tela protegida!
+        p.mb-3 Você precisa estar logado para acessar esta página.
+        .d-flex.justify-content-center.gap-2
+          a.btn.btn-success(href="/login") Login
+          a.btn.btn-primary(href="/cadastro") Cadastro
+        button.btn.btn-outline-secondary.mt-3(onclick="document.getElementById('card-flutuante-login').style.display='none';document.body.style.overflow=''") Fechar
+  else
+    #card-flutuante-login(style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2000;min-width:320px;max-width:90vw;")
+      .card.shadow-lg.p-4.text-center
+        h5.mb-3.text-danger Ação não permitida!
+        p.mb-3 Você precisa estar logado para usar esta função.
+        .d-flex.justify-content-center.gap-2
+          a.btn.btn-success(href="/login") Login
+          a.btn.btn-primary(href="/cadastro") Cadastro
+        button.btn.btn-outline-secondary.mt-3#fechar-card-flutuante Fechar
+  block scripts
+    script(src="/javascripts/index.js")

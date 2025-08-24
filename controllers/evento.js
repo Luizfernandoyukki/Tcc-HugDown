@@ -38,7 +38,44 @@ const eventoController = {
   // Criar novo evento
   criar: async (req, res) => {
     try {
-      const novo = await Evento.create(req.body);
+      const {
+        id_organizador,
+        titulo_evento,
+        data_inicio,
+        id_categoria,
+        descricao_evento,
+        data_fim,
+        local_evento,
+        endereco_evento,
+        tipo_evento,
+        evento_online,
+        link_online,
+        max_participantes,
+        ativo,
+        latitude,
+        longitude
+      } = req.body;
+      // Validação dos campos obrigatórios
+      if (!id_organizador || !titulo_evento || !data_inicio) {
+        return res.status(400).json({ error: 'Preencha id_organizador, titulo_evento e data_inicio.' });
+      }
+      const novo = await Evento.create({
+        id_organizador,
+        titulo_evento,
+        data_inicio,
+        id_categoria,
+        descricao_evento,
+        data_fim,
+        local_evento,
+        endereco_evento,
+        tipo_evento,
+        evento_online,
+        link_online,
+        max_participantes,
+        ativo: ativo !== undefined ? ativo : true,
+        latitude,
+        longitude
+      });
       res.status(201).json(novo);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar evento: ' + err.message });

@@ -36,7 +36,16 @@ const comentarioController = {
   // Criar novo comentário
   criar: async (req, res) => {
     try {
-      const novo = await Comentario.create(req.body);
+      const { id_postagem, id_autor, conteudo } = req.body;
+      // Validação dos campos obrigatórios
+      if (!id_postagem || !id_autor || !conteudo) {
+        return res.status(400).json({ error: 'Preencha id_postagem, id_autor e conteudo.' });
+      }
+      const novo = await Comentario.create({
+        id_postagem,
+        id_autor,
+        conteudo
+      });
       res.status(201).json(novo);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar comentário: ' + err.message });

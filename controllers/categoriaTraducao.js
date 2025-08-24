@@ -37,7 +37,17 @@ const categoriaTraducaoController = {
   // Criar nova tradução
   criar: async (req, res) => {
     try {
-      const nova = await CategoriaTraducao.create(req.body);
+      const { id_categoria, codigo_idioma, nome_categoria, descricao } = req.body;
+      // Validação dos campos obrigatórios
+      if (!id_categoria || !codigo_idioma || !nome_categoria) {
+        return res.status(400).json({ error: 'Preencha id_categoria, codigo_idioma e nome_categoria.' });
+      }
+      const nova = await CategoriaTraducao.create({
+        id_categoria,
+        codigo_idioma,
+        nome_categoria,
+        descricao
+      });
       res.status(201).json(nova);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar tradução: ' + err.message });
