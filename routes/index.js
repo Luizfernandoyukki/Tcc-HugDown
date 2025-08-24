@@ -153,7 +153,11 @@ router.get('/categoria/:nome', asyncHandler(async (req, res) => {
 router.get('/tag/:nome', asyncHandler(async (req, res) => {
   // Busca a tag pelo nome
   const tag = await tagController.buscarPorNome(req.params.nome);
-  if (!tag) return res.status(404).render('error', { error: 'Tag não encontrada' });
+  console.log('DEBUG tag:', tag); // <-- Adicione este log
+
+  if (!tag || !tag.id_tag) {
+    return res.status(404).render('error', { error: 'Tag não encontrada ou inválida' });
+  }
 
   // Busca as postagens dessa tag
   const posts = await postagemController.listarPorTag(req, { raw: true, id_tag: tag.id_tag });

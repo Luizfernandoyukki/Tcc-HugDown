@@ -1,4 +1,4 @@
-const { Usuario, Idioma, Amizade } = require('../models');
+const { Usuario, Idioma, Amizade, Postagem } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 
@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 exports.listar = async (req, res) => {
   try {
     const usuarios = await Usuario.findAll({
-      include: [{ model: Idioma, as: 'idioma' }]
+      include: [{ model: Idioma, as: 'idioma' }, { model: Postagem, as: 'postagens' }]
     });
     res.json(usuarios);
   } catch (err) {
@@ -19,7 +19,7 @@ exports.buscarPorId = async (req, res) => {
   try {
     const id = req.params.id;
     const usuario = await Usuario.findByPk(id, {
-      include: [{ model: Idioma, as: 'idioma' }]
+      include: [{ model: Idioma, as: 'idioma' }, { model: Postagem, as: 'postagens' }]
     });
     if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
     res.json(usuario);

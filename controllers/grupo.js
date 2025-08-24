@@ -9,85 +9,44 @@ exports.listar = async (req, resOrOptions) => {
     ]
   });
   if (resOrOptions && resOrOptions.raw) return grupos;
-  return resOrOptions.json(grupos);
+  if (resOrOptions && typeof resOrOptions.json === 'function') return resOrOptions.json(grupos);
+  return grupos;
 };
 
 // Buscar grupo por ID
 exports.buscarPorId = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const grupo = await Grupo.findByPk(id, {
-      include: [
-        { model: Usuario, as: 'administrador' },
-        { model: MembroGrupo, as: 'membros' }
-      ]
-    });
-    if (!grupo) return res.status(404).json({ error: 'Grupo não encontrado' });
-    res.json(grupo);
-  } catch (err) {
-    res.status(500).json({ error: err.message || 'Erro ao buscar grupo' });
-  }
+  const grupo = await Grupo.findByPk(req.params.id, {
+    include: [
+      { model: Usuario, as: 'administrador' },
+      { model: MembroGrupo, as: 'membros' }
+    ]
+  });
+  if (!grupo) return res.status(404).json({ error: 'Grupo não encontrado' });
+  res.json(grupo);
 };
 
 // Criar novo grupo
 exports.criar = async (req, res) => {
   try {
-    const {
-      id_administrador,
-      nome_grupo,
-      descricao_grupo,
-      foto_grupo,
-      tipo_privacidade,
-      ativo
-    } = req.body;
-    // Validação dos campos obrigatórios
-    if (!id_administrador || !nome_grupo) {
-      return res.status(400).json({ error: 'Preencha id_administrador e nome_grupo.' });
-    }
-    const novo = await Grupo.create({
-      id_administrador,
-      nome_grupo,
-      descricao_grupo,
-      foto_grupo,
-      tipo_privacidade: tipo_privacidade || 'public',
-      ativo: ativo !== undefined ? ativo : true
-    });
-    res.status(201).json(novo);
+    const novoGrupo = await Grupo.create(req.body);
+    res.status(201).json(novoGrupo);
   } catch (err) {
-    res.status(500).json({ error: err.message || 'Erro ao criar grupo' });
+    res.status(500).json({ error: 'Erro ao criar grupo: ' + err.message });
   }
 };
 
 // Atualizar grupo
 exports.atualizar = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const [updated] = await Grupo.update(req.body, {
-      where: { id_grupo: id }
-    });
-    if (!updated) return res.status(404).json({ error: 'Grupo não encontrado' });
-    const grupoAtualizado = await Grupo.findByPk(id, {
-      include: [
-        { model: Usuario, as: 'administrador' },
-        { model: MembroGrupo, as: 'membros' }
-      ]
-    });
-    res.json(grupoAtualizado);
-  } catch (err) {
-    res.status(500).json({ error: err.message || 'Erro ao atualizar grupo' });
-  }
+  const grupo = await Grupo.findByPk(req.params.id);
+  if (!grupo) return res.status(404).json({ error: 'Grupo não encontrado' });
+  await grupo.update(req.body);
+  res.json(grupo);
 };
 
 // Remover grupo
 exports.remover = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const deleted = await Grupo.destroy({
-      where: { id_grupo: id }
-    });
-    if (!deleted) return res.status(404).json({ error: 'Grupo não encontrado' });
-    res.json({ message: 'Grupo removido com sucesso' });
-  } catch (err) {
-    res.status(500).json({ error: err.message || 'Erro ao remover grupo' });
-  }
+  const grupo = await Grupo.findByPk(req.params.id);
+  if (!grupo) return res.status(404).json({ error: 'Grupo não encontrado' });
+  await grupo.destroy();
+  res.json({ mensagem: 'Grupo removido com sucesso' });
 };

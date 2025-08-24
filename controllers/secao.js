@@ -1,11 +1,12 @@
-const { Secao, SecaoTraducao } = require('../models');
+const { Secao, SecaoTraducao, PostagemSecao } = require('../models');
 
 // Listar todas as seções
 exports.listar = async (req, res) => {
   try {
     const secoes = await Secao.findAll({
       include: [
-        { model: SecaoTraducao, as: 'traducoes' }
+        { model: SecaoTraducao, as: 'traducoes' },
+        { model: PostagemSecao, as: 'postagensSecao' }
       ]
     });
     res.json(secoes);
@@ -19,7 +20,8 @@ exports.buscarPorId = async (req, res) => {
   try {
     const secao = await Secao.findByPk(req.params.id, {
       include: [
-        { model: SecaoTraducao, as: 'traducoes' }
+        { model: SecaoTraducao, as: 'traducoes' },
+        { model: PostagemSecao, as: 'postagensSecao' }
       ]
     });
     if (!secao) return res.status(404).json({ error: 'Seção não encontrada' });
@@ -68,7 +70,7 @@ exports.remover = async (req, res) => {
     const secao = await Secao.findByPk(req.params.id);
     if (!secao) return res.status(404).json({ error: 'Seção não encontrada' });
     await secao.destroy();
-    res.json({ message: 'Seção removida com sucesso' });
+    res.json({ mensagem: 'Seção removida com sucesso' });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao remover seção: ' + error.message });
   }
