@@ -31,7 +31,7 @@ exports.buscarPorId = async (req, res) => {
 // Criar novo usuário
 exports.criar = async (req, res) => {
   try {
-    // Extrai os dados do body
+    // Extrai os dados do body ou do FormData
     const {
       email,
       nome_real,
@@ -45,17 +45,29 @@ exports.criar = async (req, res) => {
       pais,
       genero,
       data_nascimento,
-      senha // <-- agora espera o campo senha
+      senha,
+      idioma_preferido,
+      verificado,
+      ativo,
+      biografia
     } = req.body;
 
-    // Validação básica dos campos obrigatórios
-    if (!email || !nome_real || !sobrenome_real || !nome_usuario || !telefone || !endereco || !cidade || !estado || !cep || !senha) {
+    // Validação dos campos obrigatórios
+    if (!email || !nome_real || !sobrenome_real || !nome_usuario || !telefone || !endereco || !cidade || !estado || !cep || !senha || !genero || !data_nascimento || !idioma_preferido || !pais) {
       return res.status(400).json({ error: 'Preencha todos os campos obrigatórios.' });
     }
 
     // Criptografa a senha antes de salvar
     const saltRounds = 10;
     const senha_hash = await bcrypt.hash(senha, saltRounds);
+
+    // Foto de perfil (se veio via upload)
+    let foto_perfil = null;
+    if (req.file && req.file.filename) {
+      foto_perfil = '/perfis/' + req.file.filename; // Caminho relativo para servir via express.static
+    } else if (req.body.foto_perfil) {
+      foto_perfil = req.body.foto_perfil;
+    }
 
     // Cria o usuário
     const novoUsuario = await Usuario.create({
@@ -68,10 +80,15 @@ exports.criar = async (req, res) => {
       cidade,
       estado,
       cep,
-      pais: pais || 'Brasil',
+      pais,
       genero,
       data_nascimento,
-      senha_hash // salva o hash da senha
+      senha_hash,
+      idioma_preferido,
+      verificado: false, // sempre false no cadastro
+      ativo: true,       // sempre true no cadastro
+      foto_perfil,
+      biografia
     });
 
     res.status(201).json(novoUsuario);

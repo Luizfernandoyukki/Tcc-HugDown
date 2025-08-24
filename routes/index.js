@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const controllers = require('../controllers');
 const requireLogin = require('../middlewares/auth');
+const multer = require('multer');
+const path = require('path');
 
 const {
   administradorController,
@@ -31,6 +33,20 @@ const {
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
+
+// Exemplo de configuração do Multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../perfis'));
+  },
+  filename: function (req, file, cb) {
+    // Nome único: id + timestamp + extensão
+    const ext = path.extname(file.originalname);
+    const nome = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
+    cb(null, nome);
+  }
+});
+const upload = multer({ storage });
 
 // ROTAS PÁGINA (renderizam HTML)
 router.get('/', asyncHandler(async (req, res) => {
@@ -65,7 +81,7 @@ router.get('/cadastro', (req, res) => res.render('cadastro'));
 router.get('/login', (req, res) => res.render('login'));
 
 // ROTAS DE API (JSON)
-router.post('/cadastro', asyncHandler(usuarioController.criar));
+router.post('/cadastro', upload.single('foto_perfil'), asyncHandler(usuarioController.criar));
 router.post('/login', asyncHandler(usuarioController.login)); // se existir login
 
 // ROTAS PROTEGIDAS (requireLogin)

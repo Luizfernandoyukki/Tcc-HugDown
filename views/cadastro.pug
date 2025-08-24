@@ -16,17 +16,17 @@ block content
               .step-section.active#step-1
                 h5.mb-3.text-success Dados Pessoais
                 .mb-3
-                  label.form-label(for="nome_real") Nome
+                  label.form-label(for="nome_real") Nome *
                   input.form-control(type="text", id="nome_real", name="nome_real", required, maxlength="100")
                 .mb-3
-                  label.form-label(for="sobrenome_real") Sobrenome
+                  label.form-label(for="sobrenome_real") Sobrenome *
                   input.form-control(type="text", id="sobrenome_real", name="sobrenome_real", required, maxlength="100")
                 .mb-3
-                  label.form-label(for="data_nascimento") Data de Nascimento
+                  label.form-label(for="data_nascimento") Data de Nascimento *
                   input.form-control(type="date", id="data_nascimento", name="data_nascimento", required)
                 .mb-3
-                  label.form-label(for="genero") Gênero
-                  select.form-select(id="genero", name="genero")
+                  label.form-label(for="genero") Gênero *
+                  select.form-select(id="genero", name="genero", required)
                     option(value="") Selecione
                     option(value="masculino") Masculino
                     option(value="feminino") Feminino
@@ -36,14 +36,21 @@ block content
 
               .step-section#step-2
                 h5.mb-3.text-primary Dados de Conta
-                .mb-3
-                  label.form-label(for="email") E-mail
+                .mb-3.position-relative
+                  label.form-label(for="email") E-mail *
                   input.form-control(type="email", id="email", name="email", required, maxlength="255")
+                .mb-3.position-relative
+                  label.form-label(for="senha") Senha *
+                  input.form-control(type="password", id="senha", name="senha", required, minlength="6", autocomplete="new-password")
+                  span.position-absolute.top-50.end-0.translate-middle-y.pe-3(style="cursor:pointer;" id="toggleSenha")
+                    i.fas.fa-eye(id="iconSenha")
+                .mb-3.position-relative
+                  label.form-label(for="confirmar_senha") Confirmar Senha *
+                  input.form-control(type="password", id="confirmar_senha", name="confirmar_senha", required, minlength="6", autocomplete="new-password")
+                  span.position-absolute.top-50.end-0.translate-middle-y.pe-3(style="cursor:pointer;" id="toggleConfirmarSenha")
+                    i.fas.fa-eye(id="iconConfirmarSenha")
                 .mb-3
-                  label.form-label(for="senha") Senha
-                  input.form-control(type="password", id="senha", name="senha", required, minlength="6")
-                .mb-3
-                  label.form-label(for="nome_usuario") Nome de Usuário
+                  label.form-label(for="nome_usuario") Nome de Usuário *
                   input.form-control(type="text", id="nome_usuario", name="nome_usuario", required, maxlength="50")
                 .step-buttons.d-flex.justify-content-between
                   button.btn.btn-outline-secondary(type="button", id="btn-voltar-2") Voltar
@@ -52,23 +59,29 @@ block content
               .step-section#step-3
                 h5.mb-3.text-info Endereço e Contato
                 .mb-3
-                  label.form-label(for="telefone") Telefone
+                  label.form-label(for="telefone") Telefone *
                   input.form-control(type="text", id="telefone", name="telefone", required, maxlength="20")
                 .mb-3
-                  label.form-label(for="endereco") Endereço
+                  label.form-label(for="endereco") Endereço *
                   input.form-control(type="text", id="endereco", name="endereco", required, maxlength="255")
                 .mb-3
-                  label.form-label(for="cidade") Cidade
+                  label.form-label(for="cidade") Cidade *
                   input.form-control(type="text", id="cidade", name="cidade", required, maxlength="100")
                 .mb-3
-                  label.form-label(for="estado") Estado
+                  label.form-label(for="estado") Estado *
                   input.form-control(type="text", id="estado", name="estado", required, maxlength="50")
                 .mb-3
-                  label.form-label(for="cep") CEP
+                  label.form-label(for="cep") CEP *
                   input.form-control(type="text", id="cep", name="cep", required, maxlength="20")
                 .mb-3
-                  label.form-label(for="pais") País
-                  input.form-control(type="text", id="pais", name="pais", value="Brasil", required, maxlength="100")
+                  label.form-label(for="pais") País *
+                  select.form-select(id="pais", name="pais", required)
+                    option(value="Brasil") Brasil
+                    option(value="Argentina") Argentina
+                    option(value="Portugal") Portugal
+                    option(value="Espanha") Espanha
+                    option(value="Estados Unidos") Estados Unidos
+                    option(value="Outro") Outro
                 .step-buttons.d-flex.justify-content-between
                   button.btn.btn-outline-secondary(type="button", id="btn-voltar-3") Voltar
                   button.btn.btn-primary(type="button", id="btn-avancar-3") Avançar
@@ -101,6 +114,24 @@ block content
                     input.form-control(type="file", id="caminho_arquivo", name="caminho_arquivo")
                 .step-buttons.d-flex.justify-content-between
                   button.btn.btn-outline-secondary(type="button", id="btn-voltar-4") Voltar
+                  button.btn.btn-primary(type="button", id="btn-avancar-4") Avançar
+
+              .step-section#step-5
+                h5.mb-3.text-secondary Informações Adicionais
+                .mb-3
+                  label.form-label(for="foto_perfil") Foto de Perfil
+                  input.form-control(type="file", id="foto_perfil", name="foto_perfil", accept="image/*")
+                .mb-3
+                  label.form-label(for="biografia") Biografia
+                  textarea.form-control(id="biografia", name="biografia", maxlength="1000")
+                .mb-3
+                  label.form-label(for="idioma_preferido") Idioma Preferido *
+                  select.form-select(id="idioma_preferido", name="idioma_preferido", required)
+                    option(value="pt-BR") Português
+                    option(value="en-US") Inglês
+                    option(value="es-ES") Espanhol
+                .step-buttons.d-flex.justify-content-between
+                  button.btn.btn-outline-secondary(type="button", id="btn-voltar-5") Voltar
                   button.btn.btn-success(type="submit") Finalizar Cadastro
 
             .mt-3
