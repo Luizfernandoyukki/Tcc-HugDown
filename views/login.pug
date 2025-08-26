@@ -1,0 +1,29 @@
+extends layout
+block styles
+  link(rel="stylesheet", href="/stylesheets/login.css")
+
+block content
+  .container.mt-5
+    .row.justify-content-center
+      .col-12.col-md-6
+        .card.shadow-sm
+          .card-body.p-4
+            h2.text-center.mb-4 Login
+            form#loginForm(method="POST", action="/login")
+              .mb-3
+                label.form-label(for="email") E-mail
+                input.form-control(type="email", id="email", name="email", required)
+              .mb-3
+                label.form-label(for="senha") Senha
+                input.form-control(type="password", id="senha", name="senha", required)
+              button.btn.btn-success.w-100(type="submit") Entrar
+            if isLoggedIn
+              .alert.alert-success.mt-3 Você já está logado!
+            else
+              .alert.alert-info.mt-3 Faça login para acessar o sistema.
+            if error
+              .alert.alert-danger.mt-3 #{error}
+
+
+block scripts
+  script(src="/javascripts/login.js")

@@ -156,3 +156,29 @@ exports.sugestoesAmigos = async (req, res) => {
   }
 };
 
+// Login de usuário
+exports.login = async (req, res) => {
+  const { email, senha } = req.body;
+
+  try {
+    // Busca o usuário pelo email
+    const usuario = await Usuario.findOne({ where: { email } });
+    if (!usuario) {
+      return res.render('login', { error: 'Usuário não encontrado!', isLoggedIn: false });
+    }
+
+    // Verifica se a senha está correta
+    const senhaOk = await bcrypt.compare(senha, usuario.senha_hash);
+    if (!senhaOk) {
+      return res.render('login', { error: 'Senha incorreta!', isLoggedIn: false });
+    }
+
+    // Autenticação bem-sucedida
+    req.session.userId = usuario.id_usuario;
+    req.session.isLoggedIn = true; // variável global de login
+    return res.redirect('/'); // Redireciona para a home após login
+  } catch (err) {
+    return res.render('login', { error: 'Erro ao realizar login: ' + err.message, isLoggedIn: false });
+  }
+};
+

@@ -34,25 +34,24 @@ html
     main.site-main.container.mt-4.mb-5
       block content
 
-    // Card flutuante para login/cadastro (restrição de página protegida)
-    if typeof telaProtegida !== 'undefined' && telaProtegida
-      #card-flutuante-login(style="display:block;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2000;min-width:320px;max-width:90vw;")
-        .card.shadow-lg.p-4.text-center
-          h5.mb-3.text-danger Tela protegida!
-          p.mb-3 Você precisa estar logado para acessar esta página.
-          .d-flex.justify-content-center.gap-2
-            a.btn.btn-success(href="/login") Login
-            a.btn.btn-primary(href="/cadastro") Cadastro
-          button.btn.btn-outline-secondary.mt-3(onclick="document.getElementById('card-flutuante-login').style.display='none';document.body.style.overflow=''") Fechar
-
     // Rodapé Bootstrap
     footer.site-footer.bg-light.shadow-sm.fixed-bottom
       .container
         .d-flex.justify-content-between.align-items-center.gap-1.py-2
-          a.acao-restrita(href='/settings', title='Configurações', class='d-flex align-items-center')
-            img#icon-engrenagem.footer-icon(src='/images/engrenagem.png', alt='Configurações', height='40')
-          a.acao-restrita(href='/chat', title='Chat', class='d-flex align-items-center')
-            img#icon-chat.footer-icon(src='/images/chat.png', alt='Chat', height='40')
+          if isLoggedIn && usuario && usuario.foto_perfil
+            // Foto de perfil do usuário logado
+            a(href='/usuarios/' + usuario.id_usuario, title='Meu Perfil')
+              img.rounded-circle(src=usuario.foto_perfil, alt='Perfil', height='40', style='border:2px solid #009e60;')
+          else
+            // Botões para cadastro e login
+            a.btn.btn-success.btn-sm.ms-2(href='/cadastro') Cadastro
+            a.btn.btn-outline-primary.btn-sm.ms-2(href='/login') Login
+          // Ícones restritos (aparecem só para logados)
+          if isLoggedIn
+            a.acao-restrita(href='/settings', title='Configurações', class='d-flex align-items-center')
+              img#icon-engrenagem.footer-icon(src='/images/engrenagem.png', alt='Configurações', height='40')
+            a.acao-restrita(href='/chat', title='Chat', class='d-flex align-items-center')
+              img#icon-chat.footer-icon(src='/images/chat.png', alt='Chat', height='40')
 
   // Bootstrap JS Bundle
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', crossorigin='anonymous')

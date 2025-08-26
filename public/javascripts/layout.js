@@ -18,12 +18,14 @@
   }
 
   // Bloqueio de ações restritas
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.acao-restrita')) {
+  document.querySelectorAll('.acao-restrita').forEach(btn => {
+    btn.addEventListener('click', function(e) {
       if (!window.usuarioLogado) {
         e.preventDefault();
         mostrarCardFlutuante();
+        return false;
       }
-    }
+      // Ação normal se logado
+    });
   });
 })();

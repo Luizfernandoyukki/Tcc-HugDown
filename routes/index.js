@@ -4,6 +4,7 @@ const controllers = require('../controllers');
 const requireLogin = require('../middlewares/auth');
 const multer = require('multer');
 const path = require('path');
+const { Usuario } = require('../models');
 
 const {
   administradorController,
@@ -194,5 +195,22 @@ router.get('/tag/:nome', asyncHandler(async (req, res) => {
     usuarioLogado: !!req.user,
   });
 }));
+
+router.post('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/');
+  });
+});
+
+router.use(async (req, res, next) => {
+  res.locals.isLoggedIn = !!req.session.isLoggedIn;
+  if (req.session.userId) {
+    // Busca o usuário logado e injeta nas views
+    res.locals.usuario = await Usuario.findByPk(req.session.userId);
+  } else {
+    res.locals.usuario = null;
+  }
+  next();
+});
 
 module.exports = router;

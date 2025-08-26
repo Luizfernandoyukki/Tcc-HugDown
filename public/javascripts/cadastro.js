@@ -89,6 +89,9 @@ document.getElementById('form-cadastro').onsubmit = async function(e) {
     formData.set('foto_perfil', fotoInput.files[0]);
   }
 
+  // Fuso horário
+  formData.set('fuso_horario', Intl.DateTimeFormat().resolvedOptions().timeZone);
+
   // Envia para /cadastro
   try {
     console.log('Enviando cadastro...');

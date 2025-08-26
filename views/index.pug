@@ -164,24 +164,5 @@ block content
           br
           a.btn.btn-outline-secondary.btn-sm.mt-2(href='/settings') Configurações
 
-  // Card flutuante para login/cadastro
-  if telaProtegida
-    #card-flutuante-login(style="display:block;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2000;min-width:320px;max-width:90vw;")
-      .card.shadow-lg.p-4.text-center
-        h5.mb-3.text-danger Tela protegida!
-        p.mb-3 Você precisa estar logado para acessar esta página.
-        .d-flex.justify-content-center.gap-2
-          a.btn.btn-success(href="/login") Login
-          a.btn.btn-primary(href="/cadastro") Cadastro
-        button.btn.btn-outline-secondary.mt-3(onclick="document.getElementById('card-flutuante-login').style.display='none';document.body.style.overflow=''") Fechar
-  else
-    #card-flutuante-login(style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2000;min-width:320px;max-width:90vw;")
-      .card.shadow-lg.p-4.text-center
-        h5.mb-3.text-danger Ação não permitida!
-        p.mb-3 Você precisa estar logado para usar esta função.
-        .d-flex.justify-content-center.gap-2
-          a.btn.btn-success(href="/login") Login
-          a.btn.btn-primary(href="/cadastro") Cadastro
-        button.btn.btn-outline-secondary.mt-3#fechar-card-flutuante Fechar
   block scripts
     script(src="/javascripts/index.js")
