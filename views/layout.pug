@@ -38,15 +38,12 @@ html
     footer.site-footer.bg-light.shadow-sm.fixed-bottom
       .container
         .d-flex.justify-content-between.align-items-center.gap-1.py-2
-          if isLoggedIn && usuario && usuario.foto_perfil
-            // Foto de perfil do usuário logado
+          if isLoggedIn && usuario
             a(href='/usuarios/' + usuario.id_usuario, title='Meu Perfil')
-              img.rounded-circle(src=usuario.foto_perfil, alt='Perfil', height='40', style='border:2px solid #009e60;')
+              img.rounded-circle(src=usuario.foto_perfil || '/images/default-avatar.png', alt='Perfil', height='40', style='border:2px solid #009e60;')
           else
-            // Botões para cadastro e login
             a.btn.btn-success.btn-sm.ms-2(href='/cadastro') Cadastro
             a.btn.btn-outline-primary.btn-sm.ms-2(href='/login') Login
-          // Ícones restritos (aparecem só para logados)
           if isLoggedIn
             a.acao-restrita(href='/chat', title='Chat', class='d-flex align-items-center')
               img#icon-chat.footer-icon(src='/images/chat.png', alt='Chat', height='40')
