@@ -9,4 +9,15 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   }
+
+  document.querySelectorAll('.acao-restrita').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      if (!window.usuarioLogado) {
+        e.preventDefault();
+        alert('Você precisa estar logado para acessar esta funcionalidade.');
+        return false;
+      }
+      // Se logado, ação normal
+    });
+  });
 });

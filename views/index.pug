@@ -127,42 +127,5 @@ block content
           each grupo in grupos
             button.grupo-btn.mb-2.acao-restrita(type='button')= grupo.nome_grupo
 
-    // Configurações e perfil (aparece embaixo no mobile)
-    .card.shadow-sm.mt-5.mb-4.d-block.d-md-none(style="background:rgba(0,180,120,0.13); border:none;")
-      .card-body.p-3.text-center
-        if usuario
-          img.rounded-circle.mb-2(
-            src=usuario.foto_perfil || '/images/default-avatar.png',
-            alt=usuario.nome_usuario || 'Usuário',
-            width='56',
-            height='56',
-            style="border:2px solid #eee;"
-          )
-          if usuario.nome_usuario
-            h6.mb-1= usuario.nome_usuario
-          a.btn.btn-outline-success.btn-sm.mt-2(href='/usuarios/' + usuario.id_usuario) Meu Perfil
-          br
-          a.btn.btn-outline-secondary.btn-sm.mt-2(href='/settings') Configurações
-        else
-          p.text-muted Faça login para acessar seu perfil.
-
-  // Configurações e perfil (aparece na lateral só em telas grandes)
-  if usuario
-    .position-fixed.top-50.end-0.translate-middle-y.d-none.d-md-block(style="width:220px; z-index:2; right:24px;")
-      .card.shadow-sm(style="background:rgba(0,180,120,0.13); border:none;")
-        .card-body.p-3.text-center
-          img.rounded-circle.mb-2(
-            src=usuario.foto_perfil || '/images/default-avatar.png',
-            alt=usuario.nome_usuario || 'Usuário',
-            width='56',
-            height='56',
-            style="border:2px solid #eee;"
-          )
-          if usuario.nome_usuario
-            h6.mb-1= usuario.nome_usuario
-          a.btn.btn-outline-success.btn-sm.mt-2(href='/usuarios/' + usuario.id_usuario) Meu Perfil
-          br
-          a.btn.btn-outline-secondary.btn-sm.mt-2(href='/settings') Configurações
-
   block scripts
     script(src="/javascripts/index.js")

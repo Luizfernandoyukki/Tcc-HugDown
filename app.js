@@ -11,6 +11,7 @@ const sequelize = require('./database/database');
 
 // Importação das rotas
 const indexRouter = require('./routes/index');
+const { Usuario } = require('./models');
 
 const app = express();
 
@@ -24,7 +25,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 // Middlewares globais
-app.use(helmet()); // segurança
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      "script-src": ["'self'", "'unsafe-inline'"],
+    },
+  },
+})); // segurança
 app.use(cors()); // habilita CORS (se necessário)
 app.use(logger('dev'));
 app.use(express.json());
@@ -44,6 +52,25 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24 // 1 dia
   }
 }));
+
+// Middleware global para injetar usuário logado e status
+app.use(async (req, res, next) => {
+  try {
+    res.locals.isLoggedIn = !!req.session.isLoggedIn;
+    if (req.session.userId) {
+      const usuario = await Usuario.findByPk(req.session.userId);
+      res.locals.usuario = usuario;
+      console.log('[DEBUG] Usuário logado:', usuario ? usuario.email : null);
+    } else {
+      res.locals.usuario = null;
+      console.log('[DEBUG] Nenhum usuário logado');
+    }
+  } catch (err) {
+    console.error('[DEBUG] Erro ao buscar usuário logado:', err);
+    res.locals.usuario = null;
+  }
+  next();
+});
 
 // Rotas
 app.use('/', indexRouter);

@@ -48,13 +48,15 @@ html
             a.btn.btn-outline-primary.btn-sm.ms-2(href='/login') Login
           // Ícones restritos (aparecem só para logados)
           if isLoggedIn
-            a.acao-restrita(href='/settings', title='Configurações', class='d-flex align-items-center')
-              img#icon-engrenagem.footer-icon(src='/images/engrenagem.png', alt='Configurações', height='40')
             a.acao-restrita(href='/chat', title='Chat', class='d-flex align-items-center')
               img#icon-chat.footer-icon(src='/images/chat.png', alt='Chat', height='40')
 
   // Bootstrap JS Bundle
-  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', crossorigin='anonymous')
+  script(src='/javascripts/bootstrap.bundle.min.js')
+  // Define status de login para o JS
+  script.
+    window.usuarioLogado = !{JSON.stringify(isLoggedIn)};
   // JS global para bloqueio de ações restritas
   script(src='/javascripts/geral.js')
   block scripts
+

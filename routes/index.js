@@ -57,13 +57,14 @@ router.get('/', asyncHandler(async (req, res) => {
     tagController.listar(req, { raw: true }),
     grupoController.listar(req, { raw: true }),
   ]);
+  console.log('[DEBUG] Renderizando index. Usuário logado:', res.locals.usuario ? res.locals.usuario.email : null);
   res.render('index', {
     posts,
     categorias,
     tags,
     grupos,
-    usuario: req.user || null,
-    usuarioLogado: !!req.user,
+    usuario: res.locals.usuario,
+    isLoggedIn: res.locals.isLoggedIn
   });
 }));
 
