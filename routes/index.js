@@ -127,6 +127,7 @@ router.post('/notificacoes', requireLogin, asyncHandler(notificacaoController.cr
 router.get('/participantes-evento', requireLogin, asyncHandler(participanteEventoController.listar));
 router.post('/participantes-evento', requireLogin, asyncHandler(participanteEventoController.criar));
 
+// Painel de postagens
 router.get('/postagens', asyncHandler(async (req, res) => {
   let minhasPostagens = [];
   if (res.locals.usuario) {
@@ -139,7 +140,39 @@ router.get('/postagens', asyncHandler(async (req, res) => {
     temPostagens: minhasPostagens.length > 0
   });
 }));
+
+// Formulário de criação
+router.get('/postagens/create', requireLogin, (req, res) => {
+  res.render('postagens/create', {
+    usuario: res.locals.usuario,
+    isLoggedIn: res.locals.isLoggedIn
+  });
+});
+
+// Configuração de postagens
+router.get('/postagens/config', requireLogin, (req, res) => {
+  res.render('postagens/config', {
+    usuario: res.locals.usuario,
+    isLoggedIn: res.locals.isLoggedIn
+  });
+});
+
+// Minhas postagens (show)
+router.get('/postagens/show', requireLogin, asyncHandler(async (req, res) => {
+  const postagens = await postagemController.listar(req, { raw: true });
+  const minhasPostagens = postagens.filter(p => p.id_autor === res.locals.usuario.id_usuario);
+  res.render('postagens/show', {
+    usuario: res.locals.usuario,
+    isLoggedIn: res.locals.isLoggedIn,
+    postagens: minhasPostagens,
+    postagensJson: JSON.stringify(minhasPostagens)
+  });
+}));
+
+// Detalhe de uma postagem específica
 router.get('/postagens/:id', requireLogin, asyncHandler(postagemController.buscarPorId));
+
+// Criação, edição, remoção (POST, PUT, DELETE)
 router.post('/postagens', requireLogin, asyncHandler(postagemController.criar));
 router.put('/postagens/:id', requireLogin, asyncHandler(postagemController.atualizar));
 router.delete('/postagens/:id', requireLogin, asyncHandler(postagemController.remover));
@@ -216,18 +249,5 @@ router.use(async (req, res, next) => {
   }
   next();
 });
-
-// Exemplo de rota para show de postagens do usuário logado
-router.get('/postagens/show', requireLogin, asyncHandler(async (req, res) => {
-  // Busque todas as postagens do usuário logado
-  const postagens = await postagemController.listar(req, { raw: true });
-  const minhasPostagens = postagens.filter(p => p.id_autor === res.locals.usuario.id_usuario);
-  res.render('postagens/show', {
-    usuario: res.locals.usuario,
-    isLoggedIn: res.locals.isLoggedIn,
-    postagens: minhasPostagens,
-    postagensJson: JSON.stringify(minhasPostagens) // para uso no JS, se quiser
-  });
-}));
 
 module.exports = router;
