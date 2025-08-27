@@ -1,4 +1,4 @@
-const { Tag, TagTraducao, Postagem } = require('../models');
+const { Tag, TagTraducao, Postagem, Categoria } = require('../models');
 
 // Listar todas as tags
 exports.listar = async (req, resOrOptions) => {
@@ -59,4 +59,20 @@ exports.buscarPorNome = async (nome) => {
   // Garante que retorna objeto puro
   const tagObj = typeof tag.get === 'function' ? tag.get({ plain: true }) : tag;
   return tagObj && tagObj.id_tag ? tagObj : null;
+};
+
+// Listar postagens por tag
+exports.listarPorTag = async (req, options) => {
+  const id_tag = options && options.id_tag ? options.id_tag : req.params.id_tag;
+  if (!id_tag) {
+    // Retorne array vazio ou uma mensagem de erro
+    return [];
+  }
+  return await Postagem.findAll({
+    where: { id_tag },
+    include: [
+      { model: Categoria, as: 'categoria' },
+      { model: Tag, as: 'tag' }
+    ]
+  });
 };

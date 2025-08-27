@@ -1,0 +1,27 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/postagens/index.css")
+
+block content
+  .container.mt-5
+    h2.text-success.text-center.mb-4 Bem-vindo, #{usuario ? usuario.nome_usuario : 'visitante'}!
+    p.text-center.text-muted Painel de Postagens
+
+    .d-flex.flex-column.align-items-center.gap-4.mt-4
+      a.btn.btn-primary.btn-lg.p-4.w-100.text-start(style="max-width:500px;" href="/postagens/create")
+        i.fas.fa-plus.me-3.fs-2
+        span.d-block.fs-4 Nova Postagem
+        small.d-block.text-white-50 Crie uma nova postagem para compartilhar com todos.
+      if temPostagens
+        a.btn.btn-outline-success.btn-lg.p-4.w-100.text-start(style="max-width:500px;" href="/postagens/show?autor=#{usuario ? usuario.id_usuario : ''}")
+          i.fas.fa-list.me-3.fs-2
+          span.d-block.fs-4 Minhas Postagens
+          small.d-block.text-success-50 Veja e gerencie todas as postagens que você já criou.
+      a.btn.btn-outline-warning.btn-lg.p-4.w-100.text-start(style="max-width:500px;" href="/postagens/config")
+        i.fas.fa-cog.me-3.fs-2
+        span.d-block.fs-4 Configurar Postagens
+        small.d-block.text-warning-50 Ajuste as configurações de postagem conforme sua preferência.
+
+block scripts
+  script(src="/javascripts/postagens/index.js")

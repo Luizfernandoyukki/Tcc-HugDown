@@ -127,7 +127,18 @@ router.post('/notificacoes', requireLogin, asyncHandler(notificacaoController.cr
 router.get('/participantes-evento', requireLogin, asyncHandler(participanteEventoController.listar));
 router.post('/participantes-evento', requireLogin, asyncHandler(participanteEventoController.criar));
 
-router.get('/postagens', requireLogin, asyncHandler(postagemController.listar));
+router.get('/postagens', asyncHandler(async (req, res) => {
+  let minhasPostagens = [];
+  if (res.locals.usuario) {
+    const todasPostagens = await postagemController.listar(req, { raw: true });
+    minhasPostagens = todasPostagens.filter(p => p.id_autor === res.locals.usuario.id_usuario);
+  }
+  res.render('postagens/index', {
+    usuario: res.locals.usuario,
+    isLoggedIn: res.locals.isLoggedIn,
+    temPostagens: minhasPostagens.length > 0
+  });
+}));
 router.get('/postagens/:id', requireLogin, asyncHandler(postagemController.buscarPorId));
 router.post('/postagens', requireLogin, asyncHandler(postagemController.criar));
 router.put('/postagens/:id', requireLogin, asyncHandler(postagemController.atualizar));
@@ -205,5 +216,18 @@ router.use(async (req, res, next) => {
   }
   next();
 });
+
+// Exemplo de rota para show de postagens do usuário logado
+router.get('/postagens/show', requireLogin, asyncHandler(async (req, res) => {
+  // Busque todas as postagens do usuário logado
+  const postagens = await postagemController.listar(req, { raw: true });
+  const minhasPostagens = postagens.filter(p => p.id_autor === res.locals.usuario.id_usuario);
+  res.render('postagens/show', {
+    usuario: res.locals.usuario,
+    isLoggedIn: res.locals.isLoggedIn,
+    postagens: minhasPostagens,
+    postagensJson: JSON.stringify(minhasPostagens) // para uso no JS, se quiser
+  });
+}));
 
 module.exports = router;

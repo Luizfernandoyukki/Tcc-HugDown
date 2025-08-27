@@ -1,0 +1,14 @@
+.post-card {
+  transition: box-shadow 0.2s;
+}
+.post-card:hover {
+  box-shadow: 0 0 0 4px #009e6033;
+}
+#btnEditarPost {
+  min-width: 180px;
+}
+.card.bg-dark {
+  background: #181818 !important;
+  color: #fff !important;
+  border: none;
+}

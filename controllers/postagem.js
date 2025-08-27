@@ -69,13 +69,16 @@ exports.listarPorCategoria = async (req, options) => {
 };
 
 // Listar postagens por tag
-exports.listarPorTag = async (req, res) => {
+exports.listarPorTag = async (req, options) => {
+  const id_tag = options && options.id_tag ? options.id_tag : req.params.id_tag;
+  if (!id_tag) return [];
   const posts = await Postagem.findAll({
-    where: { id_tag: req.params.id_tag },
+    where: { id_tag },
     include: [
       { model: Usuario, as: 'autor' },
       { model: Tag, as: 'tag' }
     ]
   });
-  res.json(posts);
+  if (options && options.raw) return posts;
+  return posts;
 };

@@ -1,0 +1,44 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/postagens/show.css")
+
+block content
+  .container.mt-5
+    h2.text-success.text-center.mb-4 Minhas Postagens
+    p.text-center.text-muted Bem-vindo, #{usuario ? usuario.nome_usuario : 'visitante'}! Aqui estão suas postagens.
+
+    if postagens && postagens.length
+      .row.g-4
+        each post in postagens
+          .col-12.col-md-6.col-lg-4
+            .card.shadow-sm.h-100.post-card(style="cursor:pointer;" data-id=post.id_postagem)
+              .card-body
+                h5.card-title= post.titulo || 'Sem título'
+                p.card-text.text-truncate= post.conteudo
+                small.text-muted= post.data_criacao ? post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao : ''
+    else
+      .d-flex.justify-content-center.align-items-center.mt-5(style="min-height:300px;")
+        .card.bg-dark.text-white.p-4(style="max-width: 420px; border-radius: 18px; box-shadow: 0 0 16px #000;")
+          h4.mb-3 Nenhuma postagem encontrada
+          p.mb-0 Você ainda não criou nenhuma postagem. Clique em "Nova Postagem" para começar!
+
+  // Modal/Card de visualização detalhada
+  .modal.fade#modalPostagem(tabindex="-1", aria-hidden="true")
+    .modal-dialog.modal-lg.modal-dialog-centered
+      .modal-content
+        .modal-header
+          h4.modal-title#modalTitulo
+          button.btn-close(type="button", data-bs-dismiss="modal", aria-label="Fechar")
+        .modal-body
+          p#modalConteudo
+        .modal-footer.justify-content-start
+          a#btnEditarPost.btn.btn-warning.btn-lg.p-3.d-flex.flex-column.align-items-start(href="#")
+            i.fas.fa-edit.fs-2.mb-1
+            span.fs-5 Editar Postagem
+            small.text-warning-50 Altere o conteúdo desta postagem.
+
+block scripts
+  script(src="/javascripts/postagens/show.js")
+  script.
+    window.postagens = !{postagensJson};
