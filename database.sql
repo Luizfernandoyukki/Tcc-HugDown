@@ -53,8 +53,10 @@ CREATE TABLE documentos_verificacao (
     data_verificacao TIMESTAMP NULL,
     verificado_por_admin INT,
     observacoes TEXT,
+    id_profissional INT NULL,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (verificado_por_admin) REFERENCES administradores(id_admin),
+    FOREIGN KEY (id_profissional) REFERENCES profissionais_saude(id_profissional) ON DELETE CASCADE,
     INDEX idx_status (status),
     INDEX idx_usuario (id_usuario)
 );
@@ -119,6 +121,15 @@ CREATE TABLE postagens (
     INDEX idx_data_criacao (data_criacao),
     INDEX idx_ativo (ativo)
 );
+CREATE TABLE postagens_tags (
+    id_postagem INT,
+    id_tag INT,
+    PRIMARY KEY (id_postagem, id_tag),
+    FOREIGN KEY (id_postagem) REFERENCES postagens(id_postagem) ON DELETE CASCADE,
+    FOREIGN KEY (id_tag) REFERENCES tags(id_tag) ON DELETE CASCADE
+);
+
+
 CREATE TABLE postagens_secoes (
     id_postagem INT NOT NULL,
     id_secao INT NOT NULL,
@@ -374,6 +385,27 @@ SELECT
     (SELECT COUNT(*) FROM curtidas c JOIN postagens p ON c.id_postagem = p.id_postagem WHERE p.id_autor = u.id_usuario) as curtidas_recebidas
 FROM usuarios u
 WHERE u.ativo = TRUE;
+
+CREATE TABLE profissionais_saude (
+    id_profissional INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    tipo_registro ENUM('CRM', 'COREN', 'CRF', 'CREFITO', 'CRP', 'OUTRO') NOT NULL,
+    numero_registro VARCHAR(50) NOT NULL,
+    uf_registro VARCHAR(2) NOT NULL,
+    especialidade VARCHAR(100),
+    instituicao VARCHAR(200),
+    data_registro DATE NOT NULL,
+    status_verificacao ENUM('pendente', 'aprovado', 'rejeitado') DEFAULT 'pendente',
+    data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_verificacao TIMESTAMP NULL,
+    verificado_por INT NULL,
+    observacoes TEXT,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (verificado_por) REFERENCES administradores(id_admin),
+    UNIQUE KEY unique_registro (tipo_registro, numero_registro, uf_registro),
+    INDEX idx_status (status_verificacao),
+    INDEX idx_tipo_registro (tipo_registro)
+);
 
 CREATE INDEX idx_postagens_autor_data ON postagens(id_autor, data_criacao DESC);
 CREATE INDEX idx_postagens_categoria_data ON postagens(id_categoria, data_criacao DESC);
