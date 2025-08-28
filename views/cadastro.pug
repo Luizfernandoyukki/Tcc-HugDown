@@ -94,24 +94,33 @@ block content
                     label.form-check-label(for="profissional_saude") Sou profissional da saúde
                 .mt-3#saude-extra(style="display:none;")
                   .mb-3
-                    label.form-label(for="tipo_documento") Tipo de Documento
-                    select.form-select(id="tipo_documento", name="tipo_documento")
+                    label.form-label(for="tipo_registro") Tipo de Registro *
+                    select.form-select(id="tipo_registro", name="tipo_registro", required)
                       option(value="") Selecione
-                      option(value="graduacao") Graduação
-                      option(value="pos_graduacao") Pós-graduação
-                      option(value="crm") CRM
-                      option(value="crefito") CREFITO
-                      option(value="coren") COREN
-                      option(value="other") Outro
+                      option(value="CRM") CRM
+                      option(value="COREN") COREN
+                      option(value="CRF") CRF
+                      option(value="CREFITO") CREFITO
+                      option(value="CRP") CRP
+                      option(value="OUTRO") Outro
                   .mb-3
-                    label.form-label(for="numero_documento") Número do Documento
-                    input.form-control(type="text", id="numero_documento", name="numero_documento", maxlength="100")
+                    label.form-label(for="numero_registro") Número do Registro *
+                    input.form-control(type="text", id="numero_registro", name="numero_registro", required, maxlength="50")
                   .mb-3
-                    label.form-label(for="instituicao") Instituição
-                    input.form-control(type="text", id="instituicao", name="instituicao", maxlength="200")
+                    label.form-label(for="uf_registro") UF do Registro *
+                    input.form-control(type="text", id="uf_registro", name="uf_registro", required, maxlength="2")
                   .mb-3
-                    label.form-label(for="caminho_arquivo") Anexar Arquivo
-                    input.form-control(type="file", id="caminho_arquivo", name="caminho_arquivo")
+                    label.form-label(for="especialidade") Especialidade
+                    input.form-control(type="text", id="especialidade", name="especialidade", maxlength="100")
+                  .mb-3
+                    label.form-label(for="instituicao") Instituição *
+                    input.form-control(type="text", id="instituicao", name="instituicao", required, maxlength="200")
+                  .mb-3
+                    label.form-label(for="data_registro") Data do Registro *
+                    input.form-control(type="date", id="data_registro", name="data_registro", required)
+                  .mb-3
+                    label.form-label(for="documento_comprobatorio") Documento Comprobatório *
+                    input.form-control(type="file", id="documento_comprobatorio", name="documento_comprobatorio", required)
                 .step-buttons.d-flex.justify-content-between
                   button.btn.btn-outline-secondary(type="button", id="btn-voltar-4") Voltar
                   button.btn.btn-primary(type="button", id="btn-avancar-4") Avançar

@@ -40,7 +40,26 @@ CREATE TABLE administradores (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX idx_nivel (nivel_admin)
 );
-
+CREATE TABLE profissionais_saude (
+    id_profissional INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    tipo_registro ENUM('CRM', 'COREN', 'CRF', 'CREFITO', 'CRP', 'OUTRO') NOT NULL,
+    numero_registro VARCHAR(50) NOT NULL,
+    uf_registro VARCHAR(2) NOT NULL,
+    especialidade VARCHAR(100),
+    instituicao VARCHAR(200),
+    data_registro DATE NOT NULL,
+    status_verificacao ENUM('pendente', 'aprovado', 'rejeitado') DEFAULT 'pendente',
+    data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_verificacao TIMESTAMP NULL,
+    verificado_por INT NULL,
+    observacoes TEXT,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (verificado_por) REFERENCES administradores(id_admin),
+    UNIQUE KEY unique_registro (tipo_registro, numero_registro, uf_registro),
+    INDEX idx_status (status_verificacao),
+    INDEX idx_tipo_registro (tipo_registro)
+);
 CREATE TABLE documentos_verificacao (
     id_documento INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
@@ -386,26 +405,7 @@ SELECT
 FROM usuarios u
 WHERE u.ativo = TRUE;
 
-CREATE TABLE profissionais_saude (
-    id_profissional INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    tipo_registro ENUM('CRM', 'COREN', 'CRF', 'CREFITO', 'CRP', 'OUTRO') NOT NULL,
-    numero_registro VARCHAR(50) NOT NULL,
-    uf_registro VARCHAR(2) NOT NULL,
-    especialidade VARCHAR(100),
-    instituicao VARCHAR(200),
-    data_registro DATE NOT NULL,
-    status_verificacao ENUM('pendente', 'aprovado', 'rejeitado') DEFAULT 'pendente',
-    data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    data_verificacao TIMESTAMP NULL,
-    verificado_por INT NULL,
-    observacoes TEXT,
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-    FOREIGN KEY (verificado_por) REFERENCES administradores(id_admin),
-    UNIQUE KEY unique_registro (tipo_registro, numero_registro, uf_registro),
-    INDEX idx_status (status_verificacao),
-    INDEX idx_tipo_registro (tipo_registro)
-);
+
 
 CREATE INDEX idx_postagens_autor_data ON postagens(id_autor, data_criacao DESC);
 CREATE INDEX idx_postagens_categoria_data ON postagens(id_categoria, data_criacao DESC);

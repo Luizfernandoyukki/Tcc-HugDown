@@ -1,4 +1,4 @@
-const { Usuario, Idioma, Amizade, Postagem } = require('../models');
+const { Usuario, Idioma, Amizade, Postagem, ProfissionalSaude } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 
@@ -49,7 +49,8 @@ exports.criar = async (req, res) => {
       idioma_preferido,
       verificado,
       ativo,
-      biografia
+      biografia,
+      fuso_horario // <-- Adicione aqui
     } = req.body;
 
     // Validação dos campos obrigatórios
@@ -85,13 +86,28 @@ exports.criar = async (req, res) => {
       data_nascimento,
       senha_hash,
       idioma_preferido,
-      verificado: false, // sempre false no cadastro
-      ativo: true,       // sempre true no cadastro
+      verificado: false,
+      ativo: true,
       foto_perfil,
-      biografia
+      biografia,
+      fuso_horario // <-- Salva aqui
     });
 
-    res.status(201).json(novoUsuario);
+    // Se for profissional de saúde, cria registro na tabela correta
+    if (req.body.profissional_saude) {
+      await ProfissionalSaude.create({
+        id_usuario: novoUsuario.id_usuario,
+        tipo_registro: req.body.tipo_registro,
+        numero_registro: req.body.numero_registro,
+        uf_registro: req.body.uf_registro,
+        especialidade: req.body.especialidade,
+        instituicao: req.body.instituicao,
+        data_registro: req.body.data_registro,
+        documento_comprobatorio: req.files?.documento_comprobatorio?.[0]?.filename // ou caminho salvo
+      });
+    }
+
+    res.redirect('/login');
   } catch (err) {
     res.status(500).json({ error: 'Erro ao criar usuário: ' + err.message });
   }

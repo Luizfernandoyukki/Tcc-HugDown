@@ -49,6 +49,38 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+const storageDoc = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../docs'));
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const nome = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
+    cb(null, nome);
+  }
+});
+const uploadDoc = multer({ storage: storageDoc });
+
+const fileFilter = (req, file, cb) => {
+  if (file.fieldname === 'foto_perfil') {
+    // Aceita apenas imagens
+    if (/^image\/(jpeg|png|gif|bmp|webp)$/.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('A foto de perfil deve ser uma imagem.'));
+    }
+  } else if (file.fieldname === 'documento_comprobatorio') {
+    // Aceita apenas PDF
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('O documento comprobatório deve ser um PDF.'));
+    }
+  } else {
+    cb(new Error('Campo de arquivo não permitido.'));
+  }
+};
+
 // ROTAS PÁGINA (renderizam HTML)
 router.get('/', asyncHandler(async (req, res) => {
   const [posts, categorias, tags, grupos] = await Promise.all([
@@ -83,7 +115,17 @@ router.get('/cadastro', (req, res) => res.render('cadastro'));
 router.get('/login', (req, res) => res.render('login'));
 
 // ROTAS DE API (JSON)
-router.post('/cadastro', upload.single('foto_perfil'), asyncHandler(usuarioController.criar));
+router.post(
+  '/cadastro',
+  multer({
+    storage: storageDoc,
+    fileFilter: fileFilter
+  }).fields([
+    { name: 'documento_comprobatorio', maxCount: 1 },
+    { name: 'foto_perfil', maxCount: 1 }
+  ]),
+  asyncHandler(usuarioController.criar)
+);
 router.post('/login', asyncHandler(usuarioController.login)); // se existir login
 
 // ROTAS PROTEGIDAS (requireLogin)

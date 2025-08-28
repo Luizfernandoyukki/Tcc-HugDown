@@ -37,16 +37,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Exibir campos de profissional de saúde
   const profissionalCheck = document.getElementById('profissional_saude');
-  const dadosProfissionais = document.getElementById('dados_profissionais');
-  if (profissionalCheck && dadosProfissionais) {
+  const saudeExtra = document.getElementById('saude-extra');
+  if (profissionalCheck && saudeExtra) {
     profissionalCheck.addEventListener('change', function() {
       if (this.checked) {
-        dadosProfissionais.classList.remove('d-none');
+        saudeExtra.style.display = '';
       } else {
-        dadosProfissionais.classList.add('d-none');
+        saudeExtra.style.display = 'none';
       }
       // Atualizar required dos campos
-      const inputs = dadosProfissionais.querySelectorAll('input, select');
+      const inputs = saudeExtra.querySelectorAll('input, select');
       inputs.forEach(input => {
         if (input.name !== 'especialidade') { // especialidade é opcional
           input.required = this.checked;
@@ -55,7 +55,59 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  
+  // Controle dos steps
+  const steps = document.querySelectorAll('.step-section');
+  let currentStep = 0;
+
+  function showStep(index) {
+    steps.forEach((step, i) => {
+      if (i === index) {
+        step.classList.add('active');
+        step.style.display = '';
+      } else {
+        step.classList.remove('active');
+        step.style.display = 'none';
+      }
+    });
+  }
+
+  showStep(currentStep);
+
+  // Botões de avançar/voltar
+  document.getElementById('btn-avancar-1')?.addEventListener('click', function() {
+    currentStep = 1;
+    showStep(currentStep);
+  });
+  document.getElementById('btn-voltar-2')?.addEventListener('click', function() {
+    currentStep = 0;
+    showStep(currentStep);
+  });
+  document.getElementById('btn-avancar-2')?.addEventListener('click', function() {
+    currentStep = 2;
+    showStep(currentStep);
+  });
+  document.getElementById('btn-voltar-3')?.addEventListener('click', function() {
+    currentStep = 1;
+    showStep(currentStep);
+  });
+  document.getElementById('btn-avancar-3')?.addEventListener('click', function() {
+    currentStep = 3;
+    showStep(currentStep);
+  });
+  document.getElementById('btn-voltar-4')?.addEventListener('click', function() {
+    currentStep = 2;
+    showStep(currentStep);
+  });
+  document.getElementById('btn-avancar-4')?.addEventListener('click', function() {
+    currentStep = 4;
+    showStep(currentStep);
+  });
+  document.getElementById('btn-voltar-5')?.addEventListener('click', function() {
+    currentStep = 3;
+    showStep(currentStep);
+  });
+
+  // Enviar formulário
   form?.addEventListener('submit', async function(e) {
     console.log('Evento submit disparado!');
     e.preventDefault();
@@ -103,11 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
       errorAlert.classList.remove('d-none');
       return;
     }
-
-    // Adicionar fuso horário
-    document.querySelector('input[name="fuso_horario"]').value =
-      Intl.DateTimeFormat().resolvedOptions().timeZone;
-
+document.querySelector('input[name="fuso_horario"]').value =
+  Intl.DateTimeFormat().resolvedOptions().timeZone;
     // Remover máscara do telefone e CEP antes de enviar
     const telefone = telefoneInput.value.replace(/\D/g, ''); // só números
     telefoneInput.value = telefone;
