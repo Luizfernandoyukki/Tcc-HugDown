@@ -29,7 +29,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     useDefaults: true,
     directives: {
-      "script-src": ["'self'", "'unsafe-inline'"],
+      "script-src": [
+        "'self'",
+        "'unsafe-inline'",
+        "https://cdn.jsdelivr.net", // Permite Bootstrap CDN
+        "https://cdnjs.cloudflare.com" // Se usar FontAwesome ou outros
+      ],
     },
   },
 })); // segurança
@@ -40,6 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/perfis', express.static(path.join(__dirname, 'perfis')));
+app.use('/post', express.static(path.join(__dirname, 'public', 'post')));
 
 // Configuração de sessão
 app.use(session({

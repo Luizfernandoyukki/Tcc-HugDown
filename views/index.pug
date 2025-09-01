@@ -37,86 +37,19 @@ block content
 
     // FEED DE POSTAGENS
     .row.justify-content-center
-      .col-12.col-md-10.col-lg-8
-        h2.mb-3.text-success.text-center Feed de Postagens
-        if posts && posts.length
-          - let count = 0;
-          each post, i in posts
-            .card.mb-2.shadow-sm
-              .card-body.p-3
-                .d-flex.align-items-center.mb-2
-                  // Foto do usuário - clicável para o perfil
-                  a(href=`/usuarios/${post.id_autor || ''}`)
-                    img.rounded-circle.me-2(
-                      src=post.foto_perfil || '/images/default-avatar.png',
-                      alt=post.nome_usuario || 'Usuário',
-                      width='48',
-                      height='48',
-                      style="border:2px solid #eee; cursor:pointer;"
-                    )
-                .flex-grow-1
-                  if post.nome_usuario
-                    span.fw-bold= post.nome_usuario
-                  if post.verificado
-                    img.ms-1(src='/images/verificado.png', alt='Verificado', title='Verificado', height='18')
-                  br
-                  if post.data_criacao
-                    span.text-muted.small= post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao
-                  if post.nome_categoria
-                    br
-                    span.badge.rounded-pill.text-bg-success.ms-1(
-                      style="background:rgba(0,180,120,0.13); color:#009e60;"
-                    )= post.nome_categoria
-                .mt-2
-                  if post.tipo_postagem === 'text' && post.conteudo
-                    // Conteúdo do post
-                    p.mb-2= post.conteudo
-                  else if post.tipo_postagem === 'photo' && post.url_midia
-                    // Foto do post - clicável para detalhes
-                    a(href=`/postagens/${post.id_postagem || ''}`)
-                      img.img-fluid.rounded.mb-2(
-                        src=post.url_midia,
-                        alt='Foto',
-                        style="cursor:pointer;"
-                      )
-                  else if post.tipo_postagem === 'video' && post.url_midia && post.tipo_midia
-                    // Vídeo do post - clicável para detalhes
-                    a(href=`/postagens/${post.id_postagem || ''}`)
-                      video.w-100.rounded.mb-2(controls, style="cursor:pointer;")
-                        source(src=post.url_midia, type=post.tipo_midia)
-                        | Seu navegador não suporta vídeo.
-                  else if post.tipo_postagem === 'article' && post.conteudo
-                    h6.text-success.mb-1 Artigo Científico
-                    p.mb-2= post.conteudo
-                .d-flex.justify-content-between.align-items-center.mt-2
-                  span
-                    button.acao-restrita.btn.btn-outline-success.btn-sm(
-                      type="button"
-                      title="Curtir"
-                    )
-                      img.me-1(src='/images/like.png', alt='Curtidas', height='20', style="cursor:pointer;")
-                      | #{post.total_curtidas || 0}
-                  span
-                    button.acao-restrita.btn.btn-outline-primary.btn-sm(
-                      type="button"
-                      title="Comentar"
-                    )
-                      img.me-1(src='/images/comment.png', alt='Comentários', height='20', style="cursor:pointer;")
-                      | #{post.total_comentarios || 0}
-                  span
-                    button.acao-restrita.btn.btn-outline-secondary.btn-sm(
-                      type="button"
-                      title="Compartilhar"
-                    )
-                      img.me-1(src='/images/share.png', alt='Compartilhamentos', height='20', style="cursor:pointer;")
-                      | #{post.total_compartilhamentos || 0}
-            - count++;
-            if count % 15 === 0 && grupos && grupos.length
-              .row.align-items-center.mb-3
-                .col-auto.p-0
-                  .d-flex.align-items-center#grupos-feed-linha(data-grupos=JSON.stringify(grupos))
-                .col.p-0
-                  button#link-visualizar-mais-grupos-feed.btn.btn-outline-primary.btn-sm.ms-2 Visualizar grupos disponíveis
+      each post in posts
+        .col-12.col-md-6.col-lg-4
+          .card.shadow-sm.h-100.post-card(style="cursor:pointer;" data-id=post.id_postagem)
+            .card-body.d-flex
+              // Foto do autor
+              a(href=`/usuarios/${post.autor.id_usuario}`)
+                img.rounded-circle.me-3(src=post.autor.foto_perfil || '/images/default-profile.png', alt=post.autor.nome_usuario, width="48", height="48")
+              .flex-grow-1
+                h5.card-title= post.titulo || 'Sem título'
+                if post.url_midia
+                  img.img-fluid.mb-2(src=post.url_midia || '/images/default-post.png', alt="Imagem da postagem")
+                p.card-text.text-truncate= post.resumo || 'Sem resumo'
+                small.text-muted= post.data_criacao ? post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao : ''
       // Painel lateral de grupos (inicialmente oculto)
       .grupos-feed-panel.position-fixed.top-0.end-0.bg-white.shadow-lg.p-3(style="display:none;z-index:999;height:100vh;width:320px;overflow-y:auto;right:0;")
         .d-flex.justify-content-between.align-items-center.mb-3
@@ -126,6 +59,60 @@ block content
           // Todos os grupos renderizados pelo JS
           each grupo in grupos
             button.grupo-btn.mb-2.acao-restrita(type='button')= grupo.nome_grupo
+
+    // MODAL DE POSTAGEM
+    .modal.fade#modalPostagem(tabindex="-1", aria-hidden="true")
+      .modal-dialog.modal-xl.modal-dialog-centered(style="max-width:75vw;")
+        .modal-content
+          .modal-body
+            .row
+              .col-md-7
+                h4#modalTitulo
+                if modalImagem
+                  img.img-fluid.mb-3(src=modalImagem, alt="Imagem da postagem")
+                p#modalConteudo
+                ul.list-group
+                  li.list-group-item
+                    b Categoria: 
+                    span#modalCategoria
+                  li.list-group-item
+                    b Tags: 
+                    span#modalTags
+                  li.list-group-item
+                    b Data de criação: 
+                    span#modalData
+                  li.list-group-item
+                    b Tipo de postagem: 
+                    span#modalTipo
+                  li.list-group-item
+                    b Artigo científico: 
+                    span#modalArtigo
+                  li.list-group-item
+                    b Latitude: 
+                    span#modalLat
+                  li.list-group-item
+                    b Longitude: 
+                    span#modalLng
+              .col-md-5
+                h5 Comentários
+                .comentarios-container(style="max-height:400px;overflow-y:auto;")
+                  // Aqui renderize os comentários
+                .mt-3
+                  span.me-3
+                    i.fas.fa-eye.me-1
+                    | <span id="modalVisualizacoes"></span> Visualizações
+                  span.me-3
+                    i.fas.fa-heart.me-1
+                    | <span id="modalCurtidas"></span> Curtidas
+                  button.btn.btn-primary#btnCompartilhar(type="button") Compartilhar
+                  button.btn.btn-outline-success#btnCurtir(type="button") Curtir
+                  button.btn.btn-outline-secondary#btnComentar(type="button") Comentar
+          .modal-footer.justify-content-end
+            a#btnEditarPost.btn.btn-warning.btn-lg.d-flex.align-items-center(href="#")
+              i.fas.fa-edit.fs-2.me-2
+              .d-flex.flex-column.align-items-start
+                span.fs-5 Editar Postagem
+                small.text-warning-50 Altere o conteúdo desta postagem.
 
   block scripts
     script(src="/javascripts/index.js")

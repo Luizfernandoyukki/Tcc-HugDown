@@ -5,6 +5,7 @@ const requireLogin = require('../middlewares/auth');
 const multer = require('multer');
 const path = require('path');
 const { Usuario } = require('../models');
+const fetch = require('node-fetch');
 
 const {
   administradorController,
@@ -34,7 +35,31 @@ const {
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
+const storagePostagem = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // O tipo de postagem vem do body do formulário
+    let tipo = req.body.tipo_postagem;
+    if (tipo === 'article') {
+      cb(null, path.join(__dirname, '../post/artigos'));
+    } else {
+      cb(null, path.join(__dirname, '../post/public'));
+    }
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const nome = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
+    cb(null, nome);
+  }
+});
 
+const uploadPost = multer({ storage: storagePostagem });
+
+router.post(
+  '/postagens',
+  requireLogin,
+  uploadPost.single('arquivo_post'),
+  asyncHandler(postagemController.criar)
+);
 // Exemplo de configuração do Multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -115,10 +140,27 @@ router.get('/cadastro', (req, res) => res.render('cadastro'));
 router.get('/login', (req, res) => res.render('login'));
 
 // ROTAS DE API (JSON)
+const storageCadastro = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === 'foto_perfil') {
+      cb(null, path.join(__dirname, '../perfis'));
+    } else if (file.fieldname === 'documento_comprobatorio') {
+      cb(null, path.join(__dirname, '../docs'));
+    } else {
+      cb(new Error('Campo de arquivo não permitido.'));
+    }
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const nome = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
+    cb(null, nome);
+  }
+});
+
 router.post(
   '/cadastro',
   multer({
-    storage: storageDoc,
+    storage: storageCadastro,
     fileFilter: fileFilter
   }).fields([
     { name: 'documento_comprobatorio', maxCount: 1 },
@@ -184,20 +226,28 @@ router.get('/postagens', asyncHandler(async (req, res) => {
 }));
 
 // Formulário de criação
-router.get('/postagens/create', requireLogin, (req, res) => {
+router.get('/postagens/create', requireLogin, asyncHandler(async (req, res) => {
+  const categorias = await categoriaController.listar(req, { raw: true });
+  const tags = await tagController.listar(req, { raw: true });
   res.render('postagens/create', {
     usuario: res.locals.usuario,
-    isLoggedIn: res.locals.isLoggedIn
+    isLoggedIn: res.locals.isLoggedIn,
+    categorias,
+    tags
   });
-});
+}));
 
 // Configuração de postagens
-router.get('/postagens/config', requireLogin, (req, res) => {
+router.get('/postagens/config', requireLogin, asyncHandler(async (req, res) => {
+  const tags = await tagController.listar(req, { raw: true });
+  const secoes = await secaoController.listar(req, { raw: true });
   res.render('postagens/config', {
     usuario: res.locals.usuario,
-    isLoggedIn: res.locals.isLoggedIn
+    isLoggedIn: res.locals.isLoggedIn,
+    tags,
+    secoes
   });
-});
+}));
 
 // Minhas postagens (show)
 router.get('/postagens/show', requireLogin, asyncHandler(async (req, res) => {
@@ -213,6 +263,17 @@ router.get('/postagens/show', requireLogin, asyncHandler(async (req, res) => {
 
 // Detalhe de uma postagem específica
 router.get('/postagens/:id', requireLogin, asyncHandler(postagemController.buscarPorId));
+
+// ROTA DE EDIÇÃO DE POSTAGEM (renderiza o formulário edit.pug)
+router.get('/postagens/:id/edit', requireLogin, asyncHandler(async (req, res) => {
+  const postagem = await postagemController.buscarPorId({ params: { id: req.params.id } }, { raw: true });
+  const categorias = await categoriaController.listar(req, { raw: true });
+  const tags = await tagController.listar(req, { raw: true });
+  if (!postagem) {
+    return res.status(404).render('error', { error: 'Postagem não encontrada' });
+  }
+  res.render('postagens/edit', { post: postagem, categorias, tags, usuario: res.locals.usuario });
+}));
 
 // Criação, edição, remoção (POST, PUT, DELETE)
 router.post('/postagens', requireLogin, asyncHandler(postagemController.criar));
@@ -291,5 +352,12 @@ router.use(async (req, res, next) => {
   }
   next();
 });
+
+async function getLocationFromLatLng(lat, lng) {
+  const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.address ? `${data.address.city || data.address.town || data.address.village || ''}, ${data.address.state || ''}` : '';
+}
 
 module.exports = router;

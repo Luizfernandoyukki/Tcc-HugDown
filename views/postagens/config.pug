@@ -1,0 +1,62 @@
+extends ../layout
+
+block styles
+  style.
+    body { background: #181818; color: #fff; }
+    .config-card { background: #222; border-radius: 12px; padding: 32px; max-width: 700px; margin: 40px auto; box-shadow: 0 0 24px #000; }
+    .config-list { background: #232323; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+    .config-list h4 { color: #00e676; }
+    .btn-config { margin-right: 12px; }
+
+block content
+  .config-card
+    h2.text-center.mb-4 Configurações das Minhas Postagens
+
+    .d-flex.justify-content-end.mb-4
+      button.btn.btn-success.btn-config#btnNovaTag(type="button") + Nova Tag
+      button.btn.btn-primary.btn-config#btnNovaSecao(type="button") + Nova Seção
+
+    .config-list
+      h4.mb-3 Minhas Tags
+      if tags && tags.length
+        ul.list-group
+          each tag in tags
+            li.list-group-item.bg-dark.text-white.mb-2= tag.nome_tag
+      else
+        p.text-muted Nenhuma tag cadastrada.
+
+    .config-list
+      h4.mb-3 Minhas Seções
+      if secoes && secoes.length
+        ul.list-group
+          each secao in secoes
+            li.list-group-item.bg-dark.text-white.mb-2= secao.nome_secao
+      else
+        p.text-muted Nenhuma seção cadastrada.
+
+    // Formulário de criação de tag (inicialmente oculto)
+    form#formTag.criar-form.mt-4(style="display:none;")
+      h5.text-success.mb-3 Nova Tag
+      .mb-3
+        label(for="nome_tag") Nome da Tag
+        input.form-control(type="text", id="nome_tag", name="nome_tag", required)
+      .mb-3
+        label(for="descricao_tag") Descrição
+        textarea.form-control(id="descricao_tag", name="descricao_tag")
+      button.btn.btn-success(type="submit") Criar Tag
+      button.btn.btn-secondary(type="button" id="cancelarTag") Cancelar
+
+    // Formulário de criação de seção (inicialmente oculto)
+    form#formSecao.criar-form.mt-4(style="display:none;")
+      h5.text-primary.mb-3 Nova Seção
+      .mb-3
+        label(for="nome_secao") Nome da Seção
+        input.form-control(type="text", id="nome_secao", name="nome_secao", required)
+      .mb-3
+        label(for="descricao_secao") Descrição
+        textarea.form-control(id="descricao_secao", name="descricao_secao")
+      button.btn.btn-primary(type="submit") Criar Seção
+      button.btn.btn-secondary(type="button" id="cancelarSecao") Cancelar
+
+block scripts
+  script(src="/javascripts/postagens/config.js")

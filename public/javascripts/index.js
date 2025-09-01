@@ -214,10 +214,13 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('card-flutuante-login').style.display = 'block';
     document.body.style.overflow = 'hidden';
   }
-  document.getElementById('fechar-card-flutuante').onclick = function() {
-    document.getElementById('card-flutuante-login').style.display = 'none';
-    document.body.style.overflow = '';
-  };
+  const btnFecharCard = document.getElementById('fechar-card-flutuante');
+  if (btnFecharCard) {
+    btnFecharCard.onclick = function() {
+      document.getElementById('card-flutuante-login').style.display = 'none';
+      document.body.style.overflow = '';
+    };
+  }
 
   // Exemplo: bloquear ações restritas
   document.addEventListener('click', function(e) {
@@ -227,4 +230,82 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
   window.usuarioLogado = !!window.usuarioLogado;
+
+  // No JS do modal
+  async function preencherLocalizacao(lat, lng) {
+    if (!lat || !lng) return '';
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.address ? `${data.address.city || data.address.town || data.address.village || ''}, ${data.address.state || ''}` : '';
+  }
+
+  // Função para abrir e preencher o modal da postagem
+  async function abrirModalPostagem(post) {
+    // Título
+    document.getElementById('modalTitulo').textContent = post.titulo || 'Sem título';
+    // Imagem
+    const modalImagem = document.querySelector('#modalPostagem img.img-fluid');
+    if (modalImagem) {
+      if (post.url_midia) {
+        modalImagem.src = post.url_midia;
+        modalImagem.style.display = '';
+      } else {
+        modalImagem.src = '/images/default-post.png';
+        modalImagem.style.display = '';
+      }
+    }
+    // Conteúdo
+    document.getElementById('modalConteudo').textContent = post.conteudo || post.resumo || '';
+    // Categoria
+    document.getElementById('modalCategoria').textContent = post.categoria ? post.categoria.nome_categoria : '';
+    // Tags
+    document.getElementById('modalTags').textContent = post.tag ? post.tag.nome_tag : '';
+    // Data
+    document.getElementById('modalData').textContent = post.data_criacao ? new Date(post.data_criacao).toLocaleString() : '';
+    // Tipo
+    document.getElementById('modalTipo').textContent = post.tipo_postagem || '';
+    // Artigo científico
+    document.getElementById('modalArtigo').textContent = post.artigo_cientifico ? 'Sim' : 'Não';
+    // Localização (latitude/longitude → nome)
+    if (post.latitude && post.longitude) {
+      const local = await preencherLocalizacao(post.latitude, post.longitude);
+      document.getElementById('modalLat').textContent = local || `${post.latitude}`;
+      document.getElementById('modalLng').textContent = `${post.longitude}`;
+    } else {
+      document.getElementById('modalLat').textContent = '';
+      document.getElementById('modalLng').textContent = '';
+    }
+    // Visualizações, curtidas, comentários (se existirem)
+    document.getElementById('modalVisualizacoes').textContent = post.visualizacoes || 0;
+    document.getElementById('modalCurtidas').textContent = post.curtidas || 0;
+    // Comentários (se vierem do backend)
+    const comentariosContainer = document.querySelector('.comentarios-container');
+    if (comentariosContainer) {
+      comentariosContainer.innerHTML = '';
+      if (post.comentarios && post.comentarios.length) {
+        post.comentarios.forEach(com => {
+          const div = document.createElement('div');
+          div.className = 'comentario mb-2 p-2 border rounded';
+          div.innerHTML = `<b>${com.autor ? com.autor.nome_usuario : 'Anônimo'}:</b> ${com.conteudo}`;
+          comentariosContainer.appendChild(div);
+        });
+      } else {
+        comentariosContainer.innerHTML = '<span class="text-muted">Nenhum comentário.</span>';
+      }
+    }
+    // Abre o modal (Bootstrap 5)
+    const modal = new bootstrap.Modal(document.getElementById('modalPostagem'));
+    modal.show();
+  }
+
+  // Detecta clique no card de postagem
+  document.querySelectorAll('.post-card').forEach(card => {
+    card.addEventListener('click', function () {
+      const id = card.getAttribute('data-id');
+      // Busca o post nos dados globais (window.posts)
+      const post = window.posts ? window.posts.find(p => p.id_postagem == id) : null;
+      if (post) abrirModalPostagem(post);
+    });
+  });
 });

@@ -1,0 +1,56 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    h2 Nova Postagem
+
+    form#form-postagem(method="POST" enctype="multipart/form-data")
+      .mb-3
+        label(for="titulo") Título *
+        input.form-control(type="text", id="titulo", name="titulo", required, maxlength="200")
+
+      .mb-3
+        label(for="resumo") Resumo
+        textarea.form-control(id="resumo", name="resumo", maxlength="500")
+
+      .mb-3
+        label(for="conteudo") Conteúdo *
+        textarea.form-control(id="conteudo", name="conteudo", required, rows="6")
+
+      .mb-3
+        label(for="categoria") Categoria *
+        select.form-select(id="categoria", name="id_categoria", required)
+          //- Aqui você deve popular as categorias dinamicamente no backend
+          each categoria in categorias
+            option(value=categoria.id_categoria)= categoria.nome_categoria
+
+      .mb-3
+        label(for="tags") Tags
+        select.form-select(id="tags", name="tags" multiple)
+          //- Aqui você deve popular as tags dinamicamente no backend
+          each tag in tags
+            option(value=tag.id_tag)= tag.nome_tag
+
+      .mb-3
+        label(for="tipo_postagem") Tipo de Postagem *
+        select.form-select(id="tipo_postagem", name="tipo_postagem", required)
+          option(value="text") Texto
+          option(value="photo") Foto
+          option(value="video") Vídeo
+          if usuario && usuario.verificado
+            option(value="article") Artigo Científico
+
+      if usuario && usuario.verificado
+        .mb-3
+          label(for="artigo_cientifico") Marcar como artigo científico?
+          input.form-check-input(type="checkbox", id="artigo_cientifico", name="artigo_cientifico", value="true")
+      else
+        input(type="hidden", name="artigo_cientifico", value="false")
+
+      .mb-3
+        label(for="arquivo_post") Arquivo da Postagem
+        input.form-control(type="file", id="arquivo_post", name="arquivo_post")
+
+      button.btn.btn-success(type="submit") Publicar
+
+  script(src="/javascripts/postagens/create.js")

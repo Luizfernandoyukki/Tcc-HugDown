@@ -17,6 +17,8 @@ block content
                 h5.card-title= post.titulo || 'Sem título'
                 p.card-text.text-truncate= post.conteudo
                 small.text-muted= post.data_criacao ? post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao : ''
+                if post.url_midia
+                  img.img-fluid.mb-2(src=post.url_midia, alt="Imagem da postagem")
     else
       .d-flex.justify-content-center.align-items-center.mt-5(style="min-height:300px;")
         .card.bg-dark.text-white.p-4(style="max-width: 420px; border-radius: 18px; box-shadow: 0 0 16px #000;")
@@ -25,20 +27,43 @@ block content
 
   // Modal/Card de visualização detalhada
   .modal.fade#modalPostagem(tabindex="-1", aria-hidden="true")
-    .modal-dialog.modal-lg.modal-dialog-centered
+    .modal-dialog.modal-xl.modal-dialog-centered(style="max-width:60vw;")
       .modal-content
         .modal-header
           h4.modal-title#modalTitulo
           button.btn-close(type="button", data-bs-dismiss="modal", aria-label="Fechar")
         .modal-body
           p#modalConteudo
-        .modal-footer.justify-content-start
-          a#btnEditarPost.btn.btn-warning.btn-lg.p-3.d-flex.flex-column.align-items-start(href="#")
-            i.fas.fa-edit.fs-2.mb-1
-            span.fs-5 Editar Postagem
-            small.text-warning-50 Altere o conteúdo desta postagem.
+          ul.list-group
+            li.list-group-item
+              b Categoria: 
+              span#modalCategoria
+            li.list-group-item
+              b Tags: 
+              span#modalTags
+            li.list-group-item
+              b Data de criação: 
+              span#modalData
+            li.list-group-item
+              b Tipo de postagem: 
+              span#modalTipo
+            li.list-group-item
+              b Artigo científico: 
+              span#modalArtigo
+            li.list-group-item
+              b Latitude: 
+              span#modalLat
+            li.list-group-item
+              b Longitude: 
+              span#modalLng
+        .modal-footer.justify-content-end
+          a#btnEditarPost.btn.btn-warning.btn-lg.d-flex.align-items-center(href="#")
+            i.fas.fa-edit.fs-2.me-2
+            .d-flex.flex-column.align-items-start
+              span.fs-5 Editar Postagem
+              small.text-warning-50 Altere o conteúdo desta postagem.
 
 block scripts
-  script(src="/javascripts/postagens/show.js")
   script.
     window.postagens = !{postagensJson};
+  script(src="/javascripts/postagens/show.js")

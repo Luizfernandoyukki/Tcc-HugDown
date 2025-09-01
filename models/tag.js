@@ -12,7 +12,12 @@ module.exports = (sequelize, DataTypes) => {
 
   Tag.associate = models => {
     Tag.hasMany(models.TagTraducao, { as: 'traducoes', foreignKey: 'id_tag' });
-    Tag.hasMany(models.Postagem, { as: 'postagens', foreignKey: 'id_tag' });
+    Tag.belongsToMany(models.Postagem, {
+      through: 'postagens_tags',
+      as: 'postagens',
+      foreignKey: 'id_tag',
+      otherKey: 'id_postagem'
+    });
   };
 
   return Tag;

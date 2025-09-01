@@ -31,6 +31,12 @@ module.exports = (sequelize, DataTypes) => {
     Postagem.hasMany(models.Curtida, { as: 'curtidas', foreignKey: 'id_postagem' });
     Postagem.hasMany(models.Compartilhamento, { as: 'compartilhamentos', foreignKey: 'id_postagem' });
     Postagem.hasMany(models.PostagemSecao, { as: 'postagensSecao', foreignKey: 'id_postagem' });
+    Postagem.belongsToMany(models.Tag, {
+      through: 'postagens_tags',
+      as: 'tags',
+      foreignKey: 'id_postagem',
+      otherKey: 'id_tag'
+    });
   };
 
   return Postagem;

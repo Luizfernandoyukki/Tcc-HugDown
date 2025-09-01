@@ -1,0 +1,43 @@
+extends ../layout
+
+block styles
+  style.
+    body { background: #111; color: #fff; }
+    .edit-card { background: #222; border-radius: 12px; padding: 32px; max-width: 500px; margin: 40px auto; box-shadow: 0 0 24px #000; }
+
+block content
+  .edit-card
+    h2.text-center.mb-4 Editar Postagem
+    form#form-edit(method="POST")
+      .mb-3
+        label(for="titulo") Título
+        input.form-control(type="text", id="titulo", name="titulo", value=post.titulo)
+      .mb-3
+        label(for="resumo") Resumo
+        textarea.form-control(id="resumo", name="resumo")= post.resumo
+      .mb-3
+        label(for="conteudo") Conteúdo
+        textarea.form-control(id="conteudo", name="conteudo")= post.conteudo
+      .mb-3
+        label(for="categoria") Categoria
+        select.form-control(id="categoria", name="id_categoria")
+          each cat in categorias
+            option(value=cat.id_categoria selected=(post.categoria && post.categoria.id_categoria == cat.id_categoria))= cat.nome_categoria
+      .mb-3
+        label(for="tags") Tags
+        select.form-control(id="tags", name="tags[]" multiple)
+          each tag in tags
+            option(value=tag.id_tag selected=(post.tag && post.tag.id_tag == tag.id_tag))= tag.nome_tag
+      .mb-3
+        label(for="tipo_postagem") Tipo
+        input.form-control(type="text", id="tipo_postagem", name="tipo_postagem", value=post.tipo_postagem)
+      .mb-3
+        label(for="latitude") Latitude
+        input.form-control(type="text", id="latitude", name="latitude", value=post.latitude)
+      .mb-3
+        label(for="longitude") Longitude
+        input.form-control(type="text", id="longitude", name="longitude", value=post.longitude)
+      button.btn.btn-success.mt-3(type="submit") Salvar Alterações
+
+block scripts
+  script(src="/javascripts/postagens/edit.js")
