@@ -107,7 +107,7 @@ exports.criar = async (req, res) => {
       });
     }
 
-    res.redirect('/login');
+    res.redirect('/');
   } catch (err) {
     res.status(500).json({ error: 'Erro ao criar usuário: ' + err.message });
   }
