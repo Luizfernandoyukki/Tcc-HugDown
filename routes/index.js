@@ -1,92 +1,92 @@
 const express = require('express');
 const router = express.Router();
-const controllers = require('../controllers');
-const requireLogin = require('../middlewares/auth');
-const multer = require('multer');
-const path = require('path');
 const { Usuario } = require('../models');
 const fetch = require('node-fetch');
 
+// Se precisar de controllers para a página inicial:
+const controllers = require('../controllers');
 const {
-  administradorController,
-  amizadeController,
-  categoriaController,
-  categoriaTraducaoController,
-  comentarioController,
-  compartilhamentoController,
-  curtidaController,
-  documentoVerificacaoController,
-  eventoController,
-  grupoController,
-  idiomaController,
-  membroGrupoController,
-  mensagemDiretaController,
-  notificacaoController,
-  participanteEventoController,
   postagemController,
-  secaoController,
-  secaoTraducaoController,
+  categoriaController,
   tagController,
-  tagTraducaoController,
-  usuarioController,
+  grupoController,
 } = controllers;
 
 // Wrapper para async/await
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
-const storagePostagem = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // O tipo de postagem vem do body do formulário
-    let tipo = req.body.tipo_postagem;
-    if (tipo === 'article') {
-      cb(null, path.join(__dirname, '../post/artigos'));
-    } else {
-      cb(null, path.join(__dirname, '../post/public'));
-    }
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const nome = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
-    cb(null, nome);
+
+// Middleware global para usuário logado
+router.use(async (req, res, next) => {
+  res.locals.isLoggedIn = !!req.session.isLoggedIn;
+  if (req.session.userId) {
+    res.locals.usuario = await Usuario.findByPk(req.session.userId);
+  } else {
+    res.locals.usuario = null;
   }
+  next();
 });
 
-const uploadPost = multer({ storage: storagePostagem });
+// Página inicial
+router.get('/', asyncHandler(async (req, res) => {
+  const [posts, categorias, tags, grupos] = await Promise.all([
+    postagemController.listar(req, { raw: true }),
+    categoriaController.listar(req, { raw: true }),
+    tagController.listar(req, { raw: true }),
+    grupoController.listar(req, { raw: true }),
+  ]);
+  res.render('index', {
+    posts,
+    categorias,
+    tags,
+    grupos,
+    usuario: res.locals.usuario,
+    isLoggedIn: res.locals.isLoggedIn
+  });
+}));
 
-router.post(
-  '/postagens',
-  requireLogin,
-  uploadPost.single('arquivo_post'),
-  asyncHandler(postagemController.criar)
-);
-// Exemplo de configuração do Multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../perfis'));
-  },
-  filename: function (req, file, cb) {
-    // Nome único: id + timestamp + extensão
-    const ext = path.extname(file.originalname);
-    const nome = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
-    cb(null, nome);
-  }
+// Rotas de autenticação
+router.get('/cadastro', (req, res) => res.render('cadastro'));
+router.get('/login', (req, res) => res.render('login'));
+router.post('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/');
+  });
 });
-const upload = multer({ storage });
 
-const storageDoc = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../docs'));
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const nome = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
-    cb(null, nome);
-  }
-});
-const uploadDoc = multer({ storage: storageDoc });
+// Importação dos módulos de rota (cada um em seu arquivo)
+router.use('/usuarios', require('./usuarios'));
+router.use('/postagens', require('./postagens'));
+router.use('/categorias', require('./categorias'));
+router.use('/tags', require('./tags'));
+router.use('/grupos', require('./grupos'));
+router.use('/administradores', require('./administradores'));
+router.use('/amizades', require('./amizades'));
+router.use('/comentarios', require('./comentarios'));
+router.use('/compartilhamentos', require('./compartilhamentos'));
+router.use('/curtidas', require('./curtidas'));
+router.use('/documentos-verificacao', require('./documentosVerificacao'));
+router.use('/eventos', require('./eventos'));
+router.use('/idiomas', require('./idiomas'));
+router.use('/membros-grupo', require('./membrosGrupo'));
+router.use('/mensagens-diretas', require('./mensagensDiretas'));
+router.use('/notificacoes', require('./notificacoes'));
+router.use('/participantes-evento', require('./participantesEvento'));
+router.use('/secoes', require('./secoes'));
+router.use('/secoes-traducao', require('./secoesTraducao'));
+router.use('/categorias-traducao', require('./categoriasTraducao'));
+router.use('/tags-traducao', require('./tagsTraducao'));
 
-const fileFilter = (req, file, cb) => {
+// Função utilitária (se necessário)
+async function getLocationFromLatLng(lat, lng) {
+  const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.address ? `${data.address.city || data.address.town || data.address.village || ''}, ${data.address.state || ''}` : '';
+}
+
+module.exports = router;
   if (file.fieldname === 'foto_perfil') {
     // Aceita apenas imagens
     if (/^image\/(jpeg|png|gif|bmp|webp)$/.test(file.mimetype)) {
@@ -104,8 +104,6 @@ const fileFilter = (req, file, cb) => {
   } else {
     cb(new Error('Campo de arquivo não permitido.'));
   }
-};
-
 // ROTAS PÁGINA (renderizam HTML)
 router.get('/', asyncHandler(async (req, res) => {
   const [posts, categorias, tags, grupos] = await Promise.all([
