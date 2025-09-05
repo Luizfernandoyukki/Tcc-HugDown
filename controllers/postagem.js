@@ -2,13 +2,24 @@ const { Postagem, Usuario, Categoria, Tag } = require('../models');
 
 // Listar todas as postagens
 exports.listar = async (req, resOrOptions) => {
-  const posts = await Postagem.findAll({
+  let posts = await Postagem.findAll({
     include: [
       { model: Usuario, as: 'autor' },
       { model: Categoria, as: 'categoria' },
       { model: Tag, as: 'tag' }
     ]
   });
+
+  // Ajusta o caminho da foto do autor
+  posts = posts.map(post => {
+    if (post.autor && post.autor.foto_perfil) {
+      if (!/^https?:\/\//.test(post.autor.foto_perfil)) {
+        post.autor.foto_perfil = '..' + post.autor.foto_perfil;
+      }
+    }
+    return post;
+  });
+
   if (resOrOptions && resOrOptions.raw) return posts;
   if (resOrOptions && typeof resOrOptions.json === 'function') return resOrOptions.json(posts);
   return posts;

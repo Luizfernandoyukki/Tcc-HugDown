@@ -1,9 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
   const Tag = sequelize.define('Tag', {
     id_tag: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    nome_tag: { type: DataTypes.STRING(100), allowNull: false, unique: true },
+    nome_tag: DataTypes.STRING,
     descricao_tag: DataTypes.TEXT,
-    uso_contador: { type: DataTypes.INTEGER, defaultValue: 0 },
+    uso_contador: DataTypes.INTEGER,
     data_criacao: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
   }, {
     tableName: 'tags',

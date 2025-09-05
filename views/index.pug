@@ -37,28 +37,51 @@ block content
 
     // FEED DE POSTAGENS
     .row.justify-content-center
-      each post in posts
-        .col-12.col-md-6.col-lg-4
-          .card.shadow-sm.h-100.post-card(style="cursor:pointer;" data-id=post.id_postagem)
-            .card-body.d-flex
-              // Foto do autor
-              a(href=`/usuarios/${post.autor.id_usuario}`)
-                img.rounded-circle.me-3(src=post.autor.foto_perfil || '/images/default-profile.png', alt=post.autor.nome_usuario, width="48", height="48")
-              .flex-grow-1
-                h5.card-title= post.titulo || 'Sem título'
-                if post.url_midia
-                  img.img-fluid.mb-2(src=post.url_midia || '/images/default-post.png', alt="Imagem da postagem")
-                p.card-text.text-truncate= post.resumo || 'Sem resumo'
-                small.text-muted= post.data_criacao ? post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao : ''
-      // Painel lateral de grupos (inicialmente oculto)
-      .grupos-feed-panel.position-fixed.top-0.end-0.bg-white.shadow-lg.p-3(style="display:none;z-index:999;height:100vh;width:320px;overflow-y:auto;right:0;")
-        .d-flex.justify-content-between.align-items-center.mb-3
-          h5.mb-0.text-primary Todos os Grupos
-          button#link-fechar-grupos-feed.btn.btn-outline-danger.btn-sm Fechar
-        .d-flex.flex-wrap#grupos-feed-panel-list
-          // Todos os grupos renderizados pelo JS
-          each grupo in grupos
-            button.grupo-btn.mb-2.acao-restrita(type='button')= grupo.nome_grupo
+      .col-12.col-md-8.col-lg-7(style="max-width:58vw;")
+        if posts && posts.length
+          each post in posts
+            .card.shadow-sm.post-card.mb-4(style="cursor:pointer;" data-id=post.id_postagem)
+              .card-body.d-flex
+                // Foto do autor
+                if post.autor
+                  if post.autor.foto_perfil
+                    a(href=`/usuarios/${post.autor.id_usuario}`)
+                      img.rounded-circle.me-3(src=post.autor.foto_perfil, alt=post.autor.nome_usuario, width="48", height="48")
+                .flex-grow-1
+                  h5.card-title= post.titulo || 'Sem título'
+                  p.card-text.text-truncate= post.resumo || 'Sem resumo'
+                  if post.url_midia
+                    img.img-fluid.mb-2(src=post.url_midia, alt="Imagem da postagem")
+                  small.text-muted
+                    | Criado em: #{post.data_criacao ? (post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao) : 'N/A'}
+                    br
+                    | Atualizado em: #{post.data_atualizacao ? (post.data_atualizacao.toLocaleString ? post.data_atualizacao.toLocaleString() : post.data_atualizacao) : 'N/A'}
+                    br
+                    | Autor: #{post.autor ? post.autor.nome_usuario : 'Desconhecido'}
+                  if isLoggedIn
+                    .mt-2
+                      button.btn.btn-outline-success.btn-sm.acao-restrita(type="button")
+                        i.fas.fa-heart.me-1
+                        | Curtir
+                      span.ms-2
+                        i.fas.fa-heart.me-1
+                        | #{post.curtidas || 0} curtidas
+                      span.ms-2
+                        i.fas.fa-eye.me-1
+                        | #{post.visualizacoes || 0} visualizações
+                  else
+                    .mt-2
+                      button.btn.btn-outline-success.btn-sm.acao-restrita(type="button")
+                        i.fas.fa-heart.me-1
+                        | Curtir
+                      span.ms-2
+                        i.fas.fa-heart.me-1
+                        | #{post.curtidas || 0} curtidas
+                      span.ms-2
+                        i.fas.fa-eye.me-1
+                        | #{post.visualizacoes || 0} visualizações
+        else
+          .alert.alert-info.text-center.mt-4 Não há postagens para exibir.
 
     // MODAL DE POSTAGEM
     .modal.fade#modalPostagem(tabindex="-1", aria-hidden="true")

@@ -1,10 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const controllers = require('../controllers');
+const controllers = require('../controllers/index.js');
 const requireLogin = require('../middlewares/auth');
 const multer = require('multer');
 const path = require('path');
-const { postagemController, categoriaController, tagController, secaoController } = controllers;
+
+const {
+  postagemController,
+  categoriaController,
+  tagController,
+  secaoController
+} = controllers;
 
 // Configuração do multer para upload de postagens
 const storagePostagem = multer.diskStorage({

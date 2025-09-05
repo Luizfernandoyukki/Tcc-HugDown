@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controllers = require('../controllers');
+const controllers = require('../controllers/index.js');
 const requireLogin = require('../middlewares/auth');
 const { grupoController } = controllers;
 
