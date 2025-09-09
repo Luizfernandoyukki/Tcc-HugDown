@@ -1,5 +1,6 @@
 const { Postagem, Usuario, Categoria, Tag } = require('../models');
 
+
 // Listar todas as postagens
 exports.listar = async (req, resOrOptions) => {
   let posts = await Postagem.findAll({
@@ -75,7 +76,8 @@ exports.criar = async (req, res) => {
       titulo: req.body.titulo,
       resumo: req.body.resumo,
       artigo_cientifico: req.body.artigo_cientifico === 'true',
-      url_midia: req.file ? `/post/${req.body.tipo_postagem === 'article' ? 'artigos' : 'public'}/${req.file.filename}` : null,
+      // url_midia: req.file ? `/post/${req.body.tipo_postagem === 'article' ? 'artigos' : 'public'}/${req.file.filename}` : null,
+      url_midia: req.file ? '/post/' + req.file.filename : null,
       latitude: req.body.latitude || null,
       longitude: req.body.longitude || null
     };

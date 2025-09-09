@@ -4,7 +4,7 @@ const controllers = require('../controllers/index.js');
 const requireLogin = require('../middlewares/auth');
 const multer = require('multer');
 const path = require('path');
-
+const { podeEditarOuVerPostagem } = require('../middlewares/auth');
 const {
   postagemController,
   categoriaController,
@@ -15,12 +15,7 @@ const {
 // Configuração do multer para upload de postagens
 const storagePostagem = multer.diskStorage({
   destination: function (req, file, cb) {
-    let tipo = req.body.tipo_postagem;
-    if (tipo === 'article') {
-      cb(null, path.join(__dirname, '../post/artigos'));
-    } else {
-      cb(null, path.join(__dirname, '../post/public'));
-    }
+    cb(null, path.join(__dirname, '../post')); // salva em /post na raiz
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
@@ -28,7 +23,7 @@ const storagePostagem = multer.diskStorage({
     cb(null, nome);
   }
 });
-const uploadPost = multer({ storage: storagePostagem });
+const uploadPostagem = multer({ storage: storagePostagem });
 
 // Painel de postagens
 router.get('/', requireLogin, async (req, res) => {
@@ -81,10 +76,10 @@ router.get('/show', requireLogin, async (req, res) => {
 });
 
 // Detalhe de uma postagem específica
-router.get('/:id', requireLogin, postagemController.buscarPorId);
+router.get('/:id', requireLogin, podeEditarOuVerPostagem, postagemController.buscarPorId);
 
 // ROTA DE EDIÇÃO DE POSTAGEM (renderiza o formulário edit.pug)
-router.get('/:id/edit', requireLogin, async (req, res) => {
+router.get('/:id/edit', requireLogin, podeEditarOuVerPostagem, async (req, res) => {
   const postagem = await postagemController.buscarPorId({ params: { id: req.params.id } }, { raw: true });
   const categorias = await categoriaController.listar(req, { raw: true });
   const tags = await tagController.listar(req, { raw: true });
@@ -95,7 +90,7 @@ router.get('/:id/edit', requireLogin, async (req, res) => {
 });
 
 // Criação, edição, remoção (POST, PUT, DELETE)
-router.post('/', requireLogin, uploadPost.single('arquivo_post'), postagemController.criar);
+router.post('/', requireLogin, uploadPostagem.single('arquivo_post'), postagemController.criar);
 router.put('/:id', requireLogin, postagemController.atualizar);
 router.delete('/:id', requireLogin, postagemController.remover);
 

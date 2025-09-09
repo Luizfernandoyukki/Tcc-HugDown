@@ -5,6 +5,7 @@ const requireLogin = require('../middlewares/auth');
 const multer = require('multer');
 const path = require('path');
 const { usuarioController } = controllers;
+const { podeEditarOuVerPerfil } = require('../middlewares/auth');
 
 // Configuração do multer para cadastro de usuário
 const storageCadastro = multer.diskStorage({
@@ -53,7 +54,10 @@ router.post(
 router.post('/login', usuarioController.login);
 
 router.get('/', requireLogin, usuarioController.listar);
-router.get('/:id', requireLogin, usuarioController.buscarPorId);
+router.get('/:id', podeEditarOuVerPerfil, usuarioController.buscarPorId);
+router.get('/:id/edit', podeEditarOuVerPerfil, async (req, res) => {
+  // ...código para editar perfil...
+});
 router.put('/:id', requireLogin, usuarioController.atualizar);
 router.delete('/:id', requireLogin, usuarioController.remover);
 

@@ -9,6 +9,7 @@ const {
   grupoController,
   postagemController, // <--- Adicione isso
 } = controllers;
+const { usuarioController } = require('../controllers');
 
 // Wrapper para async/await
 const asyncHandler = (fn) => (req, res, next) => {
@@ -52,6 +53,7 @@ router.post('/logout', (req, res) => {
     res.redirect('/');
   });
 });
+router.post('/login', usuarioController.login);
 
 // Importação dos módulos de rota (cada um em seu arquivo)
 router.use('/usuarios', require('./usuarios'));

@@ -1,7 +1,7 @@
 const { Secao, SecaoTraducao, PostagemSecao } = require('../models');
 
 // Listar todas as seções
-exports.listar = async (req, res) => {
+exports.listar = async (req, resOrOptions) => {
   try {
     const secoes = await Secao.findAll({
       include: [
@@ -9,9 +9,15 @@ exports.listar = async (req, res) => {
         { model: PostagemSecao, as: 'postagensSecao' }
       ]
     });
-    res.json(secoes);
+    if (resOrOptions && resOrOptions.raw) return secoes;
+    if (resOrOptions && typeof resOrOptions.json === 'function') return resOrOptions.json(secoes);
+    return secoes;
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao buscar seções: ' + error.message });
+    if (resOrOptions && typeof resOrOptions.status === 'function') {
+      return resOrOptions.status(500).json({ error: 'Erro ao buscar seções: ' + error.message });
+    }
+    // Se não for uma resposta Express, apenas lance o erro ou retorne null
+    throw error;
   }
 };
 
