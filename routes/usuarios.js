@@ -54,9 +54,23 @@ router.post(
 router.post('/login', usuarioController.login);
 
 router.get('/', requireLogin, usuarioController.listar);
-router.get('/:id', podeEditarOuVerPerfil, usuarioController.buscarPorId);
-router.get('/:id/edit', podeEditarOuVerPerfil, async (req, res) => {
-  // ...código para editar perfil...
+router.get('/:id', requireLogin, podeEditarOuVerPerfil, async (req, res) => {
+  try {
+    const usuario = await usuarioController.buscarPorId({ params: { id: req.params.id } }, {});
+    if (!usuario) return res.status(404).render('error', { error: 'Usuário não encontrado' });
+    res.render('usuarios/show', { usuario });
+  } catch (err) {
+    res.status(500).render('error', { error: 'Erro ao buscar usuário: ' + err.message });
+  }
+});
+router.get('/:id/edit', requireLogin, podeEditarOuVerPerfil, async (req, res) => {
+  try {
+    const usuario = await usuarioController.buscarPorId({ params: { id: req.params.id } }, {});
+    if (!usuario) return res.status(404).render('error', { error: 'Usuário não encontrado' });
+    res.render('usuarios/edit', { usuario });
+  } catch (err) {
+    res.status(500).render('error', { error: 'Erro ao buscar usuário: ' + err.message });
+  }
 });
 router.put('/:id', requireLogin, usuarioController.atualizar);
 router.delete('/:id', requireLogin, usuarioController.remover);

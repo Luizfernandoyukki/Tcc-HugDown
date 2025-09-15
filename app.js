@@ -32,8 +32,8 @@ app.use(helmet({
       "script-src": [
         "'self'",
         "'unsafe-inline'",
-        "https://cdn.jsdelivr.net", // Permite Bootstrap CDN
-        "https://cdnjs.cloudflare.com" // Se usar FontAwesome ou outros
+        "https://cdn.jsdelivr.net", 
+        "https://cdnjs.cloudflare.com" 
       ],
     },
   },

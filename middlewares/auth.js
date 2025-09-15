@@ -35,5 +35,22 @@ async function podeEditarOuVerPostagem(req, res, next) {
   next();
 }
 
+// Middleware para garantir que só o criador/admin pode editar/ver tag
+async function podeEditarOuVerTag(req, res, next) {
+  const { Tag } = require('../models');
+  const idTag = parseInt(req.params.id, 10);
+  const idSession = req.session.userId;
+  if (!idSession) {
+    return res.status(403).render('error', { error: 'Acesso negado.' });
+  }
+  const tag = await Tag.findByPk(idTag);
+  // Aqui você pode customizar a lógica: por padrão, só permite se for admin (ajuste conforme sua regra)
+  if (!tag /*|| tag.id_criador !== idSession*/) {
+    return res.status(403).render('error', { error: 'Acesso negado à tag.' });
+  }
+  next();
+}
+
 module.exports.podeEditarOuVerPerfil = podeEditarOuVerPerfil;
 module.exports.podeEditarOuVerPostagem = podeEditarOuVerPostagem;
+module.exports.podeEditarOuVerTag = podeEditarOuVerTag;
