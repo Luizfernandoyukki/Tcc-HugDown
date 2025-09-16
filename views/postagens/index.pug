@@ -17,9 +17,12 @@ block content
         a.btn.btn-outline-success.btn-lg.p-4.w-100.text-start(style="max-width:500px;" href="/postagens/show?autor=#{usuario ? usuario.id_usuario : ''}")
           i.fas.fa-list.me-3.fs-2
           span.d-block.fs-4 Minhas Postagens
-          small.d-block.text-success-50 Veja e gerencie todas as postagens que você já criou.
-      a.btn.btn-outline-warning.btn-lg.p-4.w-100.text-start(style="max-width:500px;" href="/postagens/config")
-        i.fas.fa-cog.me-3.fs-2
+          small.d-block.text-success-50 Veja e gerencie todas as postagens que você já criou.   
+        a.btn.btn-outline-primary.btn-lg.p-4.w-100.text-start.mt-2(href="/tags/create", style="max-width:500px;")
+          i.fas.fa-tag.me-3.fs-2
+          span.d-block.fs-4 Nova Tag
+          small.d-block.text-primary-50
+            | Crie uma nova tag para organizar suas postagens. Apenas você poderá editar ou visualizar as tags que criar.
 
 block scripts
   script(src="/javascripts/postagens/index.js")

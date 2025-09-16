@@ -1,0 +1,54 @@
+extends ../layout
+
+block content
+  .container.mt-5.mb-5
+    .row.justify-content-center
+      .col-12.col-md-8
+        .card.shadow-sm
+          .card-body.p-4
+            h2.text-center.mb-4 Nova Tag
+            // Aviso visual de sucesso
+            if typeof sucesso !== 'undefined' && sucesso
+              .alert.alert-success.alert-dismissible.fade.show(role="alert")
+                | Tag criada com sucesso!
+                button.btn-close(type="button", data-bs-dismiss="alert", aria-label="Close")
+            p.text-muted.text-center
+              | Crie uma nova tag para organizar suas postagens. O nome deve ser único e não pode conter palavras ofensivas.
+
+            form#form-tag-create(method="POST", action="/tags")
+              .mb-3
+                label.form-label(for="nome_tag") Nome da Tag *
+                input.form-control(type="text", id="nome_tag", name="nome_tag", required, maxlength="100", autocomplete="off")
+                small.text-danger.d-none#nomeTagError Nome já existe ou inválido.
+              .mb-3
+                label.form-label(for="descricao_tag") Descrição
+                textarea.form-control(id="descricao_tag", name="descricao_tag", maxlength="200")
+                small.text-danger.d-none#descTagError Descrição contém palavras proibidas.
+              button.btn.btn-success(type="submit") Criar Tag
+
+            hr
+            h5.mt-4.text-center Tags já existentes
+            .row.justify-content-center
+              if tagsExistentes && tagsExistentes.length
+                each tag, idx in tagsExistentes
+                  if idx % 2 === 0
+                    .col-12.col-md-6.mb-2.px-1.d-flex
+                      ul.list-group.w-100
+                        li.list-group-item.d-flex.justify-content-between.align-items-center
+                          span= tag.nome_tag
+                          button.btn.btn-danger.btn-sm.ms-2.delete-tag-btn(type="button", data-nome=tag.nome_tag) Excluir
+                  else
+                    .col-12.col-md-6.mb-2.px-1.d-flex
+                      ul.list-group.w-100
+                        li.list-group-item.d-flex.justify-content-between.align-items-center
+                          span= tag.nome_tag
+                          button.btn.btn-danger.btn-sm.ms-2.delete-tag-btn(type="button", data-nome=tag.nome_tag) Excluir
+              else
+                .col-12
+                  ul.list-group.mt-2.w-100
+                    li.list-group-item.text-muted Nenhuma tag cadastrada ainda.
+
+block scripts
+  script.
+    window.tagsExistentes = !{JSON.stringify(tagsExistentes || [])};
+  script(src="/javascripts/tags/create.js")

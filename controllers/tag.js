@@ -1,7 +1,8 @@
-const { Tag, TagTraducao, Postagem, Categoria } = require('../models');
+import models from '../models/index.js'; // Importa tudo como 'models'
+const { Tag, TagTraducao, Postagem, Categoria } = models;
 
 // Listar todas as tags
-exports.listar = async (req, resOrOptions) => {
+export const listar = async (req, resOrOptions) => {
   const tags = await Tag.findAll({
     include: [
       { model: TagTraducao, as: 'traducoes' },
@@ -24,7 +25,7 @@ exports.listar = async (req, resOrOptions) => {
 };
 
 // Buscar tag por ID
-exports.buscarPorId = async (req, resOrOptions) => {
+export const buscarPorId = async (req, resOrOptions) => {
   const id = req.params.id || req.id;
   const tag = await Tag.findByPk(id, {
     include: [
@@ -54,17 +55,22 @@ exports.buscarPorId = async (req, resOrOptions) => {
 };
 
 // Criar nova tag
-exports.criar = async (req, resOrOptions) => {
+export const criar = async (req, resOrOptions) => {
   try {
+    const { nome_tag, descricao_tag } = req.body;
     const novaTag = await Tag.create(req.body);
+    // Buscar lista atualizada de tags após criação
+    const tagsExistentes = await Tag.findAll({ attributes: ['nome_tag'] });
     if (resOrOptions && typeof resOrOptions.render === 'function') {
-      return resOrOptions.render('tags/create', { tag: novaTag, sucesso: true });
+      return resOrOptions.render('tags/create', { tag: novaTag, sucesso: true, tagsExistentes });
     }
     if (resOrOptions && typeof resOrOptions.json === 'function') return resOrOptions.status(201).json(novaTag);
     return novaTag;
   } catch (err) {
+    // Em caso de erro, também envie a lista de tags para a view
+    const tagsExistentes = await Tag.findAll({ attributes: ['nome_tag'] });
     if (resOrOptions && typeof resOrOptions.render === 'function') {
-      return resOrOptions.render('tags/create', { error: 'Erro ao criar tag: ' + err.message });
+      return resOrOptions.render('tags/create', { error: 'Erro ao criar tag: ' + err.message, tagsExistentes });
     }
     if (resOrOptions && typeof resOrOptions.json === 'function') return resOrOptions.status(500).json({ error: 'Erro ao criar tag: ' + err.message });
     throw err;
@@ -72,7 +78,7 @@ exports.criar = async (req, resOrOptions) => {
 };
 
 // Atualizar tag
-exports.atualizar = async (req, resOrOptions) => {
+export const atualizar = async (req, resOrOptions) => {
   const tag = await Tag.findByPk(req.params.id);
   if (!tag) {
     if (resOrOptions && typeof resOrOptions.render === 'function') {
@@ -90,7 +96,7 @@ exports.atualizar = async (req, resOrOptions) => {
 };
 
 // Remover tag
-exports.remover = async (req, resOrOptions) => {
+export const remover = async (req, resOrOptions) => {
   const tag = await Tag.findByPk(req.params.id);
   if (!tag) {
     if (resOrOptions && typeof resOrOptions.render === 'function') {
@@ -106,9 +112,7 @@ exports.remover = async (req, resOrOptions) => {
   if (resOrOptions && typeof resOrOptions.json === 'function') return resOrOptions.json({ mensagem: 'Tag removida com sucesso' });
   return { mensagem: 'Tag removida com sucesso' };
 };
-
-// Buscar tag por nome
-exports.buscarPorNome = async (nome, resOrOptions) => {
+export const buscarPorNome = async (nome, resOrOptions) => {
   if (!nome) return null;
   const tag = await Tag.findOne({
     where: { nome_tag: nome },
@@ -137,7 +141,7 @@ exports.buscarPorNome = async (nome, resOrOptions) => {
 };
 
 // Listar postagens por tag
-exports.listarPorTag = async (req, resOrOptions) => {
+export const listarPorTag = async (req, resOrOptions) => {
   const id_tag = resOrOptions && resOrOptions.id_tag ? resOrOptions.id_tag : req.params.id_tag;
   if (!id_tag) {
     if (resOrOptions && typeof resOrOptions.render === 'function') {
@@ -156,4 +160,10 @@ exports.listarPorTag = async (req, resOrOptions) => {
     return resOrOptions.render('tags/show', { postagens });
   }
   return postagens;
+};
+
+// Buscar apenas nomes das tags para o formulário de criação
+export const listarNomesSimples = async () => {
+  const tags = await Tag.findAll({ attributes: ['nome_tag'] });
+  return tags.map(t => t.toJSON());
 };

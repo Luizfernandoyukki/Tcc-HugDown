@@ -10,13 +10,14 @@ router.get('/', requireLogin, async (req, res) => {
   await tagController.listar(req, res);
 });
 
-router.get('/create', requireLogin, (req, res) => {
-  // Renderiza tela de criação de tag
-  res.render('tags/create');
+router.get('/create', requireLogin, async (req, res) => {
+  // Busca nomes das tags existentes e renderiza tela de criação de tag
+  const tagsExistentes = await tagController.listarNomesSimples();
+  res.render('tags/create', { tagsExistentes });
 });
 
 router.post('/', requireLogin, async (req, res) => {
-  // Cria nova tag e retorna para a tela de criação com feedback
+  // Cria nova tag e retorna para a tela de criação com feedback e lista atualizada
   await tagController.criar(req, res);
 });
 
@@ -41,6 +42,18 @@ router.get('/:id', requireLogin, podeEditarOuVerTag, async (req, res) => {
 router.get('/nome/:nome', requireLogin, async (req, res) => {
   // Busca tag por nome e envia para a view de visualização
   await tagController.buscarPorNome(req.params.nome, res);
+});
+
+router.delete('/delete/:nome', requireLogin, async (req, res) => {
+  const nome = req.params.nome;
+  try {
+    const tag = await tagController.buscarPorNome(nome, {});
+    if (!tag) return res.status(404).json({ error: 'Tag não encontrada' });
+    await tag.destroy();
+    res.json({ sucesso: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao deletar tag' });
+  }
 });
 
 module.exports = router;

@@ -21,10 +21,15 @@ exports.buscarPorId = async (req, res) => {
     const usuario = await Usuario.findByPk(id, {
       include: [{ model: Idioma, as: 'idioma' }, { model: Postagem, as: 'postagens' }]
     });
-    if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
-    res.json(usuario);
+    if (!usuario) {
+      if (res) return res.status(404).json({ error: 'Usuário não encontrado' });
+      return null;
+    }
+    if (res) return res.json(usuario);
+    return usuario; // <-- retorna o objeto para uso interno
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar usuário: ' + err.message });
+    if (res) return res.status(500).json({ error: 'Erro ao buscar usuário: ' + err.message });
+    throw err;
   }
 };
 

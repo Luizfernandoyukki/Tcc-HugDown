@@ -45,7 +45,7 @@ block content
                 // Foto do autor
                 if post.autor
                   if post.autor.foto_perfil
-                    a(href=`/usuarios/${post.autor.id_usuario}`)
+                    a(href=gerarUrlPerfil(post.autor.id_usuario))
                       img.rounded-circle.me-3(src=post.autor.foto_perfil, alt=post.autor.nome_usuario, width="48", height="48")
                 .flex-grow-1
                   h5.card-title= post.titulo || 'Sem título'

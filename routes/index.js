@@ -10,6 +10,7 @@ const {
   postagemController, // <--- Adicione isso
 } = controllers;
 const { usuarioController } = require('../controllers');
+const { gerarUrlPerfil } = require('../utils/camuflaPerfil');
 
 // Wrapper para async/await
 const asyncHandler = (fn) => (req, res, next) => {
@@ -41,7 +42,8 @@ router.get('/', asyncHandler(async (req, res) => {
     tags,
     grupos,
     usuario: res.locals.usuario,
-    isLoggedIn: res.locals.isLoggedIn
+    isLoggedIn: res.locals.isLoggedIn,
+    gerarUrlPerfil
   });
 }));
 
