@@ -1,0 +1,33 @@
+extends layout
+
+block content
+  .container.mt-5
+    .row.justify-content-center
+      .col-12.col-md-6
+        .card.shadow-sm
+          .card-body.p-4
+            h2.text-center.mb-4 Esqueci minha senha
+            if !info && !tokenEnviado
+              form(method="POST", action="/esqueciminhasenha")
+                .mb-3
+                  label.form-label(for="email") E-mail cadastrado
+                  input.form-control(type="email", name="email", required)
+                button.btn.btn-success.w-100(type="submit") Enviar código
+            if info
+              .alert.alert-info.mt-3 #{info}
+            if error
+              .alert.alert-danger.mt-3 #{error}
+            if info
+              form.mt-4(method="POST", action="/esqueciminhasenha/verificar")
+                .mb-3
+                  label.form-label(for="token") Código recebido no e-mail
+                  input.form-control(type="text", id="token", name="token", required, maxlength="6")
+                .mb-3
+                  label.form-label(for="novaSenha") Nova senha
+                  input.form-control(type="password", name="novaSenha")
+                  small.text-muted Se não quiser trocar a senha, deixe em branco.
+                button.btn.btn-primary.w-100(type="submit") Confirmar
+
+block scripts
+  script(src="/javascripts/utils/mask.js")
+   script(src="https://unpkg.com/imask")

@@ -33,7 +33,8 @@ app.use(helmet({
         "'self'",
         "'unsafe-inline'",
         "https://cdn.jsdelivr.net", 
-        "https://cdnjs.cloudflare.com" 
+        "https://cdnjs.cloudflare.com" ,
+        "https://unpkg.com/imask"
       ],
     },
   },

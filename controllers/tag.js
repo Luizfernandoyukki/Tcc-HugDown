@@ -5,7 +5,14 @@ exports.listar = async (req, resOrOptions) => {
   const tags = await Tag.findAll({
     include: [
       { model: TagTraducao, as: 'traducoes' },
-      { model: Postagem, as: 'postagens', include: [Categoria, Tag] }
+      { 
+        model: Postagem, 
+        as: 'postagens', 
+        include: [
+          { model: Categoria, as: 'categoria' }, // Corrigido: use 'as'
+          { model: Tag, as: 'tag' }
+        ] 
+      }
     ]
   });
   if (resOrOptions && resOrOptions.raw) return tags;
@@ -22,7 +29,14 @@ exports.buscarPorId = async (req, resOrOptions) => {
   const tag = await Tag.findByPk(id, {
     include: [
       { model: TagTraducao, as: 'traducoes' },
-      { model: Postagem, as: 'postagens', include: [Categoria, Tag] }
+      { 
+        model: Postagem, 
+        as: 'postagens', 
+        include: [
+          { model: Categoria, as: 'categoria' }, // Corrigido: use 'as'
+          { model: Tag, as: 'tag' }
+        ] 
+      }
     ]
   });
   if (!tag) {
@@ -100,7 +114,14 @@ exports.buscarPorNome = async (nome, resOrOptions) => {
     where: { nome_tag: nome },
     include: [
       { model: TagTraducao, as: 'traducoes' },
-      { model: Postagem, as: 'postagens', include: [Categoria, Tag] }
+      { 
+        model: Postagem, 
+        as: 'postagens', 
+        include: [
+          { model: Categoria, as: 'categoria' }, // Corrigido: use 'as'
+          { model: Tag, as: 'tag' }
+        ] 
+      }
     ]
   });
   if (!tag) {

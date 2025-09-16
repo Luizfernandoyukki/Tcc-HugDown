@@ -192,6 +192,15 @@ exports.login = async (req, res) => {
     // Autenticação bem-sucedida
     req.session.userId = usuario.id_usuario;
     req.session.isLoggedIn = true; // variável global de login
+
+    // Verifica se é administrador
+    const { Administrador } = require('../models');
+    const admin = await Administrador.findOne({ where: { id_usuario: usuario.id_usuario } });
+    if (admin) {
+      // Redireciona para painel admin se for administrador
+      return res.redirect('/administradores');
+    }
+
     return res.redirect('/'); // Redireciona para a home após login
   } catch (err) {
     return res.render('login', { error: 'Erro ao realizar login: ' + err.message, isLoggedIn: false });

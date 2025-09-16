@@ -77,6 +77,7 @@ router.use('/secoes', require('./secoes'));
 router.use('/secoes-traducao', require('./secoesTraducao'));
 router.use('/categorias-traducao', require('./categoriasTraducao'));
 router.use('/tags-traducao', require('./tagsTraducao'));
+router.use('/esqueciminhasenha', require('./esqueciminhasenha'));
 
 // Função utilitária (se necessário)
 async function getLocationFromLatLng(lat, lng) {

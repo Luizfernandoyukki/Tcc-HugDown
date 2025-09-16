@@ -17,6 +17,8 @@ block content
                 label.form-label(for="senha") Senha
                 input.form-control(type="password", id="senha", name="senha", required)
               button.btn.btn-success.w-100(type="submit") Entrar
+              .mt-2.text-center
+                a(href="/esqueciminhasenha") Esqueci minha senha
             if isLoggedIn
               .alert.alert-success.mt-3 Você já está logado!
             else
