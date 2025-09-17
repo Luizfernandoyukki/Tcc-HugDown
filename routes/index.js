@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const router = express.Router();
 const { Usuario } = require('../models');
@@ -30,8 +31,16 @@ router.use(async (req, res, next) => {
 
 // Página inicial
 router.get('/', asyncHandler(async (req, res) => {
-  const [posts, categorias, tags, grupos] = await Promise.all([
-    postagemController.listar(req, { raw: true }), // <--- Corrija aqui
+  const { categoria, tag } = req.query;
+  let posts;
+  if (categoria) {
+    posts = await postagemController.listarPorCategoria(req, { id_categoria: categoria, raw: true });
+  } else if (tag) {
+    posts = await postagemController.listarPorTag(req, { id_tag: tag, raw: true });
+  } else {
+    posts = await postagemController.listar(req, { raw: true });
+  }
+  const [categorias, tags, grupos] = await Promise.all([
     categoriaController.listar(req, { raw: true }),
     tagController.listar(req, { raw: true }),
     grupoController.listar(req, { raw: true }),
@@ -56,6 +65,10 @@ router.post('/logout', (req, res) => {
   });
 });
 router.post('/login', usuarioController.login);
+
+// Adicione este bloco no início do arquivo, após os requires
+const app = express();
+app.use('/post', express.static(path.join(__dirname, '../post')));
 
 // Importação dos módulos de rota (cada um em seu arquivo)
 router.use('/usuarios', require('./usuarios'));

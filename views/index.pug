@@ -17,7 +17,10 @@ block content
             h5.mb-0.text-success Categorias
             a#link-fechar-categorias(href="javascript:void(0)", style="color:#d9534f; text-decoration:underline; font-weight:500;") Fechar
           each categoria in categorias
-            button.categoria-btn.mb-2.acao-restrita(type='button')= categoria.nome_categoria
+            button.categoria-btn.mb-2.acao-restrita(
+              type='button',
+              onclick=`window.location.search='?categoria=${categoria.id_categoria}'`
+            )= categoria.nome_categoria
       else
         p.text-center.text-muted Nenhuma categoria encontrada.
 
@@ -33,7 +36,10 @@ block content
             a#link-fechar-tags(href="javascript:void(0)", style="color:#d9534f; text-decoration:underline; font-weight:500;") Fechar
           each tag in tags
             - const traducao = tag.traducoes && tag.traducoes[0];
-            button.tag-btn.mb-2.acao-restrita(type='button', data-href=`/tag/${tag.nome_tag}`)= traducao ? traducao.nome_tag : (tag.nome_tag || tag.nome)
+            button.tag-btn.mb-2.acao-restrita(
+              type='button',
+              onclick=`window.location.search='?tag=${tag.id_tag}'`
+            )= traducao ? traducao.nome_tag : (tag.nome_tag || tag.nome)
 
     // FEED DE POSTAGENS
     .row.justify-content-center
@@ -41,45 +47,47 @@ block content
         if posts && posts.length
           each post in posts
             .card.shadow-sm.post-card.mb-4(style="cursor:pointer;" data-id=post.id_postagem)
-              .card-body.d-flex
+              .card-body.d-flex.flex-column 
                 // Foto do autor
                 if post.autor
                   if post.autor.foto_perfil
                     a(href=gerarUrlPerfil(post.autor.id_usuario))
                       img.rounded-circle.me-3(src=post.autor.foto_perfil, alt=post.autor.nome_usuario, width="48", height="48")
-                .flex-grow-1
-                  h5.card-title= post.titulo || 'Sem título'
-                  p.card-text.text-truncate= post.resumo || 'Sem resumo'
-                  if post.url_midia
-                    img.img-fluid.mb-2(src=post.url_midia, alt="Imagem da postagem")
-                  small.text-muted
-                    | Criado em: #{post.data_criacao ? (post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao) : 'N/A'}
-                    br
-                    | Atualizado em: #{post.data_atualizacao ? (post.data_atualizacao.toLocaleString ? post.data_atualizacao.toLocaleString() : post.data_atualizacao) : 'N/A'}
-                    br
-                    | Autor: #{post.autor ? post.autor.nome_usuario : 'Desconhecido'}
-                  if isLoggedIn
-                    .mt-2
-                      button.btn.btn-outline-success.btn-sm.acao-restrita(type="button")
-                        i.fas.fa-heart.me-1
-                        | Curtir
-                      span.ms-2
-                        i.fas.fa-heart.me-1
-                        | #{post.curtidas || 0} curtidas
-                      span.ms-2
-                        i.fas.fa-eye.me-1
-                        | #{post.visualizacoes || 0} visualizações
-                  else
-                    .mt-2
-                      button.btn.btn-outline-success.btn-sm.acao-restrita(type="button")
-                        i.fas.fa-heart.me-1
-                        | Curtir
-                      span.ms-2
-                        i.fas.fa-heart.me-1
-                        | #{post.curtidas || 0} curtidas
-                      span.ms-2
-                        i.fas.fa-eye.me-1
-                        | #{post.visualizacoes || 0} visualizações
+                h5.card-title= post.titulo || 'Sem título'
+                p.card-text.text-truncate= post.resumo || 'Sem resumo'
+                // DADOS DE CRIAÇÃO/ATUALIZAÇÃO/Autor ANTES DA IMAGEM
+                small.text-muted.mb-2
+                  | Criado em: #{post.data_criacao ? (post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao) : 'N/A'}
+                  br
+                  | Atualizado em: #{post.data_atualizacao ? (post.data_atualizacao.toLocaleString ? post.data_atualizacao.toLocaleString() : post.data_atualizacao) : 'N/A'}
+                  br
+                  | Autor: #{post.autor ? post.autor.nome_usuario : 'Desconhecido'}
+                // IMAGEM DA POSTAGEM EM LINHA SEPARADA
+                if post.url_midia
+                  .w-100.mb-2
+                    img.img-fluid.d-block.mx-auto(src=post.url_midia, alt="Imagem da postagem", style="max-width:100%;height:auto;")
+                if isLoggedIn
+                  .mt-2
+                    button.btn.btn-outline-success.btn-sm.acao-restrita(type="button")
+                      i.fas.fa-heart.me-1
+                      | Curtir
+                    span.ms-2
+                      i.fas.fa-heart.me-1
+                      | #{post.curtidas || 0} curtidas
+                    span.ms-2
+                      i.fas.fa-eye.me-1
+                      | #{post.visualizacoes || 0} visualizações
+                else
+                  .mt-2
+                    button.btn.btn-outline-success.btn-sm.acao-restrita(type="button")
+                      i.fas.fa-heart.me-1
+                      | Curtir
+                    span.ms-2
+                      i.fas.fa-heart.me-1
+                      | #{post.curtidas || 0} curtidas
+                    span.ms-2
+                      i.fas.fa-eye.me-1
+                      | #{post.visualizacoes || 0} visualizações
         else
           .alert.alert-info.text-center.mt-4 Não há postagens para exibir.
 

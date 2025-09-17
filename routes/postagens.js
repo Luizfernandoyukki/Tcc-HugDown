@@ -4,6 +4,7 @@ const controllers = require('../controllers/index.js');
 const requireLogin = require('../middlewares/auth');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs'); // <-- Adicione isso
 const { podeEditarOuVerPostagem } = require('../middlewares/auth');
 const {
   postagemController,
@@ -12,10 +13,17 @@ const {
   secaoController
 } = controllers;
 
+// Garante que a pasta 'post' existe
+const postDir = path.join(__dirname, '../post');
+if (!fs.existsSync(postDir)) {
+  fs.mkdirSync(postDir, { recursive: true });
+}
+
 // Configuração do multer para upload de postagens
 const storagePostagem = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../post')); // salva em /post na raiz
+    console.log('[DEBUG] Salvando arquivo em:', postDir); // <-- Adicione este log
+    cb(null, postDir); // usa a variável já garantida
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
@@ -93,5 +101,11 @@ router.get('/:id/edit', requireLogin, podeEditarOuVerPostagem, async (req, res) 
 router.post('/', requireLogin, uploadPostagem.single('arquivo_post'), postagemController.criar);
 router.put('/:id', requireLogin, postagemController.atualizar);
 router.delete('/:id', requireLogin, postagemController.remover);
+
+// Middleware de erro para garantir resposta JSON em caso de erro
+router.use((err, req, res, next) => {
+  console.error('Erro não tratado em /postagens:', err);
+  res.status(500).json({ error: 'Erro interno do servidor.' });
+});
 
 module.exports = router;

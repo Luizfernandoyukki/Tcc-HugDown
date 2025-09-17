@@ -44,7 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Postagem criada com sucesso!');
         window.location.href = '/postagens';
       } else {
-        const data = await response.json();
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          // Se não for JSON, mostra erro genérico
+          alert('Erro ao criar postagem (resposta inesperada do servidor)');
+          return;
+        }
         alert(data.error || 'Erro ao criar postagem');
       }
     } catch (err) {

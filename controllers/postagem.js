@@ -93,6 +93,9 @@ exports.criar = async (req, res) => {
 
     res.status(201).json(novaPostagem);
   } catch (err) {
+    // Log detalhado para debug
+    console.error('Erro ao criar postagem:', err);
+    // Sempre retorna JSON
     res.status(500).json({ error: 'Erro ao criar postagem: ' + err.message });
   }
 };

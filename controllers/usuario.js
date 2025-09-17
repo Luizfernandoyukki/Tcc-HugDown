@@ -75,7 +75,6 @@ exports.criar = async (req, res) => {
       foto_perfil = req.body.foto_perfil;
     }
 
-    // Cria o usuário
     const novoUsuario = await Usuario.create({
       email,
       nome_real,
