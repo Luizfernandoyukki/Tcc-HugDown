@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const data = await response.json();
       if (response.ok) {
         alert('Usuário editado com sucesso!');
-        window.location.href = `/usuarios/${usuarioId}`;
+        window.location.href = `/usuarios/perfil-${Math.floor(Math.random()*900000+100000)}_${usuarioId}`;
       } else {
         alert(data.error || 'Erro ao editar usuário');
       }

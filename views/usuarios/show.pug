@@ -1,0 +1,57 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/perfil.css")
+
+block content
+  .container.mt-4
+    .row
+      .col-md-4
+        .card.shadow-sm.mb-4
+          .card-body.text-center
+            if usuario.foto_perfil
+              img.rounded-circle.mb-3(src=usuario.foto_perfil, alt=usuario.nome_usuario, width="120", height="120", onerror="this.src='/images/default-user.png'")
+            h4= usuario.nome_usuario
+            p.text-muted= usuario.email
+            if usuario.biografia
+              p.mt-2= usuario.biografia
+            ul.list-unstyled.mt-3
+              li
+                b Nome real: 
+                | #{usuario.nome_real} #{usuario.sobrenome_real}
+              li
+                b Localização: 
+                | #{usuario.cidade}, #{usuario.estado}, #{usuario.pais}
+        .card.shadow-sm.mb-4
+          .card-body
+            h5.text-success.mb-3 Amigos
+            if usuario.amigos && usuario.amigos.length
+              .d-flex.flex-wrap
+                each amigo in usuario.amigos
+                  .me-2.mb-2
+                    img.rounded-circle(src=amigo.foto_perfil, alt=amigo.nome_usuario, width="40", height="40", onerror="this.src='/images/default-user.png'")
+                    span.ms-2= amigo.nome_usuario
+            else
+              p.text-muted Nenhum amigo encontrado.
+      .col-md-8
+        .card.shadow-sm
+          .card-body
+            h5.text-primary.mb-3 Postagens de #{usuario.nome_usuario}
+            if usuario.postagens && usuario.postagens.length
+              each post in usuario.postagens
+                .card.mb-3
+                  .card-body
+                    if post.url_midia
+                      img.img-fluid.mb-2(src=post.url_midia, alt=post.titulo, style="max-width:100%;height:auto;", onerror="this.src='/images/default-post.png'")
+                    h6= post.titulo || 'Sem título'
+                    p.text-muted= post.resumo || ''
+                    small.text-muted
+                      | Criado em: #{post.data_criacao ? (post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao) : 'N/A'}
+            else
+              p.text-muted Nenhuma postagem encontrada.
+
+block scripts
+  script.
+    window.usuarioData = !{JSON.stringify(usuario)};
+    console.log('[FRONTEND] Dados do perfil visualizado:', window.usuarioData);
+  script(src="/javascripts/usuarios/show.js")

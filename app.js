@@ -46,7 +46,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/perfis', express.static(path.join(__dirname, 'perfis')));
-app.use('/post', express.static(path.join(__dirname, 'post'))); // <-- Corrigido aqui
+app.use('/post', express.static(path.join(__dirname, 'post')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets')));
 
 // Configuração de sessão
 app.use(session({

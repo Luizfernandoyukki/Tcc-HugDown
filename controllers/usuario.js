@@ -211,3 +211,73 @@ exports.login = async (req, res) => {
   }
 };
 
+// Buscar perfil completo para visualização (sem edição)
+exports.buscarPerfilCompleto = async (id) => {
+  console.log('[CONTROLLER] buscarPerfilCompleto | id:', id);
+  try {
+    const usuario = await Usuario.findByPk(id, {
+      attributes: [
+        'id_usuario', 'nome_usuario', 'nome_real', 'sobrenome_real', 'email', 'foto_perfil', 'biografia', 'cidade', 'estado', 'pais'
+      ],
+      include: [
+        {
+          model: Postagem,
+          as: 'postagens',
+          attributes: ['id_postagem', 'titulo', 'resumo', 'url_midia', 'data_criacao']
+        },
+        {
+          model: Amizade,
+          as: 'amizades',
+          where: { status_amizade: 'accepted' },
+          required: false,
+          include: [{
+            model: Usuario,
+            as: 'amigo',
+            attributes: ['id_usuario', 'nome_usuario', 'foto_perfil']
+          }]
+        }
+      ]
+    });
+    console.log('[CONTROLLER] Resultado do banco:', usuario);
+    if (!usuario) return null;
+    let amigos = [];
+    if (usuario.amizades && usuario.amizades.length) {
+      amigos = usuario.amizades.map(a => a.amigo);
+    }
+    return {
+      id_usuario: usuario.id_usuario,
+      nome_usuario: usuario.nome_usuario,
+      nome_real: usuario.nome_real,
+      sobrenome_real: usuario.sobrenome_real,
+      email: usuario.email,
+      foto_perfil: usuario.foto_perfil,
+      biografia: usuario.biografia,
+      cidade: usuario.cidade,
+      estado: usuario.estado,
+      pais: usuario.pais,
+      postagens: usuario.postagens || [],
+      amigos
+    };
+  } catch (err) {
+    console.error('[CONTROLLER][ERROR] Erro ao buscar perfil completo:', err);
+    return null;
+  }
+};
+
+// Gerar URL camuflada do perfil "chogue"
+exports.gerarUrlPerfilChogue = (id_usuario) => {
+  return `/usuarios/chogue_u-@-_${id_usuario}`;
+};
+
+// Gerar URL camuflada para perfil próprio
+exports.gerarUrlPerfilProprio = (id_usuario) => {
+  const rand = Math.floor(Math.random() * 900000 + 100000);
+  return `/usuarios/perfil-${rand}_${id_usuario}`;
+};
+
+// Gerar URL camuflada para perfil de outro usuário
+exports.gerarUrlPerfilOutro = (id_usuario) => {
+  const rand = Math.floor(Math.random() * 900000 + 100000);
+  return `/usuarios/u-@-${rand}_${id_usuario}`;
+};
+

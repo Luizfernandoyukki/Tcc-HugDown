@@ -1,0 +1,31 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/perfil.css")
+
+block content
+  .container.mt-4
+    .row.justify-content-center
+      .col-md-7
+        .card.shadow-sm
+          .card-body
+            h4.mb-4 Editar Perfil
+            form#form-usuario-edit(data-usuario-id=usuario.id_usuario, method="post", enctype="multipart/form-data")
+              .mb-3
+                label.form-label(for="nome_usuario") Nome de usuário
+                input.form-control(type="text", name="nome_usuario", id="nome_usuario", value=usuario.nome_usuario)
+              .mb-3
+                label.form-label(for="email") Email
+                input.form-control(type="email", name="email", id="email", value=usuario.email)
+              .mb-3
+                label.form-label(for="biografia") Biografia
+                textarea.form-control(name="biografia", id="biografia")= usuario.biografia
+              .mb-3
+                label.form-label(for="foto_perfil") Foto de perfil
+                input.form-control(type="file", name="foto_perfil", id="foto_perfil")
+                if usuario.foto_perfil
+                  img.mt-2.rounded-circle(src=usuario.foto_perfil, alt="Foto atual", width="80", height="80")
+              button.btn.btn-success(type="submit") Salvar alterações
+
+block scripts
+  script(src="/javascripts/usuarios/edit.js")

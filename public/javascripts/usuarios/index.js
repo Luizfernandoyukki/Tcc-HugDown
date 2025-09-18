@@ -15,5 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (amigosDiv && window.usuario.amigos && window.usuario.amigos.length) {
       amigosDiv.innerHTML = '<h4>Meus Amigos:</h4>' + window.usuario.amigos.map(a => `<span class='amigo'>${a.nome_usuario}</span>`).join(', ');
     }
+    // Exemplo: exibir nome do usuário no console
+    console.log('Meu perfil:', window.usuario.nome_usuario);
+    // Aqui você pode adicionar interatividade extra se quiser
   }
 });

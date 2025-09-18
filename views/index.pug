@@ -52,8 +52,12 @@ block content
                 // Foto do autor
                 if post.autor
                   if post.autor.foto_perfil
-                    a(href=gerarUrlPerfil(post.autor.id_usuario))
-                      img.rounded-circle.me-3(src=post.autor.foto_perfil, alt=post.autor.nome_usuario, width="48", height="48")
+                    if usuario && post.autor.id_usuario == usuario.id_usuario
+                      a(href=gerarUrlPerfilProprio(post.autor.id_usuario))
+                        img.rounded-circle.me-3(src=post.autor.foto_perfil, alt=post.autor.nome_usuario, width="48", height="48", onerror="this.src='/images/default-user.png'")
+                    else
+                      a(href=gerarUrlPerfilOutro(post.autor.id_usuario))
+                        img.rounded-circle.me-3(src=post.autor.foto_perfil, alt=post.autor.nome_usuario, width="48", height="48", onerror="this.src='/images/default-user.png'")
                 h5.card-title= post.titulo || 'Sem título'
                 p.card-text.text-truncate= post.resumo || 'Sem resumo'
                 // DADOS DE CRIAÇÃO/ATUALIZAÇÃO/Autor ANTES DA IMAGEM
@@ -66,7 +70,7 @@ block content
                 // IMAGEM DA POSTAGEM EM LINHA SEPARADA
                 if post.url_midia
                   .w-100.mb-2
-                    img.img-fluid.d-block.mx-auto(src=post.url_midia, alt="Imagem da postagem", style="max-width:100%;height:auto;")
+                    img.img-fluid.d-block.mx-auto(src=post.url_midia, alt="Imagem da postagem", style="max-width:100%;height:auto;", onerror="this.src='/images/default-post.png'")
                 if isLoggedIn
                   .mt-2
                     button.btn.btn-outline-success.btn-sm.acao-restrita(type="button")

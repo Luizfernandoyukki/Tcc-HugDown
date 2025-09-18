@@ -44,7 +44,8 @@ router.get('/', asyncHandler(async (req, res) => {
     grupos,
     usuario: res.locals.usuario,
     isLoggedIn: res.locals.isLoggedIn,
-    gerarUrlPerfil
+    gerarUrlPerfilOutro: usuarioController.gerarUrlPerfilOutro,
+    gerarUrlPerfilProprio: usuarioController.gerarUrlPerfilProprio
     // Remova categoriaSelecionada e tagSelecionada
   });
 }));

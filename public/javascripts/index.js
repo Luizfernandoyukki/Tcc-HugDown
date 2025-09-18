@@ -226,7 +226,9 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('click', function(e) {
     if (!window.usuarioLogado && e.target.classList.contains('acao-restrita')) {
       e.preventDefault();
-      mostrarCardFlutuante();
+      // Mostra aviso amigável
+      alert('Você precisa estar logado para realizar esta ação. Faça login para continuar.');
+      window.location.href = '/login';
     }
   });
   window.usuarioLogado = !!window.usuarioLogado;
@@ -323,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="card shadow-sm post-card mb-4" style="cursor:pointer;" data-id="${post.id_postagem}">
         <div class="card-body d-flex flex-column">
           ${post.autor && post.autor.foto_perfil ? `
-            <a href="/usuarios/u-@-_${post.autor.id_usuario}">
+            <a href="/usuarios/chogue_u-@-_${post.autor.id_usuario}">
               <img class="rounded-circle me-3" src="${post.autor.foto_perfil}" alt="${post.autor.nome_usuario}" width="48" height="48">
             </a>
           ` : ''}
