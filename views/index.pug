@@ -19,7 +19,7 @@ block content
           each categoria in categorias
             button.categoria-btn.mb-2.acao-restrita(
               type='button',
-              onclick=`window.location.search='?categoria=${categoria.id_categoria}'`
+              data-categoria=categoria.id_categoria
             )= categoria.nome_categoria
       else
         p.text-center.text-muted Nenhuma categoria encontrada.
@@ -35,15 +35,16 @@ block content
             h5.mb-0.text-primary Tags
             a#link-fechar-tags(href="javascript:void(0)", style="color:#d9534f; text-decoration:underline; font-weight:500;") Fechar
           each tag in tags
-            - const traducao = tag.traducoes && tag.traducoes[0];
-            button.tag-btn.mb-2.acao-restrita(
-              type='button',
-              onclick=`window.location.search='?tag=${tag.id_tag}'`
-            )= traducao ? traducao.nome_tag : (tag.nome_tag || tag.nome)
+            - if (tag.id_tag)
+              - const traducao = tag.traducoes && tag.traducoes[0];
+              button.tag-btn.mb-2.acao-restrita(
+                type='button',
+                data-tag=tag.id_tag
+              )= traducao ? traducao.nome_tag : (tag.nome_tag || tag.nome)
 
     // FEED DE POSTAGENS
     .row.justify-content-center
-      .col-12.col-md-8.col-lg-7(style="max-width:58vw;")
+      .col-12.col-md-8.col-lg-7#feed-postagens(style="max-width:58vw;")
         if posts && posts.length
           each post in posts
             .card.shadow-sm.post-card.mb-4(style="cursor:pointer;" data-id=post.id_postagem)

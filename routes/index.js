@@ -29,17 +29,9 @@ router.use(async (req, res, next) => {
   next();
 });
 
-// Página inicial
+// Página inicial (SEM filtro por query string)
 router.get('/', asyncHandler(async (req, res) => {
-  const { categoria, tag } = req.query;
-  let posts;
-  if (categoria) {
-    posts = await postagemController.listarPorCategoria(req, { id_categoria: categoria, raw: true });
-  } else if (tag) {
-    posts = await postagemController.listarPorTag(req, { id_tag: tag, raw: true });
-  } else {
-    posts = await postagemController.listar(req, { raw: true });
-  }
+  let posts = await postagemController.listar(req, { raw: true });
   const [categorias, tags, grupos] = await Promise.all([
     categoriaController.listar(req, { raw: true }),
     tagController.listar(req, { raw: true }),
@@ -53,6 +45,7 @@ router.get('/', asyncHandler(async (req, res) => {
     usuario: res.locals.usuario,
     isLoggedIn: res.locals.isLoggedIn,
     gerarUrlPerfil
+    // Remova categoriaSelecionada e tagSelecionada
   });
 }));
 
@@ -101,5 +94,21 @@ async function getLocationFromLatLng(lat, lng) {
   const data = await res.json();
   return data.address ? `${data.address.city || data.address.town || data.address.village || ''}, ${data.address.state || ''}` : '';
 }
+
+// API para filtro dinâmico de postagens
+router.get('/api/postagens', asyncHandler(async (req, res) => {
+  const { categoria, tag } = req.query;
+  let posts;
+  if (categoria && tag) {
+    posts = await postagemController.listarPorCategoriaETag(req, { id_categoria: categoria, id_tag: tag, raw: true });
+  } else if (categoria) {
+    posts = await postagemController.listarPorCategoria(req, { id_categoria: categoria, raw: true });
+  } else if (tag) {
+    posts = await postagemController.listarPorTag(req, { id_tag: tag, raw: true });
+  } else {
+    posts = await postagemController.listar(req, { raw: true });
+  }
+  res.json(posts);
+}));
 
 module.exports = router;

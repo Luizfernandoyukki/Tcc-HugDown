@@ -3,6 +3,7 @@ const { Postagem, Usuario, Categoria, Tag } = require('../models');
 
 // Listar todas as postagens
 exports.listar = async (req, resOrOptions) => {
+  console.log('[LOG] postagemController.listar chamado');
   let posts = await Postagem.findAll({
     include: [
       { model: Usuario, as: 'autor' },
@@ -28,8 +29,8 @@ exports.listar = async (req, resOrOptions) => {
 
 // Buscar postagem por ID
 exports.buscarPorId = async (req, resOrOptions) => {
-  // Suporta chamada por rota (req) ou por objeto (params)
   let id;
+  // Suporta chamada por rota (req) ou por objeto (params)
   if (req && req.params && req.params.id) {
     id = req.params.id;
   } else if (req && req.id) {
@@ -40,6 +41,8 @@ exports.buscarPorId = async (req, resOrOptions) => {
     id = resOrOptions.id;
   }
   if (!id) return null;
+
+  console.log('[LOG] postagemController.buscarPorId chamado para id:', id);
 
   const postagem = await Postagem.findByPk(id, {
     include: [
@@ -67,6 +70,7 @@ exports.buscarPorId = async (req, resOrOptions) => {
 // Criar nova postagem
 exports.criar = async (req, res) => {
   try {
+    console.log('[LOG] postagemController.criar chamado. Body:', req.body, 'File:', req.file);
     // Monta dados da postagem
     const dados = {
       id_autor: req.session.userId,
@@ -93,9 +97,8 @@ exports.criar = async (req, res) => {
 
     res.status(201).json(novaPostagem);
   } catch (err) {
+    console.error('[ERRO] Erro ao criar postagem:', err);
     // Log detalhado para debug
-    console.error('Erro ao criar postagem:', err);
-    // Sempre retorna JSON
     res.status(500).json({ error: 'Erro ao criar postagem: ' + err.message });
   }
 };
@@ -103,6 +106,7 @@ exports.criar = async (req, res) => {
 // Atualizar postagem
 exports.atualizar = async (req, res) => {
   try {
+    console.log('[LOG] postagemController.atualizar chamado para id:', req.params.id, 'Body:', req.body);
     const postagem = await Postagem.findByPk(req.params.id);
     if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
 
@@ -125,44 +129,16 @@ exports.atualizar = async (req, res) => {
 
     res.json(postagem);
   } catch (err) {
+    console.error('[ERRO] Erro ao atualizar postagem:', err);
     res.status(500).json({ error: 'Erro ao atualizar postagem: ' + err.message });
   }
 };
 
 // Remover postagem
 exports.remover = async (req, res) => {
+  console.log('[LOG] postagemController.remover chamado para id:', req.params.id);
   const postagem = await Postagem.findByPk(req.params.id);
   if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
   await postagem.destroy();
   res.json({ mensagem: 'Postagem removida com sucesso' });
-};
-
-// Listar postagens por categoria
-exports.listarPorCategoria = async (req, options) => {
-  const id_categoria = options && options.id_categoria ? options.id_categoria : req.params.id_categoria;
-  if (!id_categoria) return [];
-  const posts = await Postagem.findAll({
-    where: { id_categoria },
-    include: [
-      { model: Usuario, as: 'autor' },
-      { model: Categoria, as: 'categoria' }
-    ]
-  });
-  if (options && options.raw) return posts;
-  return posts;
-};
-
-// Listar postagens por tag
-exports.listarPorTag = async (req, options) => {
-  const id_tag = options && options.id_tag ? options.id_tag : req.params.id_tag;
-  if (!id_tag) return [];
-  const posts = await Postagem.findAll({
-    where: { id_tag },
-    include: [
-      { model: Usuario, as: 'autor' },
-      { model: Tag, as: 'tag' }
-    ]
-  });
-  if (options && options.raw) return posts;
-  return posts;
 };

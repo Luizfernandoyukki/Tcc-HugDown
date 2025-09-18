@@ -308,4 +308,78 @@ document.addEventListener('DOMContentLoaded', function () {
       if (post) abrirModalPostagem(post);
     });
   });
+
+  let categoriaSelecionada = '';
+  let tagSelecionada = '';
+
+  function renderPosts(posts) {
+    const container = document.getElementById('feed-postagens');
+    if (!container) return;
+    if (!posts.length) {
+      container.innerHTML = '<div class="alert alert-info text-center mt-4">Não há postagens para exibir.</div>';
+      return;
+    }
+    container.innerHTML = posts.map(post => `
+      <div class="card shadow-sm post-card mb-4" style="cursor:pointer;" data-id="${post.id_postagem}">
+        <div class="card-body d-flex flex-column">
+          ${post.autor && post.autor.foto_perfil ? `
+            <a href="/usuarios/u-@-_${post.autor.id_usuario}">
+              <img class="rounded-circle me-3" src="${post.autor.foto_perfil}" alt="${post.autor.nome_usuario}" width="48" height="48">
+            </a>
+          ` : ''}
+          <h5 class="card-title">${post.titulo || 'Sem título'}</h5>
+          <p class="card-text text-truncate">${post.resumo || 'Sem resumo'}</p>
+          <small class="text-muted mb-2">
+            Criado em: ${post.data_criacao ? new Date(post.data_criacao).toLocaleString() : 'N/A'}<br>
+            Atualizado em: ${post.data_atualizacao ? new Date(post.data_atualizacao).toLocaleString() : 'N/A'}<br>
+            Autor: ${post.autor ? post.autor.nome_usuario : 'Desconhecido'}
+          </small>
+          ${post.url_midia ? `
+            <div class="w-100 mb-2">
+              <img class="img-fluid d-block mx-auto" src="${post.url_midia}" alt="Imagem da postagem" style="max-width:100%;height:auto;">
+            </div>
+          ` : ''}
+          <div class="mt-2">
+            <button class="btn btn-outline-success btn-sm acao-restrita" type="button">
+              <i class="fas fa-heart me-1"></i> Curtir
+            </button>
+            <span class="ms-2">
+              <i class="fas fa-heart me-1"></i> ${post.curtidas || 0} curtidas
+            </span>
+            <span class="ms-2">
+              <i class="fas fa-eye me-1"></i> ${post.visualizacoes || 0} visualizações
+            </span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function fetchAndRenderPosts() {
+    let url = '/api/postagens';
+    const params = [];
+    if (categoriaSelecionada) params.push('categoria=' + encodeURIComponent(categoriaSelecionada));
+    if (tagSelecionada) params.push('tag=' + encodeURIComponent(tagSelecionada));
+    if (params.length) url += '?' + params.join('&');
+    const res = await fetch(url);
+    const posts = await res.json();
+    renderPosts(posts);
+  }
+
+  document.querySelectorAll('.categoria-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      categoriaSelecionada = this.getAttribute('data-categoria');
+      fetchAndRenderPosts();
+    });
+  });
+
+  document.querySelectorAll('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      tagSelecionada = this.getAttribute('data-tag');
+      fetchAndRenderPosts();
+    });
+  });
+
+  // Inicializa com todos os posts
+  // fetchAndRenderPosts(); // Descomente se quiser carregar via AJAX desde o início
 });
