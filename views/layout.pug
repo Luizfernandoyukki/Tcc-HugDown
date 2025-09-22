@@ -39,7 +39,7 @@ html
       .container
         .d-flex.justify-content-between.align-items-center.gap-1.py-2
           if isLoggedIn && usuario
-            a(href='/usuarios/' + usuario.id_usuario, title='Meu Perfil')
+            a(href='/usuarios/index/' + usuario.id_usuario, title='Meu Perfil')
               img.rounded-circle(src=usuario.foto_perfil || '/images/default-avatar.png', alt='Perfil', height='40', style='border:2px solid #009e60;')
           else
             a.btn.btn-success.btn-sm.ms-2(href='/cadastro') Cadastro

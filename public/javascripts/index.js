@@ -242,12 +242,70 @@ document.addEventListener('DOMContentLoaded', function () {
     return data.address ? `${data.address.city || data.address.town || data.address.village || ''}, ${data.address.state || ''}` : '';
   }
 
-  // Função para abrir e preencher o modal da postagem
+  // Modal para adicionar comentário
+  function abrirModalComentario(idPostagem) {
+    let modal = document.getElementById('modalComentario');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'modalComentario';
+      modal.className = 'modal fade';
+      modal.tabIndex = -1;
+      modal.innerHTML = `
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Adicionar comentário</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <textarea id="comentarioConteudo" class="form-control" rows="3" placeholder="Digite seu comentário"></textarea>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-primary" id="btnEnviarComentario">Enviar</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    // Evento de envio
+    document.getElementById('btnEnviarComentario').onclick = async function() {
+      const conteudo = document.getElementById('comentarioConteudo').value.trim();
+      if (!conteudo) return alert('Digite o comentário!');
+      await fetch(`/api/postagens/${idPostagem}/comentar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conteudo })
+      });
+      bsModal.hide();
+      // Opcional: recarregar comentários no modal principal
+      // fetchAndRenderPosts(); // se quiser atualizar o feed
+    };
+  }
+
+  // Função para abrir e preencher o modal da postagem usando array local
   async function abrirModalPostagem(post) {
-    // Título
+    // Incrementa visualização
+    await fetch(`/api/postagens/${post.id_postagem}/visualizar`, { method: 'POST' });
+
+    // Preenche dados do modal usando o objeto post do array local
     document.getElementById('modalTitulo').textContent = post.titulo || 'Sem título';
-    // Imagem
-    const modalImagem = document.querySelector('#modalPostagem img.img-fluid');
+    document.getElementById('modalAutorNome').textContent = post.autor ? post.autor.nome_usuario : 'Desconhecido';
+    document.getElementById('modalAutorArroba').textContent = post.autor ? '@' + post.autor.nome_usuario : '';
+    const autorFoto = post.autor && post.autor.foto_perfil ? post.autor.foto_perfil : '/images/default-user.png';
+    const imgAutor = document.getElementById('modalAutorFoto');
+    if (imgAutor) imgAutor.src = autorFoto;
+    document.getElementById('modalDataCriacao').textContent = post.data_criacao
+      ? (typeof post.data_criacao === 'string' ? post.data_criacao : new Date(post.data_criacao).toLocaleString())
+      : 'N/A';
+    document.getElementById('modalDataAtualizacao').textContent = post.data_atualizacao
+      ? (typeof post.data_atualizacao === 'string' ? post.data_atualizacao : new Date(post.data_atualizacao).toLocaleString())
+      : 'N/A';
+    const modalImagem = document.getElementById('modalImagem');
     if (modalImagem) {
       if (post.url_midia) {
         modalImagem.src = post.url_midia;
@@ -257,31 +315,45 @@ document.addEventListener('DOMContentLoaded', function () {
         modalImagem.style.display = '';
       }
     }
-    // Conteúdo
     document.getElementById('modalConteudo').textContent = post.conteudo || post.resumo || '';
-    // Categoria
     document.getElementById('modalCategoria').textContent = post.categoria ? post.categoria.nome_categoria : '';
-    // Tags
     document.getElementById('modalTags').textContent = post.tag ? post.tag.nome_tag : '';
-    // Data
-    document.getElementById('modalData').textContent = post.data_criacao ? new Date(post.data_criacao).toLocaleString() : '';
-    // Tipo
     document.getElementById('modalTipo').textContent = post.tipo_postagem || '';
-    // Artigo científico
-    document.getElementById('modalArtigo').textContent = post.artigo_cientifico ? 'Sim' : 'Não';
-    // Localização (latitude/longitude → nome)
+    document.getElementById('modalArtigo').textContent = post.artigo_cientifico ? 'Artigo científico' : '';
     if (post.latitude && post.longitude) {
       const local = await preencherLocalizacao(post.latitude, post.longitude);
-      document.getElementById('modalLat').textContent = local || `${post.latitude}`;
-      document.getElementById('modalLng').textContent = `${post.longitude}`;
+      document.getElementById('modalLocal').textContent = local || '';
     } else {
-      document.getElementById('modalLat').textContent = '';
-      document.getElementById('modalLng').textContent = '';
+      document.getElementById('modalLocal').textContent = '';
     }
-    // Visualizações, curtidas, comentários (se existirem)
-    document.getElementById('modalVisualizacoes').textContent = post.visualizacoes || 0;
-    document.getElementById('modalCurtidas').textContent = post.curtidas || 0;
-    // Comentários (se vierem do backend)
+    document.getElementById('modalVisualizacoes').textContent = (post.visualizacoes || 0) + 1;
+
+    // Atualiza número real de curtidas ao abrir modal
+    await atualizarCurtidas(post.id_postagem, true);
+
+    // Botão Curtir no modal (toggle curtida)
+    const btnCurtir = document.getElementById('btnCurtir');
+    btnCurtir.disabled = false;
+    btnCurtir.onclick = async function() {
+      if (!window.usuarioLogado) {
+        if (!btnCurtir.dataset.alerted) {
+          alert('Você precisa estar logado para curtir. Faça login para continuar.');
+          btnCurtir.dataset.alerted = 'true';
+        }
+        return;
+      }
+      btnCurtir.disabled = true;
+      const res = await fetch(`/api/postagens/${post.id_postagem}/curtir-toggle`, { method: 'POST' });
+      await atualizarCurtidas(post.id_postagem, true);
+      await atualizarCurtidas(post.id_postagem);
+      btnCurtir.disabled = false;
+    };
+
+    document.getElementById('btnComentar').onclick = function() {
+      abrirModalComentario(post.id_postagem);
+    };
+
+    // Comentários
     const comentariosContainer = document.querySelector('.comentarios-container');
     if (comentariosContainer) {
       comentariosContainer.innerHTML = '';
@@ -296,14 +368,35 @@ document.addEventListener('DOMContentLoaded', function () {
         comentariosContainer.innerHTML = '<span class="text-muted">Nenhum comentário.</span>';
       }
     }
-    // Abre o modal (Bootstrap 5)
     const modal = new bootstrap.Modal(document.getElementById('modalPostagem'));
     modal.show();
   }
 
+  // Garante que window.posts está populado com os dados das postagens renderizadas
+  if (!window.posts || !window.posts.length) {
+    window.posts = [];
+    document.querySelectorAll('.post-card').forEach(card => {
+      const id = card.getAttribute('data-id');
+      const titulo = card.querySelector('.card-title')?.textContent || '';
+      const resumo = card.querySelector('.card-text')?.textContent || '';
+      const autorNome = card.querySelector('small.text-muted')?.textContent.match(/Autor: (.*)/)?.[1] || '';
+      const autorFoto = card.querySelector('img.rounded-circle')?.src || '/images/default-user.png';
+      const url_midia = card.querySelector('img.img-fluid')?.src || '';
+      window.posts.push({
+        id_postagem: id,
+        titulo,
+        resumo,
+        autor: { nome_usuario: autorNome, foto_perfil: autorFoto },
+        url_midia
+      });
+    });
+  }
+
   // Detecta clique no card de postagem
   document.querySelectorAll('.post-card').forEach(card => {
-    card.addEventListener('click', function () {
+    card.addEventListener('click', function (e) {
+      // Evita conflito com botões internos
+      if (e.target.closest('button')) return;
       const id = card.getAttribute('data-id');
       // Busca o post nos dados globais (window.posts)
       const post = window.posts ? window.posts.find(p => p.id_postagem == id) : null;
@@ -384,4 +477,53 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Inicializa com todos os posts
   // fetchAndRenderPosts(); // Descomente se quiser carregar via AJAX desde o início
+
+  // Evento de curtir direto no card (toggle curtida)
+  document.querySelectorAll('.post-card').forEach(card => {
+    const btn = card.querySelector('.btn-outline-success.btn-sm.acao-restrita');
+    if (btn) {
+      btn.addEventListener('click', async function(e) {
+        e.stopPropagation();
+        if (!window.usuarioLogado) {
+          if (!btn.dataset.alerted) {
+            alert('Você precisa estar logado para curtir. Faça login para continuar.');
+            btn.dataset.alerted = 'true';
+          }
+          return;
+        }
+        btn.disabled = true;
+        const id = card.getAttribute('data-id');
+        const res = await fetch(`/api/postagens/${id}/curtir-toggle`, { method: 'POST' });
+        const data = await res.json();
+        await atualizarCurtidas(id);
+        btn.disabled = false;
+      });
+    }
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('button')) return;
+      const id = card.getAttribute('data-id');
+      // Busca o post nos dados globais (window.posts)
+      const post = window.posts ? window.posts.find(p => p.id_postagem == id) : null;
+      if (post) abrirModalPostagem(post);
+    });
+  });
+
+  // Função para atualizar curtidas no card e no modal
+  async function atualizarCurtidas(id_postagem, updateModal = false) {
+    const res = await fetch(`/api/postagens/${id_postagem}`);
+    if (!res.ok) return;
+    const post = await res.json();
+    // Atualiza no card
+    const card = document.querySelector(`.post-card[data-id="${id_postagem}"]`);
+    if (card) {
+      const spanCurtidas = card.querySelector('span.ms-2 i.fas.fa-heart').parentElement;
+      if (spanCurtidas) {
+        spanCurtidas.innerHTML = `<i class="fas fa-heart me-1"></i> ${post.curtidas || 0} curtidas`;
+      }
+    }
+    // Atualiza no modal se aberto
+    if (updateModal && document.getElementById('modalCurtidas')) {
+      document.getElementById('modalCurtidas').textContent = post.curtidas || 0;
+    }
+  }
 });

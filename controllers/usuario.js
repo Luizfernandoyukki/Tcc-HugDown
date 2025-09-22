@@ -226,24 +226,43 @@ exports.buscarPerfilCompleto = async (id) => {
           attributes: ['id_postagem', 'titulo', 'resumo', 'url_midia', 'data_criacao']
         },
         {
-          model: Amizade,
-          as: 'amizades',
+          model: require('../models').Amizade,
+          as: 'amizadesSolicitadas',
           where: { status_amizade: 'accepted' },
           required: false,
           include: [{
-            model: Usuario,
-            as: 'amigo',
+            model: require('../models').Usuario,
+            as: 'destinatario', // amigo é o destinatario
+            attributes: ['id_usuario', 'nome_usuario', 'foto_perfil']
+          }]
+        },
+        {
+          model: require('../models').Amizade,
+          as: 'amizadesRecebidas',
+          where: { status_amizade: 'accepted' },
+          required: false,
+          include: [{
+            model: require('../models').Usuario,
+            as: 'solicitante', // amigo é o solicitante
             attributes: ['id_usuario', 'nome_usuario', 'foto_perfil']
           }]
         }
       ]
     });
-    console.log('[CONTROLLER] Resultado do banco:', usuario);
-    if (!usuario) return null;
-    let amigos = [];
-    if (usuario.amizades && usuario.amizades.length) {
-      amigos = usuario.amizades.map(a => a.amigo);
+    if (!usuario) {
+      console.warn('[CONTROLLER] Usuário não encontrado:', id);
+      return null;
     }
+
+    // Junta todos os amigos das duas associações
+    let amigos = [];
+    if (usuario.amizadesSolicitadas && Array.isArray(usuario.amizadesSolicitadas)) {
+      amigos = amigos.concat(usuario.amizadesSolicitadas.map(a => a.destinatario).filter(Boolean));
+    }
+    if (usuario.amizadesRecebidas && Array.isArray(usuario.amizadesRecebidas)) {
+      amigos = amigos.concat(usuario.amizadesRecebidas.map(a => a.solicitante).filter(Boolean));
+    }
+
     return {
       id_usuario: usuario.id_usuario,
       nome_usuario: usuario.nome_usuario,
@@ -263,21 +282,3 @@ exports.buscarPerfilCompleto = async (id) => {
     return null;
   }
 };
-
-// Gerar URL camuflada do perfil "chogue"
-exports.gerarUrlPerfilChogue = (id_usuario) => {
-  return `/usuarios/chogue_u-@-_${id_usuario}`;
-};
-
-// Gerar URL camuflada para perfil próprio
-exports.gerarUrlPerfilProprio = (id_usuario) => {
-  const rand = Math.floor(Math.random() * 900000 + 100000);
-  return `/usuarios/perfil-${rand}_${id_usuario}`;
-};
-
-// Gerar URL camuflada para perfil de outro usuário
-exports.gerarUrlPerfilOutro = (id_usuario) => {
-  const rand = Math.floor(Math.random() * 900000 + 100000);
-  return `/usuarios/u-@-${rand}_${id_usuario}`;
-};
-

@@ -12,12 +12,15 @@ exports.listar = async (req, resOrOptions) => {
     ]
   });
 
-  // Ajusta o caminho da foto do autor
+  // Ajusta o caminho da foto do autor e adiciona links de perfil
   posts = posts.map(post => {
-    if (post.autor && post.autor.foto_perfil) {
-      if (!/^https?:\/\//.test(post.autor.foto_perfil)) {
+    if (post.autor) {
+      if (post.autor.foto_perfil && !/^https?:\/\//.test(post.autor.foto_perfil)) {
         post.autor.foto_perfil = '..' + post.autor.foto_perfil;
       }
+      // Adiciona links para o perfil do autor
+      post.autor.linkShow = `/usuarios/show/${post.autor.id_usuario}`;
+      post.autor.linkIndex = `/usuarios/index/${post.autor.id_usuario}`;
     }
     return post;
   });

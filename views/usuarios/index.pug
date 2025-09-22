@@ -22,7 +22,7 @@ block content
               li
                 b Localização: 
                 | #{usuario.cidade}, #{usuario.estado}, #{usuario.pais}
-            a.btn.btn-warning.mt-3(href=`/usuarios/perfil-${Math.floor(Math.random()*900000+100000)}_${usuario.id_usuario}/edit`) Editar perfil
+            a.btn.btn-warning.mt-3(href=`/usuarios/perfil-${usuario.id_usuario}/edit`) Editar perfil
         .card.shadow-sm.mb-4
           .card-body
             h5.text-success.mb-3 Meus Amigos

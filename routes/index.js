@@ -1,7 +1,7 @@
 const path = require('path');
 const express = require('express');
 const router = express.Router();
-const { Usuario } = require('../models');
+const { Usuario, Comentario, Curtida, Postagem } = require('../models');
 const fetch = require('node-fetch');
 const controllers = require('../controllers/index.js');
 const {
@@ -11,8 +11,6 @@ const {
   postagemController, // <--- Adicione isso
 } = controllers;
 const { usuarioController } = require('../controllers');
-const { gerarUrlPerfil } = require('../utils/camuflaPerfil');
-
 // Wrapper para async/await
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -110,6 +108,91 @@ router.get('/api/postagens', asyncHandler(async (req, res) => {
     posts = await postagemController.listar(req, { raw: true });
   }
   res.json(posts);
+}));
+
+// Incrementa visualização
+router.post('/api/postagens/:id/visualizar', asyncHandler(async (req, res) => {
+  const post = await Postagem.findByPk(req.params.id);
+  if (post) {
+    post.visualizacoes = (post.visualizacoes || 0) + 1;
+    await post.save();
+    return res.json({ visualizacoes: post.visualizacoes });
+  }
+  res.status(404).json({ error: 'Postagem não encontrada' });
+}));
+
+// Adiciona curtida
+router.post('/api/postagens/:id/curtir', asyncHandler(async (req, res) => {
+  const id_usuario = req.session.userId;
+  if (!id_usuario) return res.status(401).json({ error: 'Precisa estar logado' });
+  const id_postagem = req.params.id;
+  // Verifica se já curtiu
+  const curtidaExistente = await Curtida.findOne({ where: { id_postagem, id_usuario } });
+  if (curtidaExistente) {
+    return res.json({ sucesso: false, ja_curtiu: true });
+  }
+  await Curtida.create({ id_postagem, id_usuario });
+  // Opcional: incrementa contador na postagem
+  const post = await Postagem.findByPk(id_postagem);
+  if (post) {
+    post.curtidas = (post.curtidas || 0) + 1;
+    await post.save();
+  }
+  res.json({ sucesso: true });
+}));
+
+// Adiciona comentário
+router.post('/api/postagens/:id/comentar', asyncHandler(async (req, res) => {
+  const id_usuario = req.session.userId;
+  if (!id_usuario) return res.status(401).json({ error: 'Precisa estar logado' });
+  const id_postagem = req.params.id;
+  const { conteudo } = req.body;
+  if (!conteudo) return res.status(400).json({ error: 'Conteúdo obrigatório' });
+  await Comentario.create({
+    id_postagem,
+    id_autor: id_usuario,
+    conteudo
+  });
+  res.json({ sucesso: true });
+}));
+
+// Retorna dados atualizados da postagem (inclui curtidas)
+router.get('/api/postagens/:id', asyncHandler(async (req, res) => {
+  const post = await Postagem.findByPk(req.params.id);
+  if (!post) return res.status(404).json({ error: 'Postagem não encontrada' });
+  // Se o campo curtidas não existir, conte no banco
+  let curtidas = post.curtidas;
+  if (typeof curtidas === 'undefined') {
+    curtidas = await Curtida.count({ where: { id_postagem: req.params.id } });
+  }
+  res.json({
+    curtidas: curtidas || 0,
+    visualizacoes: post.visualizacoes || 0
+  });
+}));
+
+// Alterna curtida (adiciona ou remove)
+router.post('/api/postagens/:id/curtir-toggle', asyncHandler(async (req, res) => {
+  const id_usuario = req.session.userId;
+  if (!id_usuario) return res.status(401).json({ error: 'Precisa estar logado' });
+  const id_postagem = req.params.id;
+  const curtidaExistente = await Curtida.findOne({ where: { id_postagem, id_usuario } });
+  const post = await Postagem.findByPk(id_postagem);
+  if (curtidaExistente) {
+    await curtidaExistente.destroy();
+    if (post && post.curtidas > 0) {
+      post.curtidas = post.curtidas - 1;
+      await post.save();
+    }
+    return res.json({ sucesso: true, removido: true });
+  } else {
+    await Curtida.create({ id_postagem, id_usuario });
+    if (post) {
+      post.curtidas = (post.curtidas || 0) + 1;
+      await post.save();
+    }
+    return res.json({ sucesso: true, adicionado: true });
+  }
 }));
 
 module.exports = router;
