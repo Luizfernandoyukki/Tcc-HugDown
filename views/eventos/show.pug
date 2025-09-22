@@ -1,0 +1,34 @@
+extends ../layout
+
+block content
+  .container.py-5
+    if evento
+      h2.mb-3= evento.titulo_evento
+      .mb-2
+        span.badge.bg-primary= evento.categoria ? evento.categoria.nome_categoria : 'Sem categoria'
+        |  
+        span.badge.bg-secondary= evento.tipo_evento === 'online' ? 'Online' : (evento.tipo_evento === 'hybrid' ? 'Híbrido' : 'Presencial')
+      p.text-muted.mb-1
+        | Data: #{new Date(evento.data_inicio).toLocaleString('pt-BR')}
+        if evento.data_fim
+          |  até #{new Date(evento.data_fim).toLocaleString('pt-BR')}
+      p.text-muted.mb-1
+        | Local: #{evento.local_evento || evento.endereco_evento || 'Online'}
+      if evento.max_participantes
+        p.text-muted.mb-1 Máx. participantes: #{evento.max_participantes}
+      if evento.organizador
+        p.text-muted.mb-1 Organizador: #{evento.organizador.nome_usuario}
+      p.mt-3= evento.descricao_evento
+
+      // Participação
+      if isLoggedIn
+        if evento.usuarioJaInscrito
+          div.alert.alert-success.mt-4 Você já está inscrito neste evento.
+        else
+          form(method="post", action=`/eventos/${evento.id_evento}/participar`)
+            button.btn.btn-success.mt-4(type="submit") Participar do evento
+      else
+        div.alert.alert-warning.mt-4
+          | Faça login para participar deste evento.
+    else
+      p.text-danger Evento não encontrado.

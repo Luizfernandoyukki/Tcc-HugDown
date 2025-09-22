@@ -48,56 +48,46 @@ function initAnimations() {
 // Carregar estatísticas
 async function loadStats() {
     try {
-        // Simular dados até a API estar pronta
         const stats = await fetchStats();
-        
-        // Animar contadores
-        animateCounter('group-count', stats.groups || 125);
-        animateCounter('event-count', stats.events || 89);
-        animateCounter('user-count', stats.users || 1247);
-        
-        // Stats da seção principal
-        animateCounter('total-users', stats.totalUsers || 1247);
-        animateCounter('total-events', stats.totalEvents || 89);
-        animateCounter('total-groups', stats.totalGroups || 125);
-        animateCounter('total-connections', stats.totalConnections || 2156);
-        
+        console.log('[STATS] Dados recebidos do backend:', stats);
+        animateCounter('group-count', stats.groups);
+        animateCounter('event-count', stats.events);
+        animateCounter('user-count', stats.totalUsers); // Para o card do topo (Conexões)
+        animateCounter('total-users', stats.totalUsers); // Usuários Ativos (stats section)
+        animateCounter('total-events', stats.totalEvents);
+        animateCounter('total-groups', stats.totalGroups);
+        animateCounter('total-connections', stats.totalConnections); // Conexões (amizades aceitas)
     } catch (error) {
         console.error('Erro ao carregar estatísticas:', error);
-        // Usar valores padrão em caso de erro
-        animateCounter('group-count', 125);
-        animateCounter('event-count', 89);
-        animateCounter('user-count', 1247);
     }
 }
 
 // Buscar estatísticas da API
 async function fetchStats() {
-    try {
-        const response = await fetch('/api/stats');
-        if (response.ok) {
-            return await response.json();
-        }
-    } catch (error) {
-        console.log('API não disponível, usando dados de exemplo');
+    const response = await fetch('/stats');
+    if (response.ok) {
+        return await response.json();
     }
-    
-    // Dados de exemplo para desenvolvimento
+    // Se falhar, retorna zeros
     return {
-        groups: 125,
-        events: 89,
-        users: 1247,
-        totalUsers: 1247,
-        totalEvents: 89,
-        totalGroups: 125,
-        totalConnections: 2156
+        groups: 0,
+        events: 0,
+        users: 0,
+        totalUsers: 0,
+        totalEvents: 0,
+        totalGroups: 0,
+        totalConnections: 0
     };
 }
 
 // Animação de contadores
 function animateCounter(elementId, target) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
+    const element = document.querySelector(`#${elementId}`);
+    if (!element) {
+        console.warn(`[STATS] Elemento não encontrado para id: ${elementId}`);
+        return;
+    }
+    console.log(`[STATS] Preenchendo contador ${elementId} com valor:`, target);
 
     let current = 0;
     const increment = target / 50;
@@ -118,14 +108,9 @@ function animateCounter(elementId, target) {
 async function loadRecentActivity() {
     const activityFeed = document.querySelector('.activity-feed');
     const loadingPlaceholder = activityFeed.querySelector('.loading-placeholder');
-    
     try {
         const activities = await fetchRecentActivity();
-        
-        // Remover placeholder de loading
         loadingPlaceholder.remove();
-        
-        // Criar HTML das atividades
         const activitiesHTML = activities.map(activity => `
             <div class="activity-item">
                 <div class="activity-avatar">
@@ -137,9 +122,7 @@ async function loadRecentActivity() {
                 </div>
             </div>
         `).join('');
-        
         activityFeed.innerHTML = activitiesHTML;
-        
     } catch (error) {
         console.error('Erro ao carregar atividades:', error);
         loadingPlaceholder.innerHTML = '<p class="text-muted">Erro ao carregar atividades</p>';
@@ -148,50 +131,24 @@ async function loadRecentActivity() {
 
 // Buscar atividades recentes
 async function fetchRecentActivity() {
-    try {
-        const response = await fetch('/api/recent-activity');
-        if (response.ok) {
-            return await response.json();
-        }
-    } catch (error) {
-        console.log('API não disponível, usando dados de exemplo');
+    const response = await fetch('/api/recent-activity');
+    if (response.ok) {
+        const data = await response.json();
+        return data.map(item => ({
+            ...item,
+            createdAt: new Date(item.createdAt)
+        }));
     }
-    
-    // Dados de exemplo
-    return [
-        {
-            type: 'event',
-            title: 'Novo evento criado',
-            description: 'Workshop de JavaScript foi adicionado',
-            createdAt: new Date(Date.now() - 1000 * 60 * 30) // 30 min atrás
-        },
-        {
-            type: 'group',
-            title: 'Novo grupo formado',
-            description: 'Grupo "Desenvolvedores React" foi criado',
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2) // 2h atrás
-        },
-        {
-            type: 'user',
-            title: 'Novos membros',
-            description: '5 pessoas se juntaram hoje',
-            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 4) // 4h atrás
-        }
-    ];
+    return [];
 }
 
 // Carregar próximos eventos
 async function loadUpcomingEvents() {
     const upcomingEvents = document.querySelector('.upcoming-events');
     const loadingPlaceholder = upcomingEvents.querySelector('.loading-placeholder');
-    
     try {
         const events = await fetchUpcomingEvents();
-        
-        // Remover placeholder
         loadingPlaceholder.remove();
-        
-        // Criar HTML dos eventos
         const eventsHTML = events.map(event => `
             <div class="event-item mb-3">
                 <div class="d-flex">
@@ -209,9 +166,7 @@ async function loadUpcomingEvents() {
                 </div>
             </div>
         `).join('');
-        
         upcomingEvents.innerHTML = eventsHTML;
-        
     } catch (error) {
         console.error('Erro ao carregar eventos:', error);
         loadingPlaceholder.innerHTML = '<p class="text-muted">Erro ao carregar eventos</p>';
@@ -220,37 +175,15 @@ async function loadUpcomingEvents() {
 
 // Buscar próximos eventos
 async function fetchUpcomingEvents() {
-    try {
-        const response = await fetch('/api/upcoming-events');
-        if (response.ok) {
-            return await response.json();
-        }
-    } catch (error) {
-        console.log('API não disponível, usando dados de exemplo');
+    const response = await fetch('/api/upcoming-events');
+    if (response.ok) {
+        const data = await response.json();
+        return data.map(ev => ({
+            ...ev,
+            date: new Date(ev.date)
+        }));
     }
-    
-    // Dados de exemplo
-    const today = new Date();
-    return [
-        {
-            title: 'Workshop JavaScript',
-            location: 'Online',
-            date: new Date(today.getTime() + 1000 * 60 * 60 * 24 * 2), // 2 dias
-            attendees: 24
-        },
-        {
-            title: 'Meetup React',
-            location: 'São Paulo',
-            date: new Date(today.getTime() + 1000 * 60 * 60 * 24 * 5), // 5 dias
-            attendees: 18
-        },
-        {
-            title: 'Hackathon',
-            location: 'Florianópolis',
-            date: new Date(today.getTime() + 1000 * 60 * 60 * 24 * 7), // 7 dias
-            attendees: 42
-        }
-    ];
+    return [];
 }
 
 // Efeitos de scroll
@@ -383,74 +316,3 @@ const additionalCSS = `
 const style = document.createElement('style');
 style.textContent = additionalCSS;
 document.head.appendChild(style);
-
-// Sistema de busca na página (opcional)
-function setupSearchFunctionality() {
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        let searchTimeout;
-        
-        searchInput.addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            const query = e.target.value.trim();
-            
-            if (query.length >= 2) {
-                searchTimeout = setTimeout(() => {
-                    performSearch(query);
-                }, 300);
-            }
-        });
-    }
-}
-
-async function performSearch(query) {
-    try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        if (response.ok) {
-            const results = await response.json();
-            displaySearchResults(results);
-        }
-    } catch (error) {
-        console.error('Erro na busca:', error);
-    }
-}
-
-function displaySearchResults(results) {
-    // Implementar exibição dos resultados de busca
-    console.log('Resultados da busca:', results);
-}
-
-// Notificações toast (opcional)
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    notification.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
-}
-
-// Lazy loading para imagens (opcional)
-function setupLazyLoading() {
-    const images = document.querySelectorAll('img[data-src]');
-    
-    const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.classList.remove('lazy');
-                imageObserver.unobserve(img);
-            }
-        });
-    });
-    
-    images.forEach(img => imageObserver.observe(img));
-}

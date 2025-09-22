@@ -11,12 +11,17 @@ block content
             p.hero-subtitle Conecte-se, participe e transforme sua experiência social
             p.hero-description Encontre pessoas com interesses similares, participe de eventos incríveis e faça parte de grupos que realmente importam para você.
             .hero-actions
-              a.btn.btn-primary.btn-lg.me-3(href="/cadastro") 
-                i.fas.fa-user-plus.me-2
-                | Começar Agora
-              a.btn.btn-outline-light.btn-lg(href="#explore") 
-                i.fas.fa-compass.me-2
-                | Explorar
+              if isLoggedIn
+                a.btn.btn-primary.btn-lg.me-3(href="/cadastro") 
+                  i.fas.fa-user-plus.me-2
+                  | Começar Agora
+                a.btn.btn-outline-light.btn-lg(href="/eventos") 
+                  i.fas.fa-compass.me-2
+                  | Explorar
+              else
+                a.btn.btn-primary.btn-lg.me-3(href="/login")
+                  i.fas.fa-sign-in-alt.me-2
+                  | Entrar
         .col-lg-6
           .hero-illustration
             .floating-cards
@@ -24,17 +29,17 @@ block content
                 .card-body
                   i.fas.fa-users.text-primary
                   h6 Grupos Ativos
-                  span.counter#group-count 0
+                  span.counter#group-count 
               .card.floating-card.card-2
                 .card-body
                   i.fas.fa-calendar-alt.text-success
                   h6 Eventos
-                  span.counter#event-count 0
+                  span.counter#event-count 
               .card.floating-card.card-3
                 .card-body
                   i.fas.fa-heart.text-danger
                   h6 Conexões
-                  span.counter#user-count 0
+                  span.counter#user-count 
 
   // Features Section
   section#explore.features-section.py-5
@@ -52,8 +57,11 @@ block content
             h4 Descubra
             p Encontre grupos e eventos que combinam com seus interesses e localização
             .feature-link
-              a.btn.btn-outline-primary(href="/eventos") Ver Eventos
-        
+              if isLoggedIn
+                a.btn.btn-outline-primary(href="/eventos") Ver Eventos
+              else
+                a.btn.btn-outline-primary.disabled(href="#") Faça login para ver
+
         .col-md-4
           .feature-card.h-100
             .feature-icon
@@ -61,8 +69,11 @@ block content
             h4 Conecte-se
             p Participe de comunidades ativas e faça conexões genuínas
             .feature-link
-              a.btn.btn-outline-primary(href="/grupos") Ver Grupos
-        
+              if isLoggedIn
+                a.btn.btn-outline-primary(href="/grupos") Ver Grupos
+              else
+                a.btn.btn-outline-primary.disabled(href="#") Faça login para ver
+
         .col-md-4
           .feature-card.h-100
             .feature-icon
@@ -70,7 +81,10 @@ block content
             h4 Crie
             p Organize seus próprios eventos e lidere grupos sobre seus temas favoritos
             .feature-link
-              a.btn.btn-outline-primary(href="/eventos/create") Criar Evento
+              if isLoggedIn
+                a.btn.btn-outline-primary(href="/eventos/create") Criar Evento
+              else
+                a.btn.btn-outline-primary.disabled(href="#") Faça login para criar
 
   // Stats Section
   section.stats-section.py-5
@@ -78,20 +92,20 @@ block content
       .row.text-center
         .col-md-3.col-6.mb-4
           .stat-item
-            .stat-number#total-users 0
+            .stat-number#total-users 
             .stat-label Usuários Ativos
         .col-md-3.col-6.mb-4
           .stat-item
-            .stat-number#total-events 0
+            .stat-number#total-events 
             .stat-label Eventos Realizados
         .col-md-3.col-6.mb-4
           .stat-item
-            .stat-number#total-groups 0
+            .stat-number#total-groups 
             .stat-label Grupos Criados
         .col-md-3.col-6.mb-4
           .stat-item
-            .stat-number#total-connections 0
-            .stat-label Novas Amizades
+            .stat-number#total-connections 
+            .stat-label Conexões
 
   // Recent Activity Section
   section.activity-section.py-5
@@ -119,11 +133,15 @@ block content
   // CTA Section
   section.cta-section.py-5
     .container.text-center
-      h2 Pronto para começar?
-      p.lead Junte-se a milhares de pessoas que já encontraram sua comunidade
-      a.btn.btn-primary.btn-lg(href="/cadastro")
-        i.fas.fa-arrow-right.me-2
-        | Criar Minha Conta
+      if isLoggedIn
+        h2 Você já está pronto!
+        p.lead Aproveite todos os recursos da plataforma.
+      else
+        h2 Pronto para começar?
+        p.lead Junte-se a milhares de pessoas que já encontraram sua comunidade
+        a.btn.btn-primary.btn-lg(href="/cadastro")
+          i.fas.fa-arrow-right.me-2
+          | Criar Minha Conta
 
 block scripts
   script(src="/javascripts/index.js")

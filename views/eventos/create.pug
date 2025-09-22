@@ -1,0 +1,69 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
+  link(rel="stylesheet", href="/stylesheets/eventos/create.css")
+
+block content
+  .container.py-5
+    h2.mb-4 Criar Evento
+
+    form(method="post", action="/eventos", id="form-criar-evento")
+      .mb-3
+        label.form-label(for="titulo_evento") Título do Evento *
+        input.form-control(type="text", name="titulo_evento", id="titulo_evento", required)
+
+      .mb-3
+        label.form-label(for="descricao_evento") Descrição
+        textarea.form-control(name="descricao_evento", id="descricao_evento", rows="3")
+
+      .row
+        .col-md-6.mb-3
+          label.form-label(for="data_inicio") Data e Hora de Início *
+          input.form-control(type="datetime-local", name="data_inicio", id="data_inicio", required)
+        .col-md-6.mb-3
+          label.form-label(for="data_fim") Data e Hora de Fim
+          input.form-control(type="datetime-local", name="data_fim", id="data_fim")
+
+      .mb-3
+        label.form-label Localização do Evento *
+        #map(style="height: 350px; border-radius: 10px; margin-bottom: 10px;")
+        small.text-muted Clique no mapa para escolher o local do evento. Latitude e longitude serão preenchidos automaticamente.
+
+      .row
+        .col-md-6.mb-3
+          label.form-label(for="local_evento") Local (nome do local, sala, etc)
+          input.form-control(type="text", name="local_evento", id="local_evento")
+        .col-md-6.mb-3
+          label.form-label(for="tipo_evento") Tipo de Evento *
+          select.form-select(name="tipo_evento", id="tipo_evento", required)
+            option(value="in_person") Presencial
+            option(value="online") Online
+            option(value="hybrid") Híbrido
+
+      .mb-3
+        label.form-label(for="link_online") Link do Evento Online
+        input.form-control(type="url", name="link_online", id="link_online" placeholder="https://...")
+
+      .row
+        .col-md-6.mb-3
+          label.form-label(for="id_categoria") Categoria *
+          select.form-select(name="id_categoria", id="id_categoria", required)
+            option(value="") Selecione...
+            each cat in categorias
+              option(value=cat.id_categoria)= cat.nome_categoria
+        .col-md-6.mb-3
+          label.form-label(for="max_participantes") Máximo de Participantes
+          input.form-control(type="number", name="max_participantes", id="max_participantes", min="1")
+
+      // Campos ocultos para latitude/longitude
+      input(type="hidden", name="latitude", id="latitude", required)
+      input(type="hidden", name="longitude", id="longitude", required)
+      input(type="hidden", name="endereco_evento", id="endereco_evento")
+
+      button.btn.btn-primary.mt-3(type="submit") Criar Evento
+
+block scripts
+  // Adicione Leaflet.js e o script customizado
+  script(src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")
+  script(src="/javascripts/eventos/create.js")

@@ -34,8 +34,27 @@ app.use(helmet({
         "'unsafe-inline'",
         "https://cdn.jsdelivr.net", 
         "https://cdnjs.cloudflare.com" ,
-        "https://unpkg.com/imask"
+        "https://unpkg.com/imask",
+        "https://unpkg.com" // <-- Adicionado para permitir Leaflet.js
       ],
+      "style-src": [
+        "'self'",
+        "'unsafe-inline'",
+        "https://cdn.jsdelivr.net",
+        "https://cdnjs.cloudflare.com",
+        "https://unpkg.com"
+      ],
+      "img-src": [
+        "'self'",
+        "data:",
+        "https://*.tile.openstreetmap.org",
+        "https://tile.openstreetmap.org",
+        "https://unpkg.com" // <-- Permite ícones do Leaflet
+      ],
+      "connect-src": [
+        "'self'",
+        "https://nominatim.openstreetmap.org"
+      ]
     },
   },
 })); // segurança

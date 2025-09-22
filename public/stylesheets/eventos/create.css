@@ -1,0 +1,8 @@
+#map {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  min-height: 350px;
+  width: 100%;
+  z-index: 1;
+}

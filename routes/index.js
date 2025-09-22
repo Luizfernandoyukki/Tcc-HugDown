@@ -1,7 +1,7 @@
 const path = require('path');
 const express = require('express');
 const router = express.Router();
-const { Usuario, Comentario, Curtida, Postagem } = require('../models');
+const { Usuario, Comentario, Curtida, Postagem, Evento, Grupo, ParticipanteEvento, Amizade } = require('../models');
 const fetch = require('node-fetch');
 const controllers = require('../controllers/index.js');
 const {
@@ -193,6 +193,81 @@ router.post('/api/postagens/:id/curtir-toggle', asyncHandler(async (req, res) =>
     }
     return res.json({ sucesso: true, adicionado: true });
   }
+}));
+
+// Rota para estatísticas principais (corrigida para usar o modelo Amizade diretamente)
+router.get('/stats', asyncHandler(async (req, res) => {
+  try {
+    const [totalUsers, totalEvents, totalGroups] = await Promise.all([
+      Usuario.count({ where: { ativo: true } }),
+      Evento.count({ where: { ativo: true } }),
+      Grupo.count({ where: { ativo: true } })
+    ]);
+    // Conexões = número de amizades aceitas
+    const totalConnections = await Amizade.count({ where: { status_amizade: 'accepted' } });
+    res.json({
+      users: totalUsers,
+      events: totalEvents,
+      groups: totalGroups,
+      totalUsers,
+      totalEvents,
+      totalGroups,
+      totalConnections
+    });
+  } catch (err) {
+    console.error('[STATS][ERROR]', err);
+    res.status(500).json({ error: 'Erro ao buscar estatísticas', details: err.message });
+  }
+}));
+
+// API: Atividades recentes (exemplo: últimos eventos, grupos, usuários)
+router.get('/api/recent-activity', asyncHandler(async (req, res) => {
+  const [recentEvents, recentGroups, recentUsers] = await Promise.all([
+    Evento.findAll({ order: [['data_criacao', 'DESC']], limit: 3 }),
+    Grupo.findAll({ order: [['data_criacao', 'DESC']], limit: 3 }),
+    Usuario.findAll({ where: { ativo: true }, order: [['data_criacao', 'DESC']], limit: 3 })
+  ]);
+  const activities = [
+    ...recentEvents.map(ev => ({
+      type: 'event',
+      title: 'Novo evento criado',
+      description: ev.titulo_evento,
+      createdAt: ev.data_criacao
+    })),
+    ...recentGroups.map(gr => ({
+      type: 'group',
+      title: 'Novo grupo formado',
+      description: gr.nome_grupo,
+      createdAt: gr.data_criacao
+    })),
+    ...recentUsers.map(u => ({
+      type: 'user',
+      title: 'Novo usuário',
+      description: u.nome_usuario,
+      createdAt: u.data_criacao
+    }))
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  res.json(activities);
+}));
+
+// API: Próximos eventos (ordem por data)
+router.get('/api/upcoming-events', asyncHandler(async (req, res) => {
+  const events = await Evento.findAll({
+    where: { ativo: true },
+    order: [['data_inicio', 'ASC']],
+    limit: 5
+  });
+  // Busca número de participantes para cada evento
+  const result = await Promise.all(events.map(async ev => {
+    const attendees = await ParticipanteEvento.count({ where: { id_evento: ev.id_evento } });
+    return {
+      title: ev.titulo_evento,
+      location: ev.local_evento || ev.endereco_evento || 'Online',
+      date: ev.data_inicio,
+      attendees
+    };
+  }));
+  res.json(result);
 }));
 
 module.exports = router;

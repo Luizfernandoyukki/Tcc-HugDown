@@ -25,10 +25,44 @@ exports.buscarPorId = async (req, res) => {
 
 exports.criar = async (req, res) => {
   try {
-    const novoEvento = await Evento.create(req.body);
-    res.status(201).json(novoEvento);
+    const {
+      titulo_evento,
+      descricao_evento,
+      data_inicio,
+      data_fim,
+      endereco_evento,
+      local_evento,
+      tipo_evento,
+      link_online,
+      id_categoria,
+      max_participantes,
+      latitude,
+      longitude
+    } = req.body;
+
+    // Organizador é o usuário logado
+    const id_organizador = req.session.userId;
+
+    const novoEvento = await Evento.create({
+      titulo_evento,
+      descricao_evento,
+      data_inicio,
+      data_fim,
+      endereco_evento, // endereco_evento já vem montado do formulário
+      local_evento,
+      tipo_evento,
+      link_online,
+      id_categoria,
+      max_participantes,
+      latitude,
+      longitude,
+      id_organizador,
+      ativo: true
+    });
+
+    res.redirect('/eventos');
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao criar evento: ' + err.message });
+    res.status(500).render('error', { error: 'Erro ao criar evento: ' + err.message });
   }
 };
 

@@ -1,0 +1,56 @@
+extends ../layout
+
+block content
+  .container.py-5
+    h2.mb-4 Eventos
+    if eventos.length
+      .row.g-4
+        each evento in eventos
+          .col-md-6.col-lg-4
+            a(href=`/eventos/${evento.id_evento}` style="text-decoration:none; color:inherit;")
+              .card.mb-4.shadow-sm.event-card
+                .card-body.d-flex.align-items-center
+                  .event-date-box.me-3
+                    .event-day= new Date(evento.data_inicio).getDate().toString().padStart(2, '0')
+                    .event-month= ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][new Date(evento.data_inicio).getMonth()]
+                  .flex-grow-1
+                    h5.card-title.mb-1= evento.titulo_evento
+                    if evento.data_inicio
+                      small.text-muted
+                        | #{new Date(evento.data_inicio).toLocaleDateString('pt-BR')} - 
+                        | #{evento.local_evento || evento.endereco_evento || 'Online'}
+                    if evento.categoria
+                      span.badge.bg-primary.ms-2= evento.categoria.nome_categoria
+                    p.mt-2= evento.descricao_evento ? evento.descricao_evento.substring(0, 100) + '...' : ''
+    else
+      p.text-muted Nenhum evento encontrado.
+
+block styles
+  style.
+    .event-date-box {
+      min-width: 54px;
+      text-align: center;
+      background: #f3f4f6;
+      border-radius: 10px;
+      padding: 8px 0;
+      margin-right: 10px;
+      border: 1px solid #e0e0e0;
+    }
+    .event-day {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #667eea;
+      line-height: 1;
+    }
+    .event-month {
+      font-size: 0.9rem;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .event-card:hover {
+      box-shadow: 0 0 0 2px #667eea33;
+      background: #f8f9fa;
+      transition: box-shadow 0.2s, background 0.2s;
+    }
