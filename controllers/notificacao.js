@@ -42,3 +42,21 @@ exports.remover = async (req, res) => {
   await notificacao.destroy();
   res.json({ mensagem: 'Notificação removida com sucesso' });
 };
+
+// Função utilitária para criar notificação
+exports.criarNotificacao = async ({
+  id_usuario,
+  tipo_notificacao,
+  titulo,
+  mensagem,
+  url_relacionada = null
+}) => {
+  const { Notificacao } = require('../models');
+  await Notificacao.create({
+    id_usuario,
+    tipo_notificacao,
+    titulo,
+    mensagem,
+    url_relacionada
+  });
+};

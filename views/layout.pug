@@ -21,7 +21,8 @@ html
         .collapse.navbar-collapse#navbarNav
           ul.navbar-nav.ms-auto.align-items-center.gap-2.flex-row.flex-wrap.justify-content-between
             li.nav-item
-              a.nav-link.p-2.acao-restrita(href='/notificacao', title='Notificações')
+              // Corrige o link do ícone de notificações para /notificacoes
+              a.nav-link.p-2.acao-restrita(href='/notificacoes', title='Notificações')
                 img#icon-notificacao.menu-icon(src='/images/notificação.png', alt='Notificações', height='40')
             li.nav-item
               a.nav-link.p-2(href='/search', title='Pesquisar')
@@ -37,16 +38,21 @@ html
     // Rodapé Bootstrap
     footer.site-footer.bg-light.shadow-sm.fixed-bottom
       .container
-        .d-flex.justify-content-between.align-items-center.gap-1.py-2
-          if isLoggedIn && usuario
-            a(href='/usuarios/index/' + usuario.id_usuario, title='Meu Perfil')
-              img.rounded-circle(src=usuario.foto_perfil || '/images/default-avatar.png', alt='Perfil', height='40', style='border:2px solid #009e60;')
-          else
-            a.btn.btn-success.btn-sm.ms-2(href='/cadastro') Cadastro
-            a.btn.btn-outline-primary.btn-sm.ms-2(href='/login') Login
-          if isLoggedIn
-            a.acao-restrita(href='/chat', title='Chat', class='d-flex align-items-center')
-              img#icon-chat.footer-icon(src='/images/chat.png', alt='Chat', height='40')
+        .row.w-100
+          // Esquerda
+          .col-6.d-flex.align-items-center
+            if isLoggedIn && usuario
+              a(href='/usuarios/index/' + usuario.id_usuario, title='Meu Perfil')
+                img.rounded-circle(src=usuario.foto_perfil || '/images/default-avatar.png', alt='Perfil', height='40', style='border:2px solid #009e60;')
+            else
+              a.btn.btn-success.btn-sm.ms-2(href='/cadastro') Cadastro
+          // Direita
+          .col-6.d-flex.align-items-center.justify-content-end
+            if isLoggedIn
+              a(href='/mensagens-diretas', title='Mensagens')
+                img#icon-mensagens.footer-icon(src='/images/chat.png', alt='Mensagens', height='40')
+            else
+              a.btn.btn-outline-primary.btn-sm.ms-2(href='/login') Login
 
   // Bootstrap JS Bundle
   script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js")
@@ -55,6 +61,10 @@ html
     window.usuarioLogado = !{JSON.stringify(isLoggedIn)};
   // JS global para bloqueio de ações restritas
   script(src='/javascripts/geral.js')
+  block scripts
+  block aviso
+  block scripts
+  block aviso
   block scripts
   block aviso
 

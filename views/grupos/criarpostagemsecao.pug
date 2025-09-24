@@ -7,7 +7,7 @@ block content
     form(method="POST", action=`/grupos/${grupo.id_grupo}/criarpostagemsecao`, enctype="multipart/form-data")
       .mb-3
         label(for="conteudo") Conteúdo *
-        textarea.form-control(id="conteudo", name="conteudo", required, rows="4")
+        textarea.form-control(id="conteudo", name="conteudo", required, rows="6")
       button.btn.btn-success(type="submit") Publicar
 
     a.btn.btn-link.mt-3(href=`/grupos/${grupo.id_grupo}/index`) Voltar para o grupo

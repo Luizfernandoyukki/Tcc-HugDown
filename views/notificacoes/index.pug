@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    h2 Minhas Notificações
+    if notificacoes.length === 0
+      p.text-muted Nenhuma notificação encontrada.
+    else
+      ul.list-group
+        each n in notificacoes
+          li.list-group-item.d-flex.justify-content-between.align-items-center(
+            class=n.lida ? '' : 'list-group-item-warning'
+          )
+            .flex-grow-1
+              strong= n.titulo
+              br
+              span.text-muted.small= n.mensagem
+              br
+              small.text-muted= new Date(n.data_criacao).toLocaleString('pt-BR')
+            if !n.lida
+              form(action=`/notificacoes/${n.id_notificacao}/ler` method="POST" style="display:inline")
+                button.btn.btn-sm.btn-outline-success(type="submit") Marcar como lida

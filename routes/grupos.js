@@ -304,5 +304,65 @@ router.post('/:id/criarpostagemsecao', requireLogin, uploadPost.single('arquivo_
   }
 });
 
+// Armazena aprovações temporariamente em memória (substitua por banco se quiser persistência)
+const aprovacoesExclusaoGrupo = {};
+
+// Página de confirmação de exclusão do grupo
+router.get('/:id/excluir', requireLogin, async (req, res) => {
+  const grupo = await Grupo.findByPk(req.params.id, {
+    include: [
+      { model: MembroGrupo, as: 'membros', include: [{ model: Usuario, as: 'usuario' }] }
+    ]
+  });
+  if (!grupo) return res.status(404).send('Grupo não encontrado');
+
+  // Só administradores podem acessar
+  const usuarioLogado = req.user || res.locals.usuario;
+  const meusPapéis = grupo.membros.filter(m => m.id_usuario == usuarioLogado.id_usuario && m.papel_membro === 'admin');
+  if (!meusPapéis.length) return res.status(403).send('Apenas administradores podem aprovar exclusão.');
+
+  // Lista de administradores do grupo
+  const admins = grupo.membros.filter(m => m.papel_membro === 'admin');
+  // Quais já aprovaram
+  const aprovados = (aprovacoesExclusaoGrupo[grupo.id_grupo] || []);
+  res.render('grupos/confirmarExclusao', { grupo, admins, aprovados, usuario: usuarioLogado });
+});
+
+// Registrar aprovação do ADM para exclusão
+router.post('/:id/excluir/aprovar', requireLogin, async (req, res) => {
+  const grupoId = req.params.id;
+  const usuarioId = req.user?.id_usuario || req.session?.userId;
+  const grupo = await Grupo.findByPk(grupoId, {
+    include: [{ model: MembroGrupo, as: 'membros' }]
+  });
+  if (!grupo) return res.status(404).send('Grupo não encontrado');
+  const souAdm = grupo.membros.some(m => m.id_usuario == usuarioId && m.papel_membro === 'admin');
+  if (!souAdm) return res.status(403).send('Apenas administradores podem aprovar exclusão.');
+
+  // Marca aprovação
+  aprovacoesExclusaoGrupo[grupoId] = aprovacoesExclusaoGrupo[grupoId] || [];
+  if (!aprovacoesExclusaoGrupo[grupoId].includes(usuarioId)) {
+    aprovacoesExclusaoGrupo[grupoId].push(usuarioId);
+  }
+  res.redirect(`/grupos/${grupoId}/excluir`);
+});
+
+// Excluir grupo se todos os ADMs aprovaram
+router.post('/:id/excluir/definitivo', requireLogin, async (req, res) => {
+  const grupoId = req.params.id;
+  const grupo = await Grupo.findByPk(grupoId, {
+    include: [{ model: MembroGrupo, as: 'membros' }]
+  });
+  if (!grupo) return res.status(404).send('Grupo não encontrado');
+  const admins = grupo.membros.filter(m => m.papel_membro === 'admin');
+  const aprovados = aprovacoesExclusaoGrupo[grupoId] || [];
+  if (admins.length === 0 || aprovados.length < admins.length) {
+    return res.status(403).send('Nem todos os administradores aprovaram a exclusão.');
+  }
+  await grupo.destroy();
+  delete aprovacoesExclusaoGrupo[grupoId];
+  res.redirect('/grupos');
+});
+
 // ...existing code for PUT, DELETE if needed...
 module.exports = router;

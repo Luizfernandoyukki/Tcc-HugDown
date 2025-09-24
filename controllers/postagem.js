@@ -1,4 +1,5 @@
 const { Postagem, Usuario, Categoria, Tag } = require('../models');
+const { criarNotificacao } = require('./notificacao');
 
 
 // Listar todas as postagens
@@ -98,6 +99,17 @@ exports.criar = async (req, res) => {
       await novaPostagem.setTags(tagsArray);
     }
 
+    // Notificar amigos (busque todos amigos do autor e envie notificação)
+    const amigos = await buscarAmigosDoUsuario(req.session.userId);
+    for (const amigo of amigos) {
+      await criarNotificacao({
+        id_usuario: amigo.id_usuario,
+        tipo_notificacao: 'post',
+        titulo: 'Novo post de um amigo',
+        mensagem: 'Seu amigo postou algo novo.'
+      });
+    }
+
     res.status(201).json(novaPostagem);
   } catch (err) {
     console.error('[ERRO] Erro ao criar postagem:', err);
@@ -144,4 +156,16 @@ exports.remover = async (req, res) => {
   if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
   await postagem.destroy();
   res.json({ mensagem: 'Postagem removida com sucesso' });
+};
+
+// Exemplo: ao curtir postagem
+exports.curtir = async (req, res) => {
+  // ...existing code para curtir...
+  await criarNotificacao({
+    id_usuario: postagem.id_autor,
+    tipo_notificacao: 'like',
+    titulo: 'Sua postagem foi curtida',
+    mensagem: 'Alguém curtiu sua postagem.'
+  });
+  // ...existing code...
 };

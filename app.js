@@ -12,6 +12,7 @@ const sequelize = require('./database/database');
 // Importação das rotas
 const indexRouter = require('./routes/index');
 const { Usuario } = require('./models');
+const notificacaoService = require('./controllers/notificacaoService');
 
 const app = express();
 
@@ -102,8 +103,25 @@ app.use(async (req, res, next) => {
   next();
 });
 
+// Remova o middleware de eventos próximos (deixe só o cron rodando externamente)
+
+// Middleware para interceptar criações relevantes e notificar (exemplo para amizade)
+app.use(async (req, res, next) => {
+  // Só intercepta POSTs relevantes
+  if (req.method === 'POST') {
+    // Exemplo: solicitação de amizade
+    if (req.path.startsWith('/amizades/solicitar')) {
+      // Você pode acessar req.body aqui e chamar notificacaoService se necessário
+      // (mas normalmente já está sendo chamado no controller/rota)
+    }
+    // Adicione outros casos conforme necessário
+  }
+  next();
+});
+
 // Rotas
 app.use('/', indexRouter);
+app.use('/webpush', require('./routes/webpush'));
 app.get('/favicon.ico', (req, res) => res.status(204));
 
 // 404 handler

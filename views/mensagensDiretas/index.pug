@@ -1,0 +1,19 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    h2 Mensagens Diretas
+    if conversas.length === 0
+      p.text-muted Nenhuma conversa encontrada.
+    else
+      ul.list-group
+        each c in conversas
+          li.list-group-item.d-flex.align-items-center.justify-content-between
+            .d-flex.align-items-center
+              img.rounded-circle.me-3(src=c.amigo.foto_perfil || '/images/default-avatar.png', alt='Avatar', width='48', height='48')
+              .flex-grow-1
+                strong= c.amigo.nome_usuario
+                if c.ultimaMensagem
+                  br
+                  span.text-muted.small #{c.ultimaMensagem.conteudo.substring(0, 40)}...
+            a.btn.btn-outline-primary.btn-sm(href=`/mensagens-diretas/conversa/${c.amigo.id_usuario}`) Abrir

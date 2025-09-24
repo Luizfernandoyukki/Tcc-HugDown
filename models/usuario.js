@@ -23,7 +23,8 @@ module.exports = (sequelize, DataTypes) => {
     data_nascimento: DataTypes.DATE,
     fuso_horario: DataTypes.STRING(50),
     provider_oauth: DataTypes.STRING(50),
-    id_oauth: DataTypes.STRING(100)
+    id_oauth: DataTypes.STRING(100),
+    subscription: { type: DataTypes.TEXT, allowNull: true } // Para armazenar o objeto subscription do push
   }, {
     tableName: 'usuarios',
     timestamps: false

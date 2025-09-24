@@ -1,4 +1,5 @@
 const { MensagemDireta, Usuario } = require('../models');
+const { criarNotificacao } = require('./notificacao');
 
 // Listar todas as mensagens diretas
 exports.listar = async (req, res) => {
@@ -27,6 +28,12 @@ exports.buscarPorId = async (req, res) => {
 exports.criar = async (req, res) => {
   try {
     const novaMensagem = await MensagemDireta.create(req.body);
+    await criarNotificacao({
+      id_usuario: req.body.id_destinatario,
+      tipo_notificacao: 'message',
+      titulo: 'Nova mensagem direta',
+      mensagem: 'Você recebeu uma nova mensagem.'
+    });
     res.status(201).json(novaMensagem);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao criar mensagem: ' + err.message });

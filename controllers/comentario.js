@@ -1,4 +1,5 @@
 const { Comentario, Postagem, Usuario } = require('../models');
+const { criarNotificacao } = require('./notificacao');
 
 exports.listar = async (req, res) => {
   try {
@@ -58,4 +59,28 @@ exports.remover = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Erro ao remover comentário: ' + err.message });
   }
+};
+
+// Exemplo: ao responder comentário
+exports.responder = async (req, res) => {
+  // ...existing code para criar resposta...
+  await criarNotificacao({
+    id_usuario: comentarioOriginal.id_autor,
+    tipo_notificacao: 'comment',
+    titulo: 'Seu comentário foi respondido',
+    mensagem: 'Alguém respondeu seu comentário.'
+  });
+  // ...existing code...
+};
+
+// Exemplo: ao curtir comentário
+exports.curtir = async (req, res) => {
+  // ...existing code para curtir...
+  await criarNotificacao({
+    id_usuario: comentario.id_autor,
+    tipo_notificacao: 'like',
+    titulo: 'Seu comentário foi curtido',
+    mensagem: 'Alguém curtiu seu comentário.'
+  });
+  // ...existing code...
 };

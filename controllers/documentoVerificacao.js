@@ -1,4 +1,5 @@
 const { DocumentoVerificacao, Usuario, Administrador } = require('../models');
+const { criarNotificacao } = require('./notificacao');
 
 const documentoVerificacaoController = {
   // Listar todos os documentos de verificação
@@ -63,6 +64,27 @@ const documentoVerificacaoController = {
       res.json({ mensagem: 'Documento removido com sucesso' });
     } catch (err) {
       res.status(500).json({ error: 'Erro ao remover documento: ' + err.message });
+    }
+  },
+
+  // Aprovar documento de verificação
+  aprovar: async (req, res) => {
+    try {
+      const documento = await DocumentoVerificacao.findByPk(req.params.id);
+      if (!documento) return res.status(404).json({ error: 'Documento não encontrado' });
+      
+      // Lógica para aprovar o documento...
+      
+      await criarNotificacao({
+        id_usuario: documento.id_usuario,
+        tipo_notificacao: 'system',
+        titulo: 'Documento aprovado',
+        mensagem: 'Seu documento de verificação foi aprovado por um administrador.'
+      });
+      
+      res.json({ mensagem: 'Documento aprovado com sucesso' });
+    } catch (err) {
+      res.status(500).json({ error: 'Erro ao aprovar documento: ' + err.message });
     }
   }
 };

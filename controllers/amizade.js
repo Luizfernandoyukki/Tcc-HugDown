@@ -53,3 +53,19 @@ exports.remover = async (req, res) => {
   await amizade.destroy();
   res.json({ mensagem: 'Amizade removida com sucesso' });
 };
+
+// Aceitar solicitação de amizade
+exports.aceitar = async (req, res) => {
+  const amizade = await Amizade.findByPk(req.params.id);
+  if (!amizade) return res.status(404).json({ error: 'Amizade não encontrada' });
+  await amizade.update({ status_amizade: 'accepted' });
+  res.json(amizade);
+};
+
+// Rejeitar solicitação de amizade
+exports.rejeitar = async (req, res) => {
+  const amizade = await Amizade.findByPk(req.params.id);
+  if (!amizade) return res.status(404).json({ error: 'Amizade não encontrada' });
+  await amizade.update({ status_amizade: 'rejected' });
+  res.json(amizade);
+};

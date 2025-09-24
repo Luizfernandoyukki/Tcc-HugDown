@@ -26,6 +26,7 @@ CREATE TABLE usuarios (
     fuso_horario VARCHAR(50),
     provider_oauth VARCHAR(50),
     id_oauth VARCHAR(100),
+    subscription TEXT NULL,
     INDEX idx_email (email),
     INDEX idx_nome_usuario (nome_usuario),
     INDEX idx_verificado (verificado),

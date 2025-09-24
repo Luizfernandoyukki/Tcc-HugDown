@@ -1,0 +1,26 @@
+extends ../layout
+
+block content
+  .container.py-5
+    h2.text-danger.mb-4 Excluir Grupo: #{grupo.nome_grupo}
+    p.text-muted Atenção: esta ação é irreversível. Todos os dados do grupo serão apagados.
+
+    h4 Administradores do grupo
+    ul.list-group.mb-3
+      each adm in admins
+        li.list-group-item
+          = adm.usuario ? adm.usuario.nome_usuario : adm.id_usuario
+          if aprovados.includes(adm.id_usuario)
+            span.badge.bg-success.ms-2 Aprovado
+          else
+            span.badge.bg-secondary.ms-2 Pendente
+
+    if !aprovados.includes(usuario.id_usuario)
+      form(method="post", action=`/grupos/${grupo.id_grupo}/excluir/aprovar`)
+        button.btn.btn-warning(type="submit") Aprovar exclusão
+
+    if aprovados.length === admins.length
+      form(method="post", action=`/grupos/${grupo.id_grupo}/excluir/definitivo`)
+        button.btn.btn-danger.mt-3(type="submit") Excluir Grupo Definitivamente
+
+    a.btn.btn-link.mt-4(href=`/grupos/${grupo.id_grupo}/index`) Cancelar

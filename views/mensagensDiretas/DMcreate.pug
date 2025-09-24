@@ -1,0 +1,32 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    .d-flex.align-items-center.mb-3
+      img.rounded-circle.me-2(src=amigo.foto_perfil || '/images/default-avatar.png', alt='Avatar', width='48', height='48')
+      h4.mb-0= amigo.nome_usuario
+    .card
+      .card-body
+        .dm-messages(style='max-height:400px;overflow-y:auto;')
+          if mensagens.length === 0
+            p.text-muted Nenhuma mensagem ainda.
+          else
+            each m in mensagens
+              .d-flex.mb-2(class=m.id_remetente === usuario.id_usuario ? 'justify-content-end' : 'justify-content-start')
+                .dm-bubble.p-2.rounded(
+                  style=m.id_remetente === usuario.id_usuario ? 'background:#e0ffe0;max-width:70%;' : 'background:#f0f0f0;max-width:70%;'
+                )
+                  span.small.text-muted
+                    if m.id_remetente === usuario.id_usuario
+                      | Você
+                    else
+                      | #{amigo.nome_usuario}
+                  br
+                  | #{m.conteudo}
+                  br
+                  span.text-muted.small #{new Date(m.data_envio).toLocaleString('pt-BR')}
+    form.mt-3(action=`/mensagens-diretas/conversa/${amigo.id_usuario}` method='POST')
+      .input-group
+        input.form-control(type='text', name='conteudo', placeholder='Digite sua mensagem...' required)
+        button.btn.btn-primary(type='submit') Enviar
+    a.btn.btn-link.mt-2(href='/mensagens-diretas') Voltar para conversas

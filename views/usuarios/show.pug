@@ -25,6 +25,21 @@ block content
                 li
                   b Localização: 
                   | #{usuario.cidade}, #{usuario.estado}, #{usuario.pais}
+              // Botão de amizade
+              if !(!locals.usuario || usuario.id_usuario === locals.usuario.id_usuario)
+                // Só mostra se não for o próprio perfil
+                form(action=`/amizades/solicitar` method="POST")
+                  input(type="hidden" name="id_destinatario" value=usuario.id_usuario)
+                  if usuario.status_amizade === 'pending'
+                    button.btn.btn-secondary.mt-2(type="button" disabled) Solicitação pendente
+                  else if usuario.status_amizade === 'accepted'
+                    button.btn.btn-success.mt-2(type="button" disabled) Amizade aceita
+                  else if usuario.status_amizade === 'rejected'
+                    button.btn.btn-danger.mt-2(type="button" disabled) Solicitação rejeitada
+                  else if usuario.status_amizade === 'blocked'
+                    button.btn.btn-dark.mt-2(type="button" disabled) Usuário bloqueado
+                  else
+                    button.btn.btn-primary.mt-2(type="submit") Enviar solicitação de amizade
             .card.shadow-sm.mb-4
               .card-body
                 h5.text-success.mb-3 Amigos
