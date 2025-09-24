@@ -68,6 +68,8 @@ app.use('/perfis', express.static(path.join(__dirname, 'perfis')));
 app.use('/post', express.static(path.join(__dirname, 'post')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets')));
+// Adicione esta linha para servir a pasta grupos como estática
+app.use('/grupos', express.static(path.join(__dirname, 'grupos')));
 
 // Configuração de sessão
 app.use(session({

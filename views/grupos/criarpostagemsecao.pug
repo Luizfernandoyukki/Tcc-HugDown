@@ -1,0 +1,13 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    h2 Nova Postagem no Grupo: #{grupo.nome_grupo}
+
+    form(method="POST", action=`/grupos/${grupo.id_grupo}/criarpostagemsecao`, enctype="multipart/form-data")
+      .mb-3
+        label(for="conteudo") Conteúdo *
+        textarea.form-control(id="conteudo", name="conteudo", required, rows="4")
+      button.btn.btn-success(type="submit") Publicar
+
+    a.btn.btn-link.mt-3(href=`/grupos/${grupo.id_grupo}/index`) Voltar para o grupo

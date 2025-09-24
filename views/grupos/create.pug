@@ -1,0 +1,38 @@
+extends ../layout
+
+block content
+  .container.py-5
+    h2.mb-4 Criar Novo Grupo
+
+    form(method="post", action="/grupos", enctype="multipart/form-data")
+      .mb-3
+        label.form-label(for="nome_grupo") Nome do Grupo *
+        input.form-control(type="text", name="nome_grupo", id="nome_grupo", required)
+
+      .mb-3
+        label.form-label(for="descricao_grupo") Descrição
+        textarea.form-control(name="descricao_grupo", id="descricao_grupo", rows="3")
+
+      .mb-3
+        label.form-label(for="foto_grupo") Foto do Grupo
+        input.form-control(type="file", name="foto_grupo", id="foto_grupo", accept="image/*")
+
+      .mb-3
+        label.form-label(for="tipo_privacidade") Tipo de Privacidade *
+        select.form-select(name="tipo_privacidade", id="tipo_privacidade", required)
+          option(value="public") Público
+          option(value="private") Privado
+          option(value="secret") Secreto
+
+      .mb-3
+        label.form-label(for="max_participantes") Número máximo de participantes
+        input.form-control(type="number", name="max_participantes", id="max_participantes", min="1")
+
+      .mb-3
+        label.form-label(for="id_categoria") Categoria
+        select.form-select(name="id_categoria", id="id_categoria")
+          option(value="") Selecione uma categoria
+          //- each cat in categorias
+          //-   option(value=cat.id_categoria)= cat.nome_categoria
+
+      button.btn.btn-primary.mt-3(type="submit") Criar Grupo

@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+  .container.py-5
+    h2.mb-4= grupo.nome_grupo
+    if grupo.foto_grupo
+      img(src=grupo.foto_grupo, alt="Foto do grupo", class="mb-3 rounded", style="max-width:200px;max-height:200px;")
+    p.text-muted= grupo.descricao_grupo
+
+    .row.mt-4
+      .col-md-8
+        h4 Tópicos principais
+        if postagens && postagens.length
+          each post in postagens
+            .card.mb-3
+              .card-body
+                h5= post.autor ? post.autor.nome_usuario : 'Usuário'
+                p= post.conteudo
+                if post.url_midia
+                  if post.tipo_postagem === 'photo'
+                    img(src=post.url_midia, alt="Imagem da postagem", style="max-width:100%;max-height:300px;margin-top:10px;")
+                  else if post.tipo_postagem === 'video'
+                    video(controls, style="max-width:100%;max-height:300px;margin-top:10px;")
+                      source(src=post.url_midia, type="video/mp4")
+                      | Seu navegador não suporta vídeo.
+        else
+          .card.mb-3
+            .card-body
+              h5 Nenhum tópico ainda
+              p.text-muted Seja o primeiro a postar algo neste grupo!
+        // Botão para criar postagem em sessão
+        a.btn.btn-success.mt-3(href=`/grupos/${grupo.id_grupo}/criarpostagemsecao`) Criar Postagem
+
+      .col-md-4
+        h5 Chat em grupo
+        .card
+          .card-body
+            p.text-muted (Em breve: chat em tempo real)
+        h5.mt-4 Membros
+        ul.list-group
+          each m in grupo.membros
+            li.list-group-item= m.usuario ? m.usuario.nome_usuario : m.id_usuario
+        ul.list-group
+          each m in grupo.membros
+            li.list-group-item= m.usuario ? m.usuario.nome_usuario : m.id_usuario

@@ -20,6 +20,7 @@ const tagController = require('./tag');
 const tagTraducaoController = require('./tagTraducao');
 const usuarioController = require('./usuario');
 const profissionalSaudeController = require('./profissionalSaude');
+const postagemSecaoController = require('./postagemSecao');
 
 module.exports = {
   administradorController,
@@ -38,6 +39,7 @@ module.exports = {
   notificacaoController,
   participanteEventoController,
   postagemController,
+  postagemSecaoController,
   secaoController,
   secaoTraducaoController,
   tagController,
