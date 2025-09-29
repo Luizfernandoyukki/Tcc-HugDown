@@ -169,3 +169,55 @@ exports.curtir = async (req, res) => {
   });
   // ...existing code...
 };
+
+// Listar postagens por categoria
+exports.listarPorCategoria = async (req, options = {}) => {
+  const id_categoria = options.id_categoria || (req.query && req.query.categoria);
+  if (!id_categoria) return [];
+  const posts = await Postagem.findAll({
+    where: { id_categoria },
+    include: [
+      { model: Usuario, as: 'autor' },
+      { model: Categoria, as: 'categoria' },
+      { model: Tag, as: 'tag' }
+    ]
+  });
+  if (options.raw) return posts;
+  if (options.json) return options.json(posts);
+  return posts;
+};
+
+// Listar postagens por categoria e tag
+exports.listarPorCategoriaETag = async (req, options = {}) => {
+  const id_categoria = options.id_categoria || (req.query && req.query.categoria);
+  const id_tag = options.id_tag || (req.query && req.query.tag);
+  if (!id_categoria || !id_tag) return [];
+  const posts = await Postagem.findAll({
+    where: { id_categoria, id_tag },
+    include: [
+      { model: Usuario, as: 'autor' },
+      { model: Categoria, as: 'categoria' },
+      { model: Tag, as: 'tag' }
+    ]
+  });
+  if (options.raw) return posts;
+  if (options.json) return options.json(posts);
+  return posts;
+};
+
+// Listar postagens por tag
+exports.listarPorTag = async (req, options = {}) => {
+  const id_tag = options.id_tag || (req.query && req.query.tag);
+  if (!id_tag) return [];
+  const posts = await Postagem.findAll({
+    where: { id_tag },
+    include: [
+      { model: Usuario, as: 'autor' },
+      { model: Categoria, as: 'categoria' },
+      { model: Tag, as: 'tag' }
+    ]
+  });
+  if (options.raw) return posts;
+  if (options.json) return options.json(posts);
+  return posts;
+};

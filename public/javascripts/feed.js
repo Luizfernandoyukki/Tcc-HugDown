@@ -7,22 +7,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Exibir todas as tags
+  // Navegação dos balões de categoria
+  document.querySelectorAll('.balao-categoria').forEach(el => {
+    el.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      window.location.href = `?categoria=${id}`;
+    });
+  });
+
+  // Navegação dos balões de tag
+  document.querySelectorAll('.balao-tag').forEach(el => {
+    el.addEventListener('click', function() {
+      const id = this.getAttribute('data-id');
+      window.location.href = `?tag=${id}`;
+    });
+  });
+
+  // Exibir todas as tags (atualize para remover onclick inline)
   const btnExibirTodas = document.getElementById('btn-exibir-todas-tags');
   const tagsBaloes = document.getElementById('tags-baloes');
   if (btnExibirTodas && tagsBaloes) {
     btnExibirTodas.addEventListener('click', function() {
       const allTags = window.tagsData || [];
       tagsBaloes.innerHTML = allTags.map(tg =>
-        `<span class="badge bg-secondary text-light px-3 py-2 fs-6 tag-balao" style="cursor:pointer" onclick="window.location='?tag=${tg.id_tag}'">
+        `<span class="badge bg-secondary text-light px-3 py-2 fs-6 tag-balao balao-tag" data-id="${tg.id_tag}">
           <i class="fas fa-tag me-1"></i> ${tg.nome_tag}
         </span>`
       ).join('');
       btnExibirTodas.style.display = 'none';
+      // Reaplica os listeners após renderizar
+      document.querySelectorAll('.balao-tag').forEach(el => {
+        el.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          window.location.href = `?tag=${id}`;
+        });
+      });
     });
     // Salva tags para JS (renderizadas no template)
     window.tagsData = Array.from(tagsBaloes.children).map(el => ({
-      id_tag: el.getAttribute('onclick').match(/tag=(\d+)/)[1],
+      id_tag: el.getAttribute('data-id'),
       nome_tag: el.textContent.trim()
     }));
   }
@@ -31,6 +54,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const modal = document.getElementById('modalPostagem');
   const modalTitulo = document.getElementById('modalTitulo');
   const modalConteudo = document.getElementById('modalConteudo');
+  let bsModal; // Bootstrap modal instance
+
   document.querySelectorAll('.btn-expandir').forEach(btn => {
     btn.addEventListener('click', function() {
       const idx = this.getAttribute('data-idx');
@@ -84,11 +109,15 @@ document.addEventListener('DOMContentLoaded', function() {
       // Comentar
       document.getElementById('formComentarModal').onsubmit = function(e) {
         e.preventDefault();
-        const fd = new FormData(this);
+        const conteudo = this.querySelector('textarea[name="conteudo"]').value.trim();
+        if (!conteudo) {
+          alert('Digite um comentário antes de enviar.');
+          return;
+        }
         fetch(`/api/postagens/${post.id_postagem}/comentar`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conteudo: fd.get('conteudo') })
+          body: JSON.stringify({ conteudo })
         }).then(r => r.json()).then(resp => {
           if (resp.sucesso) {
             this.reset();
@@ -112,9 +141,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       };
       // Abre modal (Bootstrap 5)
-      const bsModal = new bootstrap.Modal(modal);
+      bsModal = new bootstrap.Modal(modal);
       bsModal.show();
     });
+  });
+
+  // Fecha modal corretamente ao clicar no botão fechar
+  modal.addEventListener('hidden.bs.modal', function () {
+    modalConteudo.innerHTML = '';
+    modalTitulo.textContent = '';
   });
 
   // Salva posts para JS
@@ -129,21 +164,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(r => r.json())
         .then(resp => {
           if (resp.sucesso) {
-            // Atualiza contador de curtidas
-            fetch(`/api/postagens/${id}`)
-              .then(res => res.json())
-              .then(data => {
-                const countEl = document.getElementById(`curtidas-count-${id}`);
-                if (countEl) countEl.textContent = data.curtidas;
-                // Toggle cor do botão
-                if (resp.adicionado) {
-                  btn.classList.remove('btn-outline-danger');
-                  btn.classList.add('btn-danger');
-                } else if (resp.removido) {
-                  btn.classList.remove('btn-danger');
-                  btn.classList.add('btn-outline-danger');
-                }
-              });
+            // Atualiza contador de curtidas com valor do backend
+            const countEl = document.getElementById(`curtidas-count-${id}`);
+            if (countEl && typeof resp.curtidas !== 'undefined') countEl.textContent = resp.curtidas;
+            // Toggle cor do botão
+            if (resp.adicionado) {
+              btn.classList.remove('btn-outline-danger');
+              btn.classList.add('btn-danger');
+            } else if (resp.removido) {
+              btn.classList.remove('btn-danger');
+              btn.classList.add('btn-outline-danger');
+            }
           }
         });
     });

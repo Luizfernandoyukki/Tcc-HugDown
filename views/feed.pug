@@ -10,7 +10,7 @@ block content
         .mb-3.d-flex.justify-content-center
           .d-flex.flex-wrap.gap-2
             each cat in categorias.slice(0,4)
-              .badge.bg-primary.text-light.px-3.py-2.fs-6(style="cursor:pointer" onclick=`window.location='?categoria=${cat.id_categoria}'`)
+              .badge.bg-primary.text-light.px-3.py-2.fs-6.balao-categoria(data-id=cat.id_categoria)
                 i.fas.fa-folder-open.me-1
                 | #{cat.nome_categoria}
 
@@ -19,7 +19,7 @@ block content
           .d-flex.flex-wrap.gap-2#tags-baloes
             each tg, idx in tags
               if idx < 8
-                .badge.bg-secondary.text-light.px-3.py-2.fs-6.tag-balao(style="cursor:pointer" onclick=`window.location='?tag=${tg.id_tag}'`)
+                .badge.bg-secondary.text-light.px-3.py-2.fs-6.tag-balao.balao-tag(data-id=tg.id_tag)
                   i.fas.fa-tag.me-1
                   | #{tg.nome_tag}
           button.btn.btn-outline-secondary.btn-sm.ms-2#btn-exibir-todas-tags(type="button") Exibir todas
@@ -73,7 +73,7 @@ block content
                         | Expandir
 
         // Modal para expandir postagem
-        .modal.fade#modalPostagem(tabindex="-1")
+        .modal.fade#modalPostagem(tabindex="1")
           .modal-dialog.modal-lg
             .modal-content
               .modal-header

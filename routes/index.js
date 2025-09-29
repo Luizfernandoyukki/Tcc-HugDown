@@ -202,45 +202,36 @@ router.post('/api/postagens/:id/comentar', asyncHandler(async (req, res) => {
   res.json({ sucesso: true });
 }));
 
-// Retorna dados atualizados da postagem (inclui curtidas)
-router.get('/api/postagens/:id', asyncHandler(async (req, res) => {
-  const post = await Postagem.findByPk(req.params.id);
-  if (!post) return res.status(404).json({ error: 'Postagem não encontrada' });
-  // Se o campo curtidas não existir, conte no banco
-  let curtidas = post.curtidas;
-  if (typeof curtidas === 'undefined') {
-    curtidas = await Curtida.count({ where: { id_postagem: req.params.id } });
-  }
-  res.json({
-    curtidas: curtidas || 0,
-    visualizacoes: post.visualizacoes || 0
-  });
-}));
-
 // Alterna curtida (adiciona ou remove)
 router.post('/api/postagens/:id/curtir-toggle', asyncHandler(async (req, res) => {
   const id_usuario = req.session.userId;
   if (!id_usuario) return res.status(401).json({ error: 'Precisa estar logado' });
   const id_postagem = req.params.id;
   const curtidaExistente = await Curtida.findOne({ where: { id_postagem, id_usuario } });
-  const post = await Postagem.findByPk(id_postagem);
-
-  if (!post) return res.status(404).json({ error: 'Postagem não encontrada' });
-
-  // Garante que o campo curtidas existe e é inteiro
-  if (typeof post.curtidas !== 'number' || isNaN(post.curtidas)) post.curtidas = 0;
 
   if (curtidaExistente) {
     await curtidaExistente.destroy();
-    post.curtidas = Math.max(0, post.curtidas - 1);
-    await post.save();
-    return res.json({ sucesso: true, removido: true });
+    // Conta o número atualizado de curtidas
+    const curtidas = await Curtida.count({ where: { id_postagem } });
+    return res.json({ sucesso: true, removido: true, curtidas });
   } else {
     await Curtida.create({ id_postagem, id_usuario });
-    post.curtidas = (post.curtidas || 0) + 1;
-    await post.save();
-    return res.json({ sucesso: true, adicionado: true });
+    // Conta o número atualizado de curtidas
+    const curtidas = await Curtida.count({ where: { id_postagem } });
+    return res.json({ sucesso: true, adicionado: true, curtidas });
   }
+}));
+
+// Retorna dados atualizados da postagem (inclui curtidas)
+router.get('/api/postagens/:id', asyncHandler(async (req, res) => {
+  const post = await Postagem.findByPk(req.params.id);
+  if (!post) return res.status(404).json({ error: 'Postagem não encontrada' });
+  // Conta as curtidas no banco
+  const curtidas = await Curtida.count({ where: { id_postagem: req.params.id } });
+  res.json({
+    curtidas: curtidas || 0,
+    visualizacoes: post.visualizacoes || 0
+  });
 }));
 
 // Rota para estatísticas principais (corrigida para usar o modelo Amizade diretamente)
