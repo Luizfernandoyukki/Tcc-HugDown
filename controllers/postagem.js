@@ -75,6 +75,10 @@ exports.buscarPorId = async (req, resOrOptions) => {
 exports.criar = async (req, res) => {
   try {
     console.log('[LOG] postagemController.criar chamado. Body:', req.body, 'File:', req.file);
+    // Verifica se o usuário está logado
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: 'Usuário não autenticado. Faça login para criar postagens.' });
+    }
     // Monta dados da postagem
     const dados = {
       id_autor: req.session.userId,
@@ -84,7 +88,6 @@ exports.criar = async (req, res) => {
       titulo: req.body.titulo,
       resumo: req.body.resumo,
       artigo_cientifico: req.body.artigo_cientifico === 'true',
-      // url_midia: req.file ? `/post/${req.body.tipo_postagem === 'article' ? 'artigos' : 'public'}/${req.file.filename}` : null,
       url_midia: req.file ? '/post/' + req.file.filename : null,
       latitude: req.body.latitude || null,
       longitude: req.body.longitude || null

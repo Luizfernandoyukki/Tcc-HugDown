@@ -12,7 +12,7 @@ block content
           .card-body.p-4
             h2.text-center.mb-4 Cadastro
 
-            form#form-cadastro(method="POST" enctype="multipart/form-data")
+            form#form-cadastro(method="POST" enctype="multipart/form-data" action="/usuarios")
               .step-section.active#step-1
                 h5.mb-3.text-success Dados Pessoais
                 .mb-3
@@ -42,13 +42,19 @@ block content
                 .mb-3.position-relative
                   label.form-label(for="senha") Senha *
                   input.form-control(type="password", id="senha", name="senha", required, minlength="6", autocomplete="new-password")
-                  span.position-absolute.top-50.end-0.translate-middle-y.pe-3(style="cursor:pointer;" id="toggleSenha")
-                    i.fas.fa-eye(id="iconSenha")
+                  span.toggle-password.position-absolute.top-50.end-0.translate-middle-y.pe-3(
+                    style="cursor:pointer;"
+                    data-target="senha"
+                  )
+                    i.fas.fa-eye
                 .mb-3.position-relative
                   label.form-label(for="confirmar_senha") Confirmar Senha *
                   input.form-control(type="password", id="confirmar_senha", name="confirmar_senha", required, minlength="6", autocomplete="new-password")
-                  span.position-absolute.top-50.end-0.translate-middle-y.pe-3(style="cursor:pointer;" id="toggleConfirmarSenha")
-                    i.fas.fa-eye(id="iconConfirmarSenha")
+                  span.toggle-password.position-absolute.top-50.end-0.translate-middle-y.pe-3(
+                    style="cursor:pointer;"
+                    data-target="confirmar_senha"
+                  )
+                    i.fas.fa-eye
                 .mb-3
                   label.form-label(for="nome_usuario") Nome de Usuário *
                   input.form-control(type="text", id="nome_usuario", name="nome_usuario", required, maxlength="50")
@@ -95,7 +101,7 @@ block content
                 .mt-3#saude-extra(style="display:none;")
                   .mb-3
                     label.form-label(for="tipo_registro") Tipo de Registro *
-                    select.form-select(id="tipo_registro", name="tipo_registro", required)
+                    select.form-select(id="tipo_registro", name="tipo_registro")
                       option(value="") Selecione
                       option(value="CRM") CRM
                       option(value="COREN") COREN
@@ -105,19 +111,19 @@ block content
                       option(value="OUTRO") Outro
                   .mb-3
                     label.form-label(for="numero_registro") Número do Registro *
-                    input.form-control(type="text", id="numero_registro", name="numero_registro", required, maxlength="50")
+                    input.form-control(type="text", id="numero_registro", name="numero_registro", maxlength="50")
                   .mb-3
                     label.form-label(for="uf_registro") UF do Registro *
-                    input.form-control(type="text", id="uf_registro", name="uf_registro", required, maxlength="2")
+                    input.form-control(type="text", id="uf_registro", name="uf_registro", maxlength="2")
                   .mb-3
                     label.form-label(for="especialidade") Especialidade
                     input.form-control(type="text", id="especialidade", name="especialidade", maxlength="100")
                   .mb-3
                     label.form-label(for="instituicao") Instituição *
-                    input.form-control(type="text", id="instituicao", name="instituicao", required, maxlength="200")
+                    input.form-control(type="text", id="instituicao", name="instituicao", maxlength="200")
                   .mb-3
                     label.form-label(for="data_registro") Data do Registro *
-                    input.form-control(type="date", id="data_registro", name="data_registro", required)
+                    input.form-control(type="date", id="data_registro", name="data_registro")
                   .mb-3
                     label.form-label(for="documento_comprobatorio") Documento Comprobatório *
                     input.form-control(type="file", id="documento_comprobatorio", name="documento_comprobatorio", required)

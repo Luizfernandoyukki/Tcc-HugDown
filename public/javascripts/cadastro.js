@@ -42,17 +42,32 @@ document.addEventListener('DOMContentLoaded', function() {
     profissionalCheck.addEventListener('change', function() {
       if (this.checked) {
         saudeExtra.style.display = '';
+        // Adiciona required nos campos do bloco
+        saudeExtra.querySelectorAll('input, select').forEach(input => {
+          if (input.name !== 'especialidade') { // especialidade é opcional
+            input.required = true;
+          }
+        });
       } else {
         saudeExtra.style.display = 'none';
+        // Remove required dos campos do bloco
+        saudeExtra.querySelectorAll('input, select').forEach(input => {
+          input.required = false;
+        });
       }
-      // Atualizar required dos campos
-      const inputs = saudeExtra.querySelectorAll('input, select');
-      inputs.forEach(input => {
-        if (input.name !== 'especialidade') { // especialidade é opcional
-          input.required = this.checked;
-        }
-      });
     });
+    // Inicializa o estado dos required ao carregar a página
+    if (profissionalCheck.checked) {
+      saudeExtra.style.display = '';
+      saudeExtra.querySelectorAll('input, select').forEach(input => {
+        if (input.name !== 'especialidade') input.required = true;
+      });
+    } else {
+      saudeExtra.style.display = 'none';
+      saudeExtra.querySelectorAll('input, select').forEach(input => {
+        input.required = false;
+      });
+    }
   }
 
   // Controle dos steps
@@ -167,7 +182,7 @@ document.querySelector('input[name="fuso_horario"]').value =
     // Enviar formulário
     try {
       const formData = new FormData(form);
-      const response = await fetch('/cadastro', {
+      const response = await fetch('/usuarios', { // <-- Corrigido para /usuarios
         method: 'POST',
         body: formData
       });
