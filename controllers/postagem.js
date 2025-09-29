@@ -9,7 +9,7 @@ exports.listar = async (req, resOrOptions) => {
     include: [
       { model: Usuario, as: 'autor' },
       { model: Categoria, as: 'categoria' },
-      { model: Tag, as: 'tag' }
+      { model: Tag, as: 'tags' } // modelo correto: Tag, alias correto: 'tags'
     ]
   });
 
@@ -52,7 +52,7 @@ exports.buscarPorId = async (req, resOrOptions) => {
     include: [
       { model: Usuario, as: 'autor' },
       { model: Categoria, as: 'categoria' },
-      { model: Tag, as: 'tag' }
+      { model: Tag, as: 'tags' } // modelo correto: Tag, alias correto: 'tags'
     ]
   });
 
@@ -96,21 +96,26 @@ exports.criar = async (req, res) => {
     // Cria a postagem
     const novaPostagem = await Postagem.create(dados);
 
-    // Relaciona tags (N para N)
-    if (req.body['tags[]']) {
-      let tagsArray = Array.isArray(req.body['tags[]']) ? req.body['tags[]'] : [req.body['tags[]']];
+    // Relaciona tags (N para N) - use 'tags' e não 'tag'
+    if (req.body.tags || req.body['tags[]']) {
+      let tagsArray = req.body.tags || req.body['tags[]'];
+      if (!Array.isArray(tagsArray)) tagsArray = [tagsArray];
       await novaPostagem.setTags(tagsArray);
     }
 
     // Notificar amigos (busque todos amigos do autor e envie notificação)
-    const amigos = await buscarAmigosDoUsuario(req.session.userId);
-    for (const amigo of amigos) {
-      await criarNotificacao({
-        id_usuario: amigo.id_usuario,
-        tipo_notificacao: 'post',
-        titulo: 'Novo post de um amigo',
-        mensagem: 'Seu amigo postou algo novo.'
-      });
+    if (typeof buscarAmigosDoUsuario === 'function') {
+      const amigos = await buscarAmigosDoUsuario(req.session.userId);
+      for (const amigo of amigos) {
+        await criarNotificacao({
+          id_usuario: amigo.id_usuario,
+          tipo_notificacao: 'post',
+          titulo: 'Novo post de um amigo',
+          mensagem: 'Seu amigo postou algo novo.'
+        });
+      }
+    } else {
+      console.warn('[WARN] Função buscarAmigosDoUsuario não está definida. Nenhuma notificação enviada.');
     }
 
     res.status(201).json(novaPostagem);
@@ -182,7 +187,7 @@ exports.listarPorCategoria = async (req, options = {}) => {
     include: [
       { model: Usuario, as: 'autor' },
       { model: Categoria, as: 'categoria' },
-      { model: Tag, as: 'tag' }
+      { model: Tag, as: 'tags' } // modelo correto: Tag, alias correto: 'tags'
     ]
   });
   if (options.raw) return posts;
@@ -196,11 +201,15 @@ exports.listarPorCategoriaETag = async (req, options = {}) => {
   const id_tag = options.id_tag || (req.query && req.query.tag);
   if (!id_categoria || !id_tag) return [];
   const posts = await Postagem.findAll({
-    where: { id_categoria, id_tag },
+    where: { id_categoria },
     include: [
       { model: Usuario, as: 'autor' },
       { model: Categoria, as: 'categoria' },
-      { model: Tag, as: 'tag' }
+      {
+        model: Tag,
+        as: 'tags',
+        where: { id_tag }
+      }
     ]
   });
   if (options.raw) return posts;
@@ -213,14 +222,18 @@ exports.listarPorTag = async (req, options = {}) => {
   const id_tag = options.id_tag || (req.query && req.query.tag);
   if (!id_tag) return [];
   const posts = await Postagem.findAll({
-    where: { id_tag },
     include: [
       { model: Usuario, as: 'autor' },
       { model: Categoria, as: 'categoria' },
-      { model: Tag, as: 'tag' }
+      {
+        model: Tag,
+        as: 'tags',
+        where: { id_tag }
+      }
     ]
   });
   if (options.raw) return posts;
   if (options.json) return options.json(posts);
   return posts;
 };
+

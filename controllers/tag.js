@@ -11,7 +11,7 @@ export const listar = async (req, resOrOptions) => {
         as: 'postagens', 
         include: [
           { model: Categoria, as: 'categoria' }, // Corrigido: use 'as'
-          { model: Tag, as: 'tag' }
+          { model: Tag, as: 'tags' } // Corrigido: alias 'tags'
         ] 
       }
     ]
@@ -35,7 +35,7 @@ export const buscarPorId = async (req, resOrOptions) => {
         as: 'postagens', 
         include: [
           { model: Categoria, as: 'categoria' }, // Corrigido: use 'as'
-          { model: Tag, as: 'tag' }
+          { model: Tag, as: 'tags' } // Corrigido: alias 'tags'
         ] 
       }
     ]
@@ -123,7 +123,7 @@ export const buscarPorNome = async (nome, resOrOptions) => {
         as: 'postagens', 
         include: [
           { model: Categoria, as: 'categoria' }, // Corrigido: use 'as'
-          { model: Tag, as: 'tag' }
+          { model: Tag, as: 'tags' } // Corrigido: alias 'tags'
         ] 
       }
     ]
@@ -153,7 +153,7 @@ export const listarPorTag = async (req, resOrOptions) => {
     where: { id_tag },
     include: [
       { model: Categoria, as: 'categoria' },
-      { model: Tag, as: 'tag' }
+      { model: Tag, as: 'tags' } // Corrigido: alias 'tags'
     ]
   });
   if (resOrOptions && typeof resOrOptions.render === 'function') {

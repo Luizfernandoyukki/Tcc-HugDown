@@ -3,7 +3,6 @@ module.exports = (sequelize, DataTypes) => {
     id_postagem: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     id_autor: { type: DataTypes.INTEGER, allowNull: false },
     id_categoria: DataTypes.INTEGER,
-    id_tag: DataTypes.INTEGER,
     tipo_postagem: { type: DataTypes.ENUM('text', 'photo', 'video', 'article'), allowNull: false },
     conteudo: DataTypes.TEXT,
     url_midia: DataTypes.STRING(500),
@@ -26,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
   Postagem.associate = models => {
     Postagem.belongsTo(models.Usuario, { as: 'autor', foreignKey: 'id_autor' });
     Postagem.belongsTo(models.Categoria, { as: 'categoria', foreignKey: 'id_categoria' });
-    Postagem.belongsTo(models.Tag, { as: 'tag', foreignKey: 'id_tag' });
     Postagem.hasMany(models.Comentario, { as: 'comentarios', foreignKey: 'id_postagem' });
     Postagem.hasMany(models.Curtida, { as: 'curtidas', foreignKey: 'id_postagem' });
     Postagem.hasMany(models.Compartilhamento, { as: 'compartilhamentos', foreignKey: 'id_postagem' });

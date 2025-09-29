@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       if (response.ok) {
         alert('Postagem atualizada com sucesso!');
-        window.location.href = '/postagens/show';
+        window.location.href = '/postagens/show'; // Redireciona para index de postagens
       } else {
         let errorMsg = 'Erro ao atualizar postagem';
         try {
