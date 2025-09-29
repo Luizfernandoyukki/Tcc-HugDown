@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const router = express.Router();
 const { Usuario, Comentario, Curtida, Postagem, Evento, Grupo, ParticipanteEvento, Amizade } = require('../models');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const controllers = require('../controllers/index.js');
 const {
   categoriaController,
@@ -85,6 +85,52 @@ router.use('/secoes-traducao', require('./secoesTraducao'));
 router.use('/categorias-traducao', require('./categoriasTraducao'));
 router.use('/tags-traducao', require('./tagsTraducao'));
 router.use('/esqueciminhasenha', require('./esqueciminhasenha'));
+
+// Função utilitária para converter lat/lng em endereço
+async function getLocationFromLatLng(lat, lng) {
+  if (!lat || !lng) return '';
+  const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.address ? `${data.address.city || data.address.town || data.address.village || ''}, ${data.address.state || ''}` : '';
+}
+
+// Rota do feed de postagens
+router.get('/feed', asyncHandler(async (req, res) => {
+  const { categoria, tag } = req.query;
+  let posts;
+  if (categoria && tag) {
+    posts = await postagemController.listarPorCategoriaETag(req, { id_categoria: categoria, id_tag: tag, raw: true });
+  } else if (categoria) {
+    posts = await postagemController.listarPorCategoria(req, { id_categoria: categoria, raw: true });
+  } else if (tag) {
+    posts = await postagemController.listarPorTag(req, { id_tag: tag, raw: true });
+  } else {
+    posts = await postagemController.listar(req, { raw: true });
+  }
+
+  // Para cada postagem, converte lat/lng em endereço
+  for (const post of posts) {
+    if (post.latitude && post.longitude) {
+      post.endereco = await getLocationFromLatLng(post.latitude, post.longitude);
+    } else {
+      post.endereco = '';
+    }
+  }
+
+  const [categorias, tags] = await Promise.all([
+    categoriaController.listar(req, { raw: true }),
+    tagController.listar(req, { raw: true })
+  ]);
+
+  res.render('feed', {
+    posts,
+    categorias,
+    tags,
+    usuario: res.locals.usuario,
+    isLoggedIn: res.locals.isLoggedIn
+  });
+}));
 
 // Função utilitária (se necessário)
 async function getLocationFromLatLng(lat, lng) {
@@ -178,19 +224,21 @@ router.post('/api/postagens/:id/curtir-toggle', asyncHandler(async (req, res) =>
   const id_postagem = req.params.id;
   const curtidaExistente = await Curtida.findOne({ where: { id_postagem, id_usuario } });
   const post = await Postagem.findByPk(id_postagem);
+
+  if (!post) return res.status(404).json({ error: 'Postagem não encontrada' });
+
+  // Garante que o campo curtidas existe e é inteiro
+  if (typeof post.curtidas !== 'number' || isNaN(post.curtidas)) post.curtidas = 0;
+
   if (curtidaExistente) {
     await curtidaExistente.destroy();
-    if (post && post.curtidas > 0) {
-      post.curtidas = post.curtidas - 1;
-      await post.save();
-    }
+    post.curtidas = Math.max(0, post.curtidas - 1);
+    await post.save();
     return res.json({ sucesso: true, removido: true });
   } else {
     await Curtida.create({ id_postagem, id_usuario });
-    if (post) {
-      post.curtidas = (post.curtidas || 0) + 1;
-      await post.save();
-    }
+    post.curtidas = (post.curtidas || 0) + 1;
+    await post.save();
     return res.json({ sucesso: true, adicionado: true });
   }
 }));
@@ -268,6 +316,18 @@ router.get('/api/upcoming-events', asyncHandler(async (req, res) => {
     };
   }));
   res.json(result);
+}));
+
+// API: Comentários de uma postagem
+router.get('/api/postagens/:id/comentarios', asyncHandler(async (req, res) => {
+  const comentarios = await Comentario.findAll({
+    where: { id_postagem: req.params.id },
+    include: [
+      { model: Usuario, as: 'autor', attributes: ['id_usuario', 'nome_usuario', 'foto_perfil'] }
+    ],
+    order: [['data_criacao', 'ASC']]
+  });
+  res.json(comentarios);
 }));
 
 module.exports = router;

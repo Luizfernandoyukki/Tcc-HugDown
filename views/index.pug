@@ -2,7 +2,7 @@ extends layout
 
 block content
   // Hero Section
-  section.hero-section
+  section.hero-section.mb-5
     .container
       .row.align-items-center.min-vh-100
         .col-lg-6
@@ -12,9 +12,9 @@ block content
             p.hero-description Encontre pessoas com interesses similares, participe de eventos incríveis e faça parte de grupos que realmente importam para você.
             .hero-actions
               if isLoggedIn
-                a.btn.btn-primary.btn-lg.me-3(href="/cadastro") 
-                  i.fas.fa-user-plus.me-2
-                  | Começar Agora
+                a.btn.btn-primary.btn-lg.me-3(href="/feed")
+                  i.fas.fa-rss.me-2
+                  | Feed de Postagens
                 a.btn.btn-outline-light.btn-lg(href="/eventos") 
                   i.fas.fa-compass.me-2
                   | Explorar
@@ -25,24 +25,24 @@ block content
         .col-lg-6
           .hero-illustration
             .floating-cards
-              .card.floating-card.card-1
+              .card.floating-card.card-1.mb-4
                 .card-body
                   i.fas.fa-users.text-primary
                   h6 Grupos Ativos
                   span.counter#group-count 
-              .card.floating-card.card-2
+              .card.floating-card.card-2.mb-4
                 .card-body
                   i.fas.fa-calendar-alt.text-success
                   h6 Eventos
                   span.counter#event-count 
-              .card.floating-card.card-3
+              .card.floating-card.card-3.mb-4
                 .card-body
                   i.fas.fa-heart.text-danger
                   h6 Conexões
                   span.counter#user-count 
 
   // Features Section
-  section#explore.features-section.py-5
+  section#explore.features-section.py-5.mb-5
     .container
       .row.text-center.mb-5
         .col-12
@@ -87,7 +87,7 @@ block content
                 a.btn.btn-outline-primary.disabled(href="#") Faça login para criar
 
   // Stats Section
-  section.stats-section.py-5
+  section.stats-section.py-5.mb-5
     .container
       .row.text-center
         .col-md-3.col-6.mb-4
@@ -108,7 +108,7 @@ block content
             .stat-label Conexões
 
   // Recent Activity Section
-  section.activity-section.py-5
+  section.activity-section.py-5.mb-5
     .container
       .row
         .col-lg-8
@@ -131,7 +131,7 @@ block content
                   span Carregando eventos...
 
   // CTA Section
-  section.cta-section.py-5
+  section.cta-section.py-5.mb-5
     .container.text-center
       if isLoggedIn
         h2 Você já está pronto!

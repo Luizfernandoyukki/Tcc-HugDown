@@ -189,6 +189,8 @@ async function fetchUpcomingEvents() {
 // Efeitos de scroll
 function setupScrollEffects() {
     // Parallax suave no hero
+    // Remova ou comente este bloco para evitar sobreposição/deslocamento
+    /*
     window.addEventListener('scroll', () => {
         const scrolled = window.pageYOffset;
         const heroSection = document.querySelector('.hero-section');
@@ -196,7 +198,7 @@ function setupScrollEffects() {
             heroSection.style.transform = `translateY(${scrolled * 0.5}px)`;
         }
     });
-
+    */
     // Animação das stats quando aparecem na tela
     const statsSection = document.querySelector('.stats-section');
     if (statsSection) {
@@ -276,43 +278,39 @@ function formatMonth(date) {
 }
 
 // Adicionar CSS adicional para os eventos
-const additionalCSS = `
-.event-item {
-    padding: 1rem;
-    border-radius: 10px;
-    border: 1px solid #eee;
-    transition: all 0.3s ease;
+if (!document.getElementById('hugdown-additional-css')) {
+  const additionalCSS = `
+  .event-item {
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      transition: all 0.3s ease;
+  }
+  .event-item:hover {
+      background: #f8f9fa;
+      border-color: #667eea;
+  }
+  .event-date {
+      text-align: center;
+      min-width: 50px;
+  }
+  .date-day {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #667eea;
+  }
+  .date-month {
+      font-size: 0.8rem;
+      color: #666;
+      font-weight: 600;
+  }
+  .event-info h6 {
+      color: #333;
+      font-weight: 600;
+  }
+  `;
+  const style = document.createElement('style');
+  style.id = 'hugdown-additional-css';
+  style.textContent = additionalCSS;
+  document.head.appendChild(style);
 }
-
-.event-item:hover {
-    background: #f8f9fa;
-    border-color: #667eea;
-}
-
-.event-date {
-    text-align: center;
-    min-width: 50px;
-}
-
-.date-day {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #667eea;
-}
-
-.date-month {
-    font-size: 0.8rem;
-    color: #666;
-    font-weight: 600;
-}
-
-.event-info h6 {
-    color: #333;
-    font-weight: 600;
-}
-`;
-
-// Injetar CSS adicional
-const style = document.createElement('style');
-style.textContent = additionalCSS;
-document.head.appendChild(style);
