@@ -17,6 +17,17 @@ block content
               span.text-muted.small= n.mensagem
               br
               small.text-muted= new Date(n.data_criacao).toLocaleString('pt-BR')
-            if !n.lida
+            // Botões para amizade ou grupo
+            if n.tipo_notificacao === 'friendship' && !n.lida && n.id_amizade
+              form(action=`/amizades/${n.id_amizade}/aceitar`, method="POST", style="display:inline")
+                button.btn.btn-sm.btn-success(type="submit") Aceitar
+              form(action=`/amizades/${n.id_amizade}/recusar`, method="POST", style="display:inline")
+                button.btn.btn-sm.btn-danger(type="submit") Recusar
+            else if n.tipo_notificacao === 'group_invite' && !n.lida && n.id_grupo
+              form(action=`/grupos/${n.id_grupo}/aceitar-convite`, method="POST", style="display:inline")
+                button.btn.btn-sm.btn-success(type="submit") Aceitar
+              form(action=`/grupos/${n.id_grupo}/recusar-convite`, method="POST", style="display:inline")
+                button.btn.btn-sm.btn-danger(type="submit") Recusar
+            else if !n.lida
               form(action=`/notificacoes/${n.id_notificacao}/ler` method="POST" style="display:inline")
                 button.btn.btn-sm.btn-outline-success(type="submit") Marcar como lida

@@ -51,6 +51,29 @@ router.get('/:id', requireLogin, async (req, res) => {
     });
     if (!evento) return res.status(404).render('error', { error: 'Evento não encontrado' });
 
+    // Busca endereço corrido via Nominatim se houver latitude/longitude
+    let enderecoCompleto = '';
+    if (evento.latitude && evento.longitude) {
+      const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${evento.latitude}&lon=${evento.longitude}`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.address) {
+          enderecoCompleto = [
+            data.address.road,
+            data.address.neighbourhood,
+            data.address.suburb,
+            data.address.city || data.address.town || data.address.village,
+            data.address.state,
+            data.address.country
+          ].filter(Boolean).join(', ');
+        }
+      } catch (err) {
+        enderecoCompleto = '';
+      }
+    }
+
     // Verifica se o usuário já está inscrito
     let usuarioJaInscrito = false;
     if (req.session.userId) {
@@ -60,7 +83,12 @@ router.get('/:id', requireLogin, async (req, res) => {
       usuarioJaInscrito = !!inscrito;
     }
 
-    res.render('eventos/show', { evento, isLoggedIn: !!req.session.userId, usuarioJaInscrito });
+    res.render('eventos/show', {
+      evento,
+      isLoggedIn: !!req.session.userId,
+      usuarioJaInscrito,
+      enderecoCompleto // <-- passa para a view
+    });
   } catch (err) {
     res.status(500).render('error', { error: 'Erro ao buscar evento: ' + err.message });
   }

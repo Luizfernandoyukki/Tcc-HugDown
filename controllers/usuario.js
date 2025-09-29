@@ -69,8 +69,8 @@ exports.criar = async (req, res) => {
 
     // Foto de perfil (se veio via upload)
     let foto_perfil = null;
-    if (req.file && req.file.filename) {
-      foto_perfil = '/perfis/' + req.file.filename; // Caminho relativo para servir via express.static
+    if (req.files && req.files.foto_perfil && req.files.foto_perfil[0]) {
+      foto_perfil = '/perfis/' + req.files.foto_perfil[0].filename; // Caminho relativo para servir via express.static
     } else if (req.body.foto_perfil) {
       foto_perfil = req.body.foto_perfil;
     }

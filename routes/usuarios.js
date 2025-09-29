@@ -128,7 +128,7 @@ async function redirecionarParaPerfil(req, res, next) {
 // Rota para buscar qualquer usuário pelo id e redirecionar para o perfil correto
 router.get('/find/:id', requireLogin, redirecionarParaPerfil);
 
-// Servir imagens de perfil e post como estático
+module.exports = router;
 router.use('/perfis', express.static(path.join(__dirname, '../perfis')));
 router.use('/post', express.static(path.join(__dirname, '../post')));
 module.exports = router;

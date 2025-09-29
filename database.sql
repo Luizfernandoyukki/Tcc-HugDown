@@ -20,7 +20,7 @@ CREATE TABLE usuarios (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     ativo BOOLEAN DEFAULT TRUE,
-    idioma_preferido VARCHAR(10) DEFAULT 'en-US',
+    idioma_preferido VARCHAR(10) DEFAULT 'pt-br',
     genero VARCHAR(20),
     data_nascimento DATE,
     fuso_horario VARCHAR(50),

@@ -13,7 +13,7 @@ block content
         if evento.data_fim
           |  até #{new Date(evento.data_fim).toLocaleString('pt-BR')}
       p.text-muted.mb-1
-        | Local: #{evento.local_evento || evento.endereco_evento || 'Online'}
+        | Local: #{enderecoCompleto || evento.local_evento || evento.endereco_evento || 'Online'}
       if evento.max_participantes
         p.text-muted.mb-1 Máx. participantes: #{evento.max_participantes}
       if evento.organizador

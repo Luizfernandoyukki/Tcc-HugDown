@@ -10,7 +10,7 @@ block content
         .card.shadow-sm.mb-4
           .card-body.text-center
             if usuario.foto_perfil
-              img.rounded-circle.mb-3(src=usuario.foto_perfil, alt=usuario.nome_usuario, width="120", height="120", onerror="this.src='/images/default-user.png'")
+              img.rounded-circle.mb-3(src=usuario.foto_perfil, alt=usuario.nome_usuario, width="120", height="120")
             h4= usuario.nome_usuario
             p.text-muted= usuario.email
             if usuario.biografia
@@ -23,17 +23,26 @@ block content
                 b Localização: 
                 | #{usuario.cidade}, #{usuario.estado}, #{usuario.pais}
             a.btn.btn-warning.mt-3(href=`/usuarios/perfil-${usuario.id_usuario}/edit`) Editar perfil
-        .card.shadow-sm.mb-4
-          .card-body
-            h5.text-success.mb-3 Meus Amigos
-            if usuario.amigos && usuario.amigos.length
-              .d-flex.flex-wrap
-                each amigo in usuario.amigos
-                  .me-2.mb-2
-                    img.rounded-circle(src=amigo.foto_perfil, alt=amigo.nome_usuario, width="40", height="40", onerror="this.src='/images/default-user.png'")
-                    span.ms-2= amigo.nome_usuario
-            else
-              p.text-muted Nenhum amigo encontrado.
+            a.btn.btn-primary.mt-2(href="/amizades") Procurar usuários
+            // Botão para abrir modal de pedidos de amizade
+            button.btn.btn-info.mt-2(type="button", id="btn-pedidos-amizade") Pedidos de amizade
+        // Modal de pedidos de amizade
+        .modal.fade#modal-pedidos-amizade(tabindex="-1", aria-labelledby="modalPedidosLabel", aria-hidden="true")
+          .modal-dialog
+            .modal-content
+              .modal-header
+                h5.modal-title#modalPedidosLabel Pedidos de amizade
+                button.btn-close(type="button", data-bs-dismiss="modal", aria-label="Fechar")
+              .modal-body
+                // Lista de pedidos será preenchida via JS
+                ul.list-group#lista-pedidos-amizade
+                  li.list-group-item.text-muted Carregando...
+              .modal-footer
+                button.btn.btn-secondary(type="button", data-bs-dismiss="modal") Fechar
+        // Botão de logout no canto inferior esquerdo
+        .mt-4
+          form(action="/logout", method="POST")
+            button.btn.btn-outline-danger.w-100(type="submit") Logout
       .col-md-8
         .card.shadow-sm
           .card-body
@@ -52,7 +61,6 @@ block content
               p.text-muted Nenhuma postagem encontrada.
 
 block scripts
-  script.
-    window.usuario = !{JSON.stringify(usuario)};
-    console.log('[FRONTEND] Dados do meu perfil:', window.usuario);
   script(src="/javascripts/usuarios/index.js")
+    window.usuario = !{JSON.stringify(usuario)};
+   

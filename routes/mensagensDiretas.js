@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { MensagemDireta, Usuario, Amizade } = require('../models');
 const { Op } = require('sequelize');
+const notificacaoService = require('../controllers/notificacaoService');
 
 // Middleware: exige login
 function requireLogin(req, res, next) {
@@ -96,11 +97,13 @@ router.post('/conversa/:id', requireLogin, async (req, res) => {
     }
   });
   if (!amizade) return res.status(403).render('error', { message: 'Você só pode conversar com amigos.' });
-  await MensagemDireta.create({
+  const mensagem = await MensagemDireta.create({
     id_remetente: userId,
     id_destinatario: outroId,
     conteudo
   });
+  // Notifica o destinatário
+  await notificacaoService.notificarMensagemDireta(outroId);
   res.redirect(`/mensagens-diretas/conversa/${outroId}`);
 });
 

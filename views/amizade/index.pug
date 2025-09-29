@@ -1,0 +1,56 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/perfil.css")
+
+block content
+  .container.mt-4
+    h3.text-primary.mb-4 Procurar Usuários
+    // Barra de pesquisa por nome de usuário
+    .mb-3
+      input.form-control(type="text", id="search-usuario", placeholder="Pesquisar por nome de usuário...")
+    if usuarios && usuarios.length
+      table.table.table-hover#usuarios-table
+        thead
+          tr
+            th Foto
+            th Nome de Usuário
+            th Nome Real
+            th Ação
+        tbody
+          each usuario in usuarios
+            tr
+              td
+                img.rounded-circle(src=usuario.foto_perfil || '/images/default-user.png', alt=usuario.nome_usuario, width="40", height="40")
+              td.usuario-nome= usuario.nome_usuario
+              td= usuario.nome_real + ' ' + usuario.sobrenome_real
+              td
+                if usuario.id_usuario != userId
+                  form(action="/amizades/solicitar", method="POST")
+                    input(type="hidden", name="id_destinatario", value=usuario.id_usuario)
+                    button.btn.btn-success.btn-sm(type="submit") Solicitar amizade
+                else
+                  span.text-muted Você
+    else
+      p.text-muted Nenhum usuário encontrado.
+
+block scripts
+  script.
+    window.usuarios = !{JSON.stringify(usuarios)};
+    window.userId = !{JSON.stringify(userId)};
+    // Filtro de pesquisa por nome de usuário
+    document.addEventListener('DOMContentLoaded', function() {
+      const input = document.getElementById('search-usuario');
+      const table = document.getElementById('usuarios-table');
+      if (!input || !table) return;
+      input.addEventListener('input', function() {
+        const termo = input.value.trim().toLowerCase();
+        const linhas = table.querySelectorAll('tbody tr');
+        linhas.forEach(tr => {
+          const nomeTd = tr.querySelector('.usuario-nome');
+          if (!nomeTd) return;
+          const nome = nomeTd.textContent.trim().toLowerCase();
+          tr.style.display = nome.includes(termo) ? '' : 'none';
+        });
+      });
+    });

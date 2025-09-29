@@ -364,5 +364,7 @@ router.post('/:id/excluir/definitivo', requireLogin, async (req, res) => {
   res.redirect('/grupos');
 });
 
+// Remova qualquer router.use para servir imagens de grupos aqui, pois está centralizado em index.js
+
 // ...existing code for PUT, DELETE if needed...
 module.exports = router;

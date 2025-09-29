@@ -1,5 +1,5 @@
-const path = require('path');
 const express = require('express');
+const path = require('path');
 const router = express.Router();
 const { Usuario, Comentario, Curtida, Postagem, Evento, Grupo, ParticipanteEvento, Amizade } = require('../models');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
@@ -58,9 +58,12 @@ router.post('/logout', (req, res) => {
 });
 router.post('/login', usuarioController.login);
 
-// Adicione este bloco no início do arquivo, após os requires
-const app = express();
-app.use('/post', express.static(path.join(__dirname, '../post')));
+// Servir imagens de perfil de usuário, grupos e postagens como estático
+router.use('/perfis', express.static(path.join(__dirname, '../perfis')));
+router.use('/grupos/public', express.static(path.join(__dirname, '../grupos/public')));
+router.use('/grupos/private', express.static(path.join(__dirname, '../grupos/private')));
+router.use('/post', express.static(path.join(__dirname, '../post')));
+router.use('/images', express.static(path.join(__dirname, '../images')));
 
 // Importação dos módulos de rota (cada um em seu arquivo)
 router.use('/usuarios', require('./usuarios'));

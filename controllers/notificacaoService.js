@@ -112,12 +112,18 @@ exports.notificarNovoPostAmigo = async (amigos, id_postagem) => {
 };
 
 // Mensagem direta
-exports.notificarMensagemDireta = async (id_destinatario) => {
+exports.notificarMensagemDireta = async (id_destinatario, id_solicitante) => {
+  // Busca o nome do remetente
+  let nomeRemetente = 'Um usuário';
+  if (id_solicitante) {
+    const usuario = await Usuario.findByPk(id_solicitante, { attributes: ['nome_usuario'] });
+    if (usuario && usuario.nome_usuario) nomeRemetente = usuario.nome_usuario;
+  }
   await criarNotificacao({
     id_usuario: id_destinatario,
     tipo_notificacao: 'message',
-    titulo: 'Nova mensagem direta',
-    mensagem: 'Você recebeu uma nova mensagem.'
+    titulo: 'Nova mensagem',
+    mensagem: `Você recebeu uma nova mensagem de ${nomeRemetente}.`
   });
 };
 

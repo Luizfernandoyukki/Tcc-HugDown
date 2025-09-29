@@ -28,6 +28,8 @@ block content
                 .card.mb-4.shadow-sm
                   if g.foto_grupo
                     img.card-img-top(src=g.foto_grupo, alt="Foto do grupo", style="max-height:160px;object-fit:cover;")
+                  else
+                    img.card-img-top(src="/images/default-group.png", alt="Grupo padrão", style="max-height:160px;object-fit:cover;")
                   .card-body
                     h5.card-title.mb-1= g.nome_grupo
                     if g.descricao_grupo
@@ -48,6 +50,8 @@ block content
       h2.mb-3.mt-5= grupo.nome_grupo
       if grupo.foto_grupo
         img(src=grupo.foto_grupo, alt="Foto do grupo", class="mb-3 rounded", style="max-width:200px;max-height:200px;")
+      else
+        img(src="/images/default-group.png", alt="Grupo padrão", class="mb-3 rounded", style="max-width:200px;max-height:200px;")
       p.text-muted.mb-2= grupo.descricao_grupo
       p
         b Tipo de privacidade:
