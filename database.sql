@@ -419,3 +419,18 @@ ALTER TABLE secoes
   ADD COLUMN id_grupo INT NULL AFTER ativo,
   ADD CONSTRAINT fk_secoes_grupo FOREIGN KEY (id_grupo) REFERENCES grupos(id_grupo) ON DELETE CASCADE;
 
+CREATE TABLE reports (
+    id_report INT AUTO_INCREMENT PRIMARY KEY,
+    id_postagem INT NOT NULL,
+    id_usuario INT NOT NULL,
+    motivo TEXT NOT NULL,
+    snapshot_post TEXT NOT NULL,
+    data_report TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'reviewed', 'dismissed') DEFAULT 'pending',
+    FOREIGN KEY (id_postagem) REFERENCES postagens(id_postagem) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    INDEX idx_postagem (id_postagem),
+    INDEX idx_usuario (id_usuario),
+    INDEX idx_status (status)
+);
+

@@ -1,93 +1,84 @@
 extends layout
 
 block content
-  section.feed-section.py-5
-    .container.d-flex.justify-content-center
-      .feed-wrapper(style="width:60%;margin:auto;")
-        h2.mb-4.text-center Feed de Postagens
+  //- Inclua CSS e JS aqui, no topo do bloco content
+  link(rel="stylesheet", href="/stylesheets/feed.css")
+  script(src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")
+ 
+  .feed-container
+    // Topo: Categorias e Tags
+    .top-bar
+      .categorias
+        each categoria in categorias
+          button.btn.btn-primary.categoria-btn(data-categoria=categoria.id_categoria)= categoria.nome_categoria
+      .tags-scroll
+        .tags-list
+          each tag, i in tags
+            if i < 10
+              button.btn.btn-light.tag-btn(data-tag=tag.id_tag)= tag.nome_tag
+          if tags.length > 10
+            button.btn.btn-secondary#mostrar-todas-tags Mostrar todas
 
-        // Balões de categorias
-        .mb-3.d-flex.justify-content-center
-          .d-flex.flex-wrap.gap-2
-            each cat in categorias.slice(0,4)
-              .badge.bg-primary.text-light.px-3.py-2.fs-6.balao-categoria(data-id=cat.id_categoria)
-                i.fas.fa-folder-open.me-1
-                | #{cat.nome_categoria}
+    // Menu lateral de tags (oculto por padrão)
+    .menu-lateral-tags#menu-lateral-tags
+      h4 Todas as Tags
+      each tag in tags
+        button.btn.btn-light.tag-btn(data-tag=tag.id_tag)= tag.nome_tag
+      button.btn.btn-dark#fechar-menu-lateral Fechar
 
-        // Balões de tags (limitadas, botão para expandir)
-        .mb-3.d-flex.justify-content-center
-          .d-flex.flex-wrap.gap-2#tags-baloes
-            each tg, idx in tags
-              if idx < 8
-                .badge.bg-secondary.text-light.px-3.py-2.fs-6.tag-balao.balao-tag(data-id=tg.id_tag)
-                  i.fas.fa-tag.me-1
-                  | #{tg.nome_tag}
-          button.btn.btn-outline-secondary.btn-sm.ms-2#btn-exibir-todas-tags(type="button") Exibir todas
+    // Mensagem de boas-vindas
+    .bem-vindo
+      if usuario
+        h2 Bem-vindo, #{usuario.nome_usuario}!
+      else
+        h2 Bem-vindo!
 
-        // Lista de postagens
-        .row.mt-4.justify-content-start
-          if posts.length === 0
-            .col-12
-              p.text-muted.text-center Nenhuma postagem encontrada.
-          else
-            each post, idx in posts
-              .col-12.mb-5 
-                .card.shadow-sm.mx-auto(style="max-width:100%; text-align:left;")
-                  .card-body
-                    .d-flex.align-items-center.mb-2
-                      if post.autor && post.autor.foto_perfil
-                        img.rounded-circle.me-2(src=post.autor.foto_perfil, alt="Foto perfil", width="40", height="40")
-                      else
-                        img.rounded-circle.me-2(src="/images/default-profile.png", alt="Foto perfil", width="40", height="40")
-                      .flex-grow-1
-                        h6.mb-0 #{post.autor ? post.autor.nome_usuario : 'Autor desconhecido'}
-                        small.text-muted #{post.data_criacao ? post.data_criacao.toLocaleString() : ''}
-                    h5.card-title.mt-2 #{post.titulo}
-                    .d-flex.mb-2
-                      if post.categoria
-                        span.badge.bg-primary.me-1 #{post.categoria.nome_categoria}
-                      if post.tag
-                        span.badge.bg-secondary.me-1 #{post.tag.nome_tag}
-                    if post.endereco
-                      small.text-muted.d-block.mb-1 Endereço: #{post.endereco}
-                    if post.url_midia
-                      .d-flex.justify-content-start
-                        img.mt-2.mb-2(src=post.url_midia, alt="Imagem da postagem", style="max-width:100%;max-height:200px;")
-                    else
-                      if post.resumo
-                        p.card-text.text-muted #{post.resumo}
-                      p.mb-2 #{post.conteudo}
-                    .d-flex.gap-2.align-items-center
-                      button.btn.btn-outline-danger.btn-sm.btn-curtir(type="button" data-id=post.id_postagem data-idx=idx)
-                        i.fas.fa-heart.me-1
-                        | Curtir
-                        span.ms-1.curtidas-count(id=`curtidas-count-${post.id_postagem}`) #{post.curtidas || 0}
-                      button.btn.btn-outline-primary.btn-sm.btn-comentar(type="button" data-id=post.id_postagem)
-                        i.fas.fa-comment.me-1
-                        | Comentar
-                      button.btn.btn-outline-success.btn-sm.btn-compartilhar(type="button" data-id=post.id_postagem)
-                        i.fas.fa-share.me-1
-                        | Compartilhar
-                      button.btn.btn-outline-dark.btn-sm.btn-expandir(type="button" style="margin-left:auto;" data-idx=idx)
-                        i.fas.fa-expand.me-1
-                        | Expandir
+    // Feed de postagens
+    .posts-feed
+      each post in posts
+        .card-postagem(data-id=post.id_postagem)
+          button.btn.btn-outline-danger.reportar-btn(title="Reportar postagem") Reportar
+          .autor-info
+            img.foto-autor(src=post.autor.foto_perfil, alt="Foto do autor")
+            span.nome-autor @#{post.autor.nome_usuario}
+          h3.titulo-post= post.titulo
+          .resumo-post= post.resumo
+          .datas-post
+            span Data de criação:
+            span= post.data_criacao ? new Date(post.data_criacao).toLocaleString('pt-BR') : ''
+            if post.data_atualizacao
+              span Atualizado em:
+              span= post.data_atualizacao ? new Date(post.data_atualizacao).toLocaleString('pt-BR') : ''
+            // Adiciona campo de localização logo após a data de atualização
+            if post.endereco
+              span Localização:
+              span= post.endereco
+          if post.conteudo
+            .conteudo-post= post.conteudo
+          if post.url_midia
+            img.foto-post(src=post.url_midia, alt="Foto da postagem")
+          // Rodapé do card: botões e visualizações
+          .card-footer.d-flex.justify-content-between.align-items-center(style="background:transparent;border:none;padding:0;margin-top:1rem;")
+            .acoes-post.d-flex.gap-2
+              button.btn.btn-primary.curtir-btn(data-id=post.id_postagem)
+                i.bi.bi-hand-thumbs-up-fill
+                |  Curtir (
+                span.curtidas-count= post.curtidas || 0
+                | )
+              button.btn.btn-light.comentar-btn(data-id=post.id_postagem)
+                i.bi.bi-chat-dots-fill
+                |  Comentários
+            .visualizacoes.text-end
+              i.bi.bi-eye-fill(style="font-size:1.2rem;vertical-align:middle;")
+              span(style="margin-left:4px;")= post.visualizacoes || 0
 
-        // Modal para expandir postagem
-        .modal.fade#modalPostagem(tabindex="1")
-          .modal-dialog.modal-lg
-            .modal-content
-              .modal-header
-                h5.modal-title#modalTitulo
-                button.btn-close(type="button" data-bs-dismiss="modal")
-              .modal-body
-                // Conteúdo dinâmico
-                #modalConteudo
-              .modal-footer
-                button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Fechar
+    // Aba de comentários fixa inferior (oculta por padrão)
+    .comentarios-aba#comentarios-aba
+      .comentarios-list-aba
+        // Comentários serão carregados via JS
+      form.comentar-form-aba
+        textarea(name="conteudo" placeholder="Digite seu comentário...")
+        button.btn.btn-primary(type="submit") Enviar
 
-      // Exporta os dados das postagens para o JS
-      script.
-        window.postsData = !{JSON.stringify(posts)};
-
-block scripts
-  script(src="/javascripts/feed.js")
+  // Adicione o script JS no final do bloco content
+  script(src="/javascripts/feed.js", defer)

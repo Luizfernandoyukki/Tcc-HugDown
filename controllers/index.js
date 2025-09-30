@@ -21,6 +21,7 @@ const tagTraducaoController = require('./tagTraducao');
 const usuarioController = require('./usuario');
 const profissionalSaudeController = require('./profissionalSaude');
 const postagemSecaoController = require('./postagemSecao');
+const reportsController = require('./reports');
 
 module.exports = {
   administradorController,
@@ -30,6 +31,7 @@ module.exports = {
   comentarioController,
   compartilhamentoController,
   curtidaController,
+  reportsController,
   documentoVerificacaoController,
   eventoController,
   grupoController,

@@ -44,6 +44,7 @@ html
             if isLoggedIn && usuario
               a(href='/usuarios/index/' + usuario.id_usuario, title='Meu Perfil')
                 img.rounded-circle(src=usuario.foto_perfil || '/images/default-avatar.png', alt='Perfil', height='40', style='border:2px solid #009e60;')
+                span.ms-2= usuario.nome_usuario
             else
               a.btn.btn-success.btn-sm.ms-2(href='/cadastro') Cadastro
           // Direita

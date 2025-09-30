@@ -88,6 +88,7 @@ router.use('/secoes-traducao', require('./secoesTraducao'));
 router.use('/categorias-traducao', require('./categoriasTraducao'));
 router.use('/tags-traducao', require('./tagsTraducao'));
 router.use('/esqueciminhasenha', require('./esqueciminhasenha'));
+router.use('/feed', require('./feed'));
 
 // Função utilitária para converter lat/lng em endereço
 async function getLocationFromLatLng(lat, lng) {
@@ -95,7 +96,10 @@ async function getLocationFromLatLng(lat, lng) {
   const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
   const res = await fetch(url);
   const data = await res.json();
-  return data.address ? `${data.address.city || data.address.town || data.address.village || ''}, ${data.address.state || ''}` : '';
+  // Retorna apenas estado e país para privacidade
+  const estado = data.address?.state || '';
+  const pais = data.address?.country || '';
+  return [estado, pais].filter(Boolean).join(', ');
 }
 
 // Rota do feed de postagens
