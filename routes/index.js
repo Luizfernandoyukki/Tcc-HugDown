@@ -11,6 +11,8 @@ const {
   postagemController, // <--- Adicione isso
 } = controllers;
 const { usuarioController } = require('../controllers');
+const reportsController = require('../controllers/reports');
+const notificacaoService = require('../controllers/notificacaoService');
 // Wrapper para async/await
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -218,15 +220,12 @@ router.post('/api/postagens/:id/curtir-toggle', asyncHandler(async (req, res) =>
 
   if (curtidaExistente) {
     await curtidaExistente.destroy();
-    // Conta o número atualizado de curtidas
-    const curtidas = await Curtida.count({ where: { id_postagem } });
-    return res.json({ sucesso: true, removido: true, curtidas });
   } else {
     await Curtida.create({ id_postagem, id_usuario });
-    // Conta o número atualizado de curtidas
-    const curtidas = await Curtida.count({ where: { id_postagem } });
-    return res.json({ sucesso: true, adicionado: true, curtidas });
   }
+  // Conta o número atualizado de curtidas SEM atualizar campo em postagens
+  const curtidas = await Curtida.count({ where: { id_postagem } });
+  return res.json({ sucesso: true, curtidas });
 }));
 
 // Retorna dados atualizados da postagem (inclui curtidas)
@@ -326,6 +325,23 @@ router.get('/api/postagens/:id/comentarios', asyncHandler(async (req, res) => {
     order: [['data_criacao', 'ASC']]
   });
   res.json(comentarios);
+}));
+
+// API para criar report de postagem
+router.post('/api/reports', asyncHandler(async (req, res) => {
+  // Cria o report
+  const result = await reportsController.criar(req, res);
+  // Se sucesso, notifica o usuário
+  if (result && result.sucesso && req.session.userId) {
+    await notificacaoService.criarNotificacao({
+      id_usuario: req.session.userId,
+      tipo_notificacao: 'system',
+      titulo: 'Report enviado',
+      mensagem: 'Seu report foi enviado para análise.',
+      url_relacionada: null
+    });
+  }
+  // O controller já envia o response
 }));
 
 module.exports = router;

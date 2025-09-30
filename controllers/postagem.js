@@ -13,8 +13,10 @@ exports.listar = async (req, resOrOptions) => {
     ]
   });
 
-  // Ajusta o caminho da foto do autor e adiciona links de perfil
-  posts = posts.map(post => {
+  // Preenche curtidas contando na tabela curtidas
+  for (const post of posts) {
+    post.curtidas = await require('../models').Curtida.count({ where: { id_postagem: post.id_postagem } });
+    // Ajusta o caminho da foto do autor e adiciona links de perfil
     if (post.autor) {
       if (post.autor.foto_perfil && !/^https?:\/\//.test(post.autor.foto_perfil)) {
         post.autor.foto_perfil = '..' + post.autor.foto_perfil;
@@ -23,8 +25,7 @@ exports.listar = async (req, resOrOptions) => {
       post.autor.linkShow = `/usuarios/show/${post.autor.id_usuario}`;
       post.autor.linkIndex = `/usuarios/index/${post.autor.id_usuario}`;
     }
-    return post;
-  });
+  }
 
   if (resOrOptions && resOrOptions.raw) return posts;
   if (resOrOptions && typeof resOrOptions.json === 'function') return resOrOptions.json(posts);

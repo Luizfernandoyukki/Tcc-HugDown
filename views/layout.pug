@@ -25,9 +25,6 @@ html
               a.nav-link.p-2.acao-restrita(href='/notificacoes', title='Notificações')
                 img#icon-notificacao.menu-icon(src='/images/notificação.png', alt='Notificações', height='40')
             li.nav-item
-              a.nav-link.p-2(href='/search', title='Pesquisar')
-                img#icon-lupa.menu-icon(src='/images/lupa.png', alt='Pesquisar', height='40')
-            li.nav-item
               a.nav-link.p-2.acao-restrita(href='/postagens', title='Nova postagem')
                 img#icon-mais.menu-icon(src='/images/mais.png', alt='Nova postagem', height='40')
 
@@ -43,8 +40,12 @@ html
           .col-6.d-flex.align-items-center
             if isLoggedIn && usuario
               a(href='/usuarios/index/' + usuario.id_usuario, title='Meu Perfil')
-                img.rounded-circle(src=usuario.foto_perfil || '/images/default-avatar.png', alt='Perfil', height='40', style='border:2px solid #009e60;')
-                span.ms-2= usuario.nome_usuario
+                img.rounded-circle(
+                  src=usuario.foto_perfil && usuario.foto_perfil.startsWith('/') ? usuario.foto_perfil : ('/perfis/' + (usuario.foto_perfil || 'default-avatar.png')),
+                  alt='Perfil',
+                  height='40',
+                  style='border:2px solid #009e60;'
+                )
             else
               a.btn.btn-success.btn-sm.ms-2(href='/cadastro') Cadastro
           // Direita
@@ -60,6 +61,7 @@ html
   // Define status de login para o JS
   script.
     window.usuarioLogado = !{JSON.stringify(isLoggedIn)};
+    window.usuarioLogadoId = !{usuario ? usuario.id_usuario : null};
   // JS global para bloqueio de ações restritas
   script(src='/javascripts/geral.js')
   block scripts

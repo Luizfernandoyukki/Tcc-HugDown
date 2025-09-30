@@ -1,6 +1,27 @@
+/* Garante que o fundo ocupa toda a tela, inclusive topo e esquerda */
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Fundo do feed com degradê verde cobrindo toda a área do conteúdo, mas permitindo rolagem */
+.feed-bg {
+  position: relative; /* Corrigido: permite rolagem normal */
+  min-height: 100%;
+  width: 100%;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* O conteúdo do feed fica acima do fundo */
 .feed-container {
+  position: relative;
+  z-index: 1;
   width: 80vw;
   margin: 0 auto;
+  padding-bottom: 3rem;
 }
 .top-bar {
   display: flex;
@@ -15,8 +36,8 @@
   margin-bottom: 0.8rem;
 }
 .categoria-btn {
-  background: #007bff;
-  color: #fff;
+  background: #27ae60 !important;
+  color: #fff !important;
   border: none;
   padding: 0.7rem 2rem;
   border-radius: 24px;
@@ -27,7 +48,7 @@
   transition: background 0.2s;
 }
 .categoria-btn:hover {
-  background: #0056b3;
+  background: #009e60 !important;
 }
 .tags-scroll {
   width: 100%;
@@ -175,8 +196,8 @@
   margin-top: 0.5rem;
 }
 .curtir-btn {
-  background: #007bff;
-  color: #fff;
+  background: #e74c3c !important;
+  color: #fff !important;
   border: none;
   padding: 0.4rem 1rem;
   border-radius: 20px;
@@ -184,7 +205,7 @@
   font-weight: 500;
 }
 .curtir-btn:hover {
-  background: #0056b3;
+  background: #c0392b !important;
 }
 .curtidas-count {
   font-weight: bold;
@@ -273,21 +294,11 @@
 .comentarios-aba.ativo {
   display: flex;
 }
-.comentarios-list-aba {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-  padding-right: 8px;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
-}
-.comentarios-list-aba::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
-}
 .comentar-form-aba {
   display: flex;
   gap: 0.5rem;
   align-items: flex-end;
+  margin-bottom: 2.5rem; /* Adiciona espaço para o rodapé fixo */
 }
 .comentar-form-aba textarea {
   flex: 1 1 auto;
@@ -323,3 +334,75 @@
   color: #666;
   margin-right: 0.5rem;
 }
+.contadores {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+.curtidas-indicador i {
+  color: #e74c3c;
+}
+.visualizacoes-indicador i {
+  color: #007bff;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+.curtidas-indicador i {
+  color: #e74c3c;
+}
+.visualizacoes-indicador i {
+  color: #007bff;
+}
+.visualizacoes-indicador i {
+  color: #007bff;
+}
+.comentarios-list-aba {
+  flex: 1 1 auto;
+  /* Altura máxima para 4 comentários (ajuste conforme o tamanho médio de um comentário) */
+  max-height: 7.5em; /* Aproximadamente 4 linhas/comentários */
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding-right: 8px;
+  scrollbar-width: thin; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.comentarios-list-aba::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+.comentarios-list-aba::-webkit-scrollbar-thumb {
+  background: #e5e5e5;
+  border-radius: 4px;
+}
+#modal-report {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.3);
+  z-index: 5000;
+}
+#modal-report > div {
+  background: #fff;
+  max-width: 350px;
+  margin: 10vh auto;
+  padding: 1.5rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px #0002;
+  position: relative;
+}
+#modal-report h5 {
+  margin-bottom: 1rem;
+}
+#modal-report select {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+#modal-report button[type="submit"] {
+  margin-top: 0.5rem;
+}
+

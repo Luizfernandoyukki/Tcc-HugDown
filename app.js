@@ -89,16 +89,20 @@ app.use(async (req, res, next) => {
   try {
     res.locals.isLoggedIn = !!req.session.isLoggedIn;
     if (req.session.userId) {
+      // Sempre busca do banco para garantir atualização da foto e dados
       const usuario = await Usuario.findByPk(req.session.userId);
       res.locals.usuario = usuario;
+      req.session.usuario = usuario; // Atualiza na sessão também (opcional)
       console.log('[DEBUG] Usuário logado:', usuario ? usuario.email : null);
     } else {
       res.locals.usuario = null;
+      req.session.usuario = null;
       console.log('[DEBUG] Nenhum usuário logado');
     }
   } catch (err) {
     console.error('[DEBUG] Erro ao buscar usuário logado:', err);
     res.locals.usuario = null;
+    req.session.usuario = null;
   }
   next();
 });
