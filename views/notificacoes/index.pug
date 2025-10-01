@@ -1,33 +1,54 @@
 extends ../layout
 
+block styles
+  link(rel="stylesheet", href="/stylesheets/notificacoes/index.css")
+
 block content
   .container.mt-4
-    h2 Minhas Notificações
+    h2.d-flex.align-items-center
+      i.fas.fa-bell.me-3.text-success
+      | Minhas Notificações
+    
     if notificacoes.length === 0
-      p.text-muted Nenhuma notificação encontrada.
+      p.text-muted.empty-state
+        i.fas.fa-inbox.d-block.mb-3.fa-2x
+        | Nenhuma notificação encontrada.
     else
       ul.list-group
         each n in notificacoes
-          li.list-group-item.d-flex.justify-content-between.align-items-center(
+          li.list-group-item.d-flex.flex-wrap(
             class=n.lida ? '' : 'list-group-item-warning'
           )
-            .flex-grow-1
+            .notification-content
               strong= n.titulo
-              br
-              span.text-muted.small= n.mensagem
-              br
-              small.text-muted= new Date(n.data_criacao).toLocaleString('pt-BR')
-            // Botões para amizade ou grupo
-            if n.tipo_notificacao === 'friendship' && !n.lida && n.id_amizade
-              form(action=`/amizades/${n.id_amizade}/aceitar`, method="POST", style="display:inline")
-                button.btn.btn-sm.btn-success(type="submit") Aceitar
-              form(action=`/amizades/${n.id_amizade}/recusar`, method="POST", style="display:inline")
-                button.btn.btn-sm.btn-danger(type="submit") Recusar
-            else if n.tipo_notificacao === 'group_invite' && !n.lida && n.id_grupo
-              form(action=`/grupos/${n.id_grupo}/aceitar-convite`, method="POST", style="display:inline")
-                button.btn.btn-sm.btn-success(type="submit") Aceitar
-              form(action=`/grupos/${n.id_grupo}/recusar-convite`, method="POST", style="display:inline")
-                button.btn.btn-sm.btn-danger(type="submit") Recusar
-            else if !n.lida
-              form(action=`/notificacoes/${n.id_notificacao}/ler` method="POST" style="display:inline")
-                button.btn.btn-sm.btn-outline-success(type="submit") Marcar como lida
+              span.text-muted= n.mensagem
+              small.text-muted
+                i.far.fa-clock.me-1
+                = new Date(n.data_criacao).toLocaleString('pt-BR')
+            
+            .notification-actions
+              if n.tipo_notificacao === 'friendship' && !n.lida && n.id_amizade
+                form.d-inline-block.me-2(action=`/amizades/${n.id_amizade}/aceitar`, method="POST")
+                  button.btn.btn-sm.btn-success(type="submit")
+                    i.fas.fa-check.me-1
+                    | Aceitar
+                form.d-inline-block(action=`/amizades/${n.id_amizade}/recusar`, method="POST")
+                  button.btn.btn-sm.btn-danger(type="submit")
+                    i.fas.fa-times.me-1
+                    | Recusar
+              
+              else if n.tipo_notificacao === 'group_invite' && !n.lida && n.id_grupo
+                form.d-inline-block.me-2(action=`/grupos/${n.id_grupo}/aceitar-convite`, method="POST")
+                  button.btn.btn-sm.btn-success(type="submit")
+                    i.fas.fa-check.me-1
+                    | Aceitar
+                form.d-inline-block(action=`/grupos/${n.id_grupo}/recusar-convite`, method="POST")
+                  button.btn.btn-sm.btn-danger(type="submit")
+                    i.fas.fa-times.me-1
+                    | Recusar
+              
+              else if !n.lida
+                form.d-inline-block(action=`/notificacoes/${n.id_notificacao}/ler` method="POST")
+                  button.btn.btn-sm.btn-outline-success(type="submit")
+                    i.fas.fa-check.me-1
+                    | Marcar como lida

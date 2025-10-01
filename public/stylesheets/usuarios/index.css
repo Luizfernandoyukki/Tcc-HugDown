@@ -1,0 +1,138 @@
+/* Container e cards */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(90, 241, 123, 0.1);
+    background: rgba(255, 255, 255, 0.98);
+    margin-bottom: 1.5rem;
+}
+
+/* Perfil header */
+.card-body.text-center {
+    padding: 2rem;
+}
+
+.rounded-circle {
+    border: 3px solid #5af17b;
+    padding: 3px;
+    background: #fff;
+    transition: transform 0.3s ease;
+}
+
+.rounded-circle:hover {
+    transform: scale(1.05);
+}
+
+/* Nome e informações */
+h4 {
+    color: #198754;
+    font-weight: 600;
+    margin: 1rem 0;
+}
+
+/* Botões de ação */
+.btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    margin: 0.3rem;
+    font-weight: 500;
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, #ffd700, #daa520);
+    border: none;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(218, 165, 32, 0.3);
+}
+
+.btn-warning:hover {
+    background: linear-gradient(45deg, #daa520, #ffd700);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(218, 165, 32, 0.4);
+}
+
+.btn-info {
+    background: linear-gradient(45deg, #4a90e2, #81c3fd);
+    border: none;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
+}
+
+.btn-info:hover {
+    background: linear-gradient(45deg, #81c3fd, #4a90e2);
+    transform: translateY(-2px);
+}
+
+/* Modal de pedidos de amizade */
+.modal-content {
+    border: none;
+    border-radius: 16px;
+}
+
+.modal-header {
+    background: linear-gradient(45deg, #43e97b, #38f9d7);
+    color: white;
+    border: none;
+    border-radius: 16px 16px 0 0;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.list-group-item {
+    border: none;
+    border-radius: 8px !important;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+/* Botão de logout */
+.btn-outline-danger {
+    border: 2px solid #ff6b6b;
+    color: #ff6b6b;
+}
+
+.btn-outline-danger:hover {
+    background: linear-gradient(45deg, #ff6b6b, #ff8787);
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+}
+
+/* Postagens */
+.post-card {
+    border: 1px solid rgba(90, 241, 123, 0.1);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(90, 241, 123, 0.1);
+}
+
+.img-fluid {
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .btn {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}

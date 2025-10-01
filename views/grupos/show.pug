@@ -1,77 +1,95 @@
 extends ../layout
 
+block styles
+  link(rel="stylesheet", href="/stylesheets/grupos/show.css")
+
 block content
   .container.py-5
     // Botão para criar novo grupo no topo
-    .d-flex.justify-content-end.mb-4
-      a.btn.btn-outline-primary(href="/grupos/create") 
-        i.fas.fa-plus.me-2
-        | Criar novo grupo
-
-    h2.mb-4 Grupos Disponíveis
+    .d-flex.justify-content-between.align-items-center.mb-4
+      h2.mb-0 Grupos Disponíveis
+      if usuario
+        a.btn.btn-primary(href="/grupos/create")
+          i.fas.fa-plus.me-2
+          | Criar novo grupo
 
     // Listagem de todos os grupos por categoria
     if grupos && grupos.length
-      // Agrupar por categoria (assumindo que cada grupo tem grupo.categoria.nome_categoria)
+      // Agrupar por categoria
       - var gruposPorCategoria = {};
       - grupos.forEach(function(g) {
       -   var cat = g.categoria ? g.categoria.nome_categoria : 'Sem Categoria';
       -   if (!gruposPorCategoria[cat]) gruposPorCategoria[cat] = [];
       -   gruposPorCategoria[cat].push(g);
       - });
+      
       each categoria in Object.keys(gruposPorCategoria).sort()
         h4.mt-4.mb-3= categoria
         .row.g-4.mb-5
           each g in gruposPorCategoria[categoria]
             .col-md-6.col-lg-4
-              a(href=`/grupos/${g.id_grupo}` style="text-decoration:none; color:inherit;")
-                .card.mb-4.shadow-sm
-                  if g.foto_grupo
-                    img.card-img-top(src=g.foto_grupo, alt="Foto do grupo", style="max-height:160px;object-fit:cover;")
-                  else
-                    img.card-img-top(src="/images/default-group.png", alt="Grupo padrão", style="max-height:160px;object-fit:cover;")
-                  .card-body
-                    h5.card-title.mb-1= g.nome_grupo
-                    if g.descricao_grupo
-                      p.text-muted= g.descricao_grupo.substring(0, 100) + (g.descricao_grupo.length > 100 ? '...' : '')
-                    p.mb-1
-                      b Membros:
-                      |  #{g.membros ? g.membros.length : 0}
-                      if g.max_participantes
-                        |  / #{g.max_participantes}
-                    if g.categoria
-                      span.badge.bg-primary= g.categoria.nome_categoria
+              .card.grupo-card
+                if g.foto_grupo
+                  img.card-img-top.grupo-image(src=g.foto_grupo, alt=g.nome_grupo)
+                else
+                  img.card-img-top.grupo-image(src="/images/default-group.png", alt="Grupo padrão")
+                
+                if g.tipo_privacidade !== 'public'
+                  span.badge.bg-secondary.grupo-badge
+                    i.fas.fa-lock.me-1
+                    = g.tipo_privacidade
+                
+                .grupo-details
+                  h5.card-title= g.nome_grupo
+                  if g.descricao_grupo
+                    p.text-muted= g.descricao_grupo.substring(0, 100) + (g.descricao_grupo.length > 100 ? '...' : '')
+                  .grupo-members
+                    i.fas.fa-users.me-2
+                    | #{g.membros ? g.membros.length : 0}
+                    if g.max_participantes
+                      |  / #{g.max_participantes}
+                  if g.categoria
+                    span.badge.bg-primary= g.categoria.nome_categoria
+                  a.stretched-link(href=`/grupos/${g.id_grupo}`)
     else
       p.text-muted Nenhum grupo encontrado.
 
     // Visualização individual do grupo selecionado
     if grupo
-      hr
-      h2.mb-3.mt-5= grupo.nome_grupo
-      if grupo.foto_grupo
-        img(src=grupo.foto_grupo, alt="Foto do grupo", class="mb-3 rounded", style="max-width:200px;max-height:200px;")
-      else
-        img(src="/images/default-group.png", alt="Grupo padrão", class="mb-3 rounded", style="max-width:200px;max-height:200px;")
-      p.text-muted.mb-2= grupo.descricao_grupo
-      p
-        b Tipo de privacidade:
-        |  #{grupo.tipo_privacidade}
-      p
-        b Administrador:
-        |  #{grupo.administrador ? grupo.administrador.nome_usuario : 'Desconhecido'}
-      p
-        b Membros:
-        |  #{grupo.membros ? grupo.membros.length : 0}
-        if grupo.max_participantes
-          |  / #{grupo.max_participantes}
-      // Corrigir checagem de membro sem optional chaining/arrow function
-      - var usuarioEhMembro = false;
-      if usuario && grupo.membros
-        - for (var i = 0; i < grupo.membros.length; i++) {
-        -   if (grupo.membros[i].id_usuario == usuario.id_usuario) { usuarioEhMembro = true; break; }
-        - }
-      if !usuarioEhMembro
-        form(method="post", action=`/grupos/${grupo.id_grupo}/participar`)
-          button.btn.btn-success.mt-3(type="submit") Incluir-se no grupo
-    else
-      p.text-muted Selecione um grupo para visualizar detalhes.
+      hr.mt-5
+      .row.mt-4
+        .col-md-8
+          .card
+            .card-body
+              h2.card-title.mb-3= grupo.nome_grupo
+              if grupo.foto_grupo
+                img.img-fluid.rounded.mb-3(src=grupo.foto_grupo, alt="Foto do grupo", style="max-width:200px;")
+              else
+                img.img-fluid.rounded.mb-3(src="/images/default-group.png", alt="Grupo padrão", style="max-width:200px;")
+              
+              p.text-muted.mb-3= grupo.descricao_grupo
+              
+              .grupo-info
+                p
+                  i.fas.fa-lock.me-2
+                  b Tipo de privacidade: 
+                  | #{grupo.tipo_privacidade}
+                p
+                  i.fas.fa-user-shield.me-2
+                  b Administrador: 
+                  | #{grupo.administrador ? grupo.administrador.nome_usuario : 'Desconhecido'}
+                p
+                  i.fas.fa-users.me-2
+                  b Membros: 
+                  | #{grupo.membros ? grupo.membros.length : 0}
+                  if grupo.max_participantes
+                    |  / #{grupo.max_participantes}
+
+              if !usuarioEhMembro
+                form.mt-4(method="post", action=`/grupos/${grupo.id_grupo}/participar`)
+                  button.btn.btn-success.btn-lg(type="submit")
+                    i.fas.fa-user-plus.me-2
+                    | Participar do grupo
+
+block scripts
+  script(src="/javascripts/grupos/show.js")

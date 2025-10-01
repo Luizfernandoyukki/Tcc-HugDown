@@ -1,0 +1,66 @@
+/* Container principal */
+.edit-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 800px;
+    margin: 2rem auto;
+    box-shadow: 0 4px 20px rgba(90, 241, 123, 0.1);
+}
+
+/* Título */
+h2 {
+    color: #198754;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(90, 241, 123, 0.2);
+}
+
+/* Campos do formulário */
+.form-control {
+    border: 1.5px solid rgba(90, 241, 123, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.form-control:focus {
+    border-color: #5af17b;
+    box-shadow: 0 0 0 0.25rem rgba(90, 241, 123, 0.1);
+    background: #fff;
+}
+
+textarea.form-control {
+    min-height: 150px;
+    resize: vertical;
+}
+
+/* Labels */
+label {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Botão de salvar */
+.btn-success {
+    background: linear-gradient(45deg, #43e97b, #38f9d7);
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(67, 233, 123, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background: linear-gradient(45deg, #38f9d7, #43e97b);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 233, 123, 0.3);
+}

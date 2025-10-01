@@ -10,6 +10,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Função para verificar notificações
+  async function checkNotifications() {
+    if (window.usuarioLogado) {
+      try {
+        const response = await fetch('/api/notificacoes/nao-lidas/count');
+        const data = await response.json();
+        const notifItem = document.querySelector('.nav-item');
+        if (data.count > 0) {
+          notifItem.classList.add('has-notifications');
+        } else {
+          notifItem.classList.remove('has-notifications');
+        }
+      } catch (error) {
+        console.error('Erro ao verificar notificações:', error);
+      }
+    }
+  }
+
+  // Verificação de notificações a cada 30 segundos
+  checkNotifications();
+  setInterval(checkNotifications, 30000);
+
+  // Bloqueio de ações restritas
   document.querySelectorAll('.acao-restrita').forEach(btn => {
     btn.addEventListener('click', function(e) {
       if (!window.usuarioLogado) {
@@ -17,7 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Você precisa estar logado para acessar esta funcionalidade.');
         return false;
       }
-      // Se logado, ação normal
     });
   });
 });

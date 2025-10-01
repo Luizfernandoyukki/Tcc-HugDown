@@ -39,46 +39,49 @@ block content
       // Feed de postagens
       .posts-feed
         each post in posts
-          .card-postagem(data-id=post.id_postagem data-id-autor=post.autor.id_usuario)
-            button.btn.btn-outline-danger.reportar-btn(title="Reportar postagem") Reportar
-            .autor-info
-              a(href='/usuarios/show/' + post.autor.id_usuario, title='Perfil do autor')
-                img.foto-autor(
-                  src=post.autor.foto_perfil && post.autor.foto_perfil.startsWith('/') ? post.autor.foto_perfil : ('/perfis/' + (post.autor.foto_perfil || 'default-avatar.png')),
-                  alt="Foto do autor"
-                )
-                span.nome-autor @#{post.autor.nome_usuario}
-            h3.titulo-post= post.titulo
-            .resumo-post= post.resumo
-            .datas-post
-              span Data de criação:
-              span= post.data_criacao ? new Date(post.data_criacao).toLocaleString('pt-BR') : ''
-              if post.data_atualizacao
-                span Atualizado em:
-                span= post.data_atualizacao ? new Date(post.data_atualizacao).toLocaleString('pt-BR') : ''
-              if post.endereco
-                span Localização:
-                span= post.endereco
-            if post.conteudo
-              .conteudo-post= post.conteudo
-            if post.url_midia
-              img.foto-post(src=post.url_midia, alt="Foto da postagem")
-            // Rodapé do card: botões e contadores
-            .card-footer.d-flex.justify-content-between.align-items-center(style="background:transparent;border:none;padding:0;margin-top:1rem;")
-              .acoes-post.d-flex.gap-2
-                button.btn.btn-danger.curtir-btn(data-id=post.id_postagem)
-                  i.fa.fa-heart(style="color:#e74c3c;")
-                  | Curtir
-                button.btn.btn-success.comentar-btn(data-id=post.id_postagem)
-                  i.fa.fa-comment(style="color:#27ae60;")
-                  | Comentários
-              .contadores.d-flex.align-items-center.gap-3
-                .curtidas-indicador.d-flex.align-items-center
-                  i.fa.fa-heart(style="color:#e74c3c;font-size:1.2rem;")
-                  span.curtidas-count(style="margin-left:4px;")= post.curtidas || 0
-                .visualizacoes-indicador.d-flex.align-items-center
-                  i.fa.fa-wifi(style="color:#007bff;font-size:1.2rem;")
-                  span(style="margin-left:4px;")= post.visualizacoes || 0
+          if post && post.id_postagem && post.autor && post.titulo
+            .card-postagem(data-id=post.id_postagem data-id-autor=post.autor.id_usuario)
+              // Só mostra o botão reportar se o post tem id_postagem e autor
+              if post.id_postagem && post.autor
+                button.btn.btn-outline-danger.reportar-btn(title="Reportar postagem") Reportar
+              .autor-info
+                a(href='/usuarios/show/' + post.autor.id_usuario, title='Perfil do autor')
+                  img.foto-autor(
+                    src=post.autor.foto_perfil && post.autor.foto_perfil.startsWith('/') ? post.autor.foto_perfil : ('/perfis/' + (post.autor.foto_perfil || 'default-avatar.png')),
+                    alt="Foto do autor"
+                  )
+                  span.nome-autor @#{post.autor.nome_usuario}
+              h3.titulo-post= post.titulo
+              .resumo-post= post.resumo
+              .datas-post
+                span Data de criação:
+                span= post.data_criacao ? new Date(post.data_criacao).toLocaleString('pt-BR') : ''
+                if post.data_atualizacao
+                  span Atualizado em:
+                  span= post.data_atualizacao ? new Date(post.data_atualizacao).toLocaleString('pt-BR') : ''
+                if post.endereco
+                  span Localização:
+                  span= post.endereco
+              if post.conteudo
+                .conteudo-post= post.conteudo
+              if post.url_midia
+                img.foto-post(src=post.url_midia, alt="Foto da postagem")
+              // Rodapé do card: botões e contadores
+              .card-footer.d-flex.justify-content-between.align-items-center(style="background:transparent;border:none;padding:0;margin-top:1rem;")
+                .acoes-post.d-flex.gap-2
+                  button.btn.btn-danger.curtir-btn(data-id=post.id_postagem)
+                    i.fa.fa-heart(style="color:#e74c3c;")
+                    | Curtir
+                  button.btn.btn-success.comentar-btn(data-id=post.id_postagem)
+                    i.fa.fa-comment(style="color:#27ae60;")
+                    | Comentários
+                .contadores.d-flex.align-items-center.gap-3
+                  .curtidas-indicador.d-flex.align-items-center
+                    i.fa.fa-heart(style="color:#e74c3c;font-size:1.2rem;")
+                    span.curtidas-count(style="margin-left:4px;")= post.curtidas || 0
+                  .visualizacoes-indicador.d-flex.align-items-center
+                    i.fa.fa-wifi(style="color:#007bff;font-size:1.2rem;")
+                    span(style="margin-left:4px;")= post.visualizacoes || 0
 
       .comentarios-aba#comentarios-aba
         .comentarios-list-aba

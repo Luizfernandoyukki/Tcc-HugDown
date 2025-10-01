@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
+const controllers = require('../controllers'); // Certifique-se de que o caminho está correto
 
 // Carregue todos os models em uma variável só
 const models = require('../models');
@@ -64,25 +65,53 @@ router.get('/', requireLogin, async (req, res) => {
 
 // Página interna do grupo (index do grupo)
 router.get('/:id/index', requireLogin, async (req, res) => {
-  const grupo = await Grupo.findByPk(req.params.id, {
-    include: [
-      { model: Usuario, as: 'administrador' },
-      { model: MembroGrupo, as: 'membros' }
-    ]
-  });
-  // Busca a seção exclusiva do grupo
-  const secaoGrupo = await Secao.findOne({ where: { id_grupo: grupo.id_grupo, ativo: true } });
-  let postagens = [];
-  if (secaoGrupo) {
-    // Busca postagens da seção do grupo
-    const postagensSecao = await PostagemSecao.findAll({ where: { id_secao: secaoGrupo.id_secao } });
-    const idsPostagens = postagensSecao.map(ps => ps.id_postagem);
-    postagens = await Postagem.findAll({
-      where: { id_postagem: idsPostagens, ativo: true },
-      include: [{ model: Usuario, as: 'autor' }]
+  try {
+    const grupo = await controllers.grupoController.buscarGrupoComMembros(req.params.id);
+    if (!grupo) {
+      return res.status(404).send('Grupo não encontrado');
+    }
+
+    // Buscar postagens com informações do autor
+    const secaoGrupo = await Secao.findOne({ 
+      where: { id_grupo: grupo.id_grupo, ativo: true } 
     });
+
+    let postagens = [];
+    if (secaoGrupo) {
+      const postagensSecao = await PostagemSecao.findAll({ 
+        where: { id_secao: secaoGrupo.id_secao },
+        include: [{
+          model: Postagem,
+          as: 'postagem',
+          where: { ativo: true },
+          include: [{
+            model: Usuario,
+            as: 'autor',
+            attributes: ['id_usuario', 'nome_usuario', 'foto_perfil']
+          }]
+        }],
+        // CORREÇÃO: ordenar pelo campo da postagem, não do PostagemSecao
+        order: [[{ model: Postagem, as: 'postagem' }, 'data_criacao', 'DESC']]
+      });
+
+      postagens = postagensSecao.map(ps => ({
+        ...ps.postagem.dataValues,
+        data_formatada: new Date(ps.postagem.data_criacao).toLocaleDateString('pt-BR'),
+        autor_nome: ps.postagem.autor.nome_usuario,
+        autor_foto: ps.postagem.autor.foto_perfil || '/images/default-avatar.png'
+      }));
+    }
+
+    res.render('grupos/index', { 
+      grupo, 
+      postagens,
+      usuario: req.user,
+      title: grupo.nome_grupo
+    });
+  } catch (err) {
+    console.error('[GRUPOS] Erro ao carregar página do grupo:', err);
+    res.status(500).send('Erro ao carregar página do grupo');
   }
-  res.render('grupos/index', { grupo, usuario: req.user, postagens });
 });
 
 // Visualizar um grupo específico (detalhe)
@@ -184,7 +213,18 @@ router.post('/:id/participar', requireLogin, async (req, res) => {
   try {
     const id_grupo = req.params.id;
     const id_usuario = req.user?.id_usuario || req.session?.userId;
-    console.log('[GRUPOS] Usuário tentando participar:', id_usuario, 'do grupo:', id_grupo);
+
+    // Busca o grupo para verificar o tipo de privacidade
+    const grupo = await Grupo.findByPk(id_grupo);
+    if (!grupo) {
+      return res.status(404).send('Grupo não encontrado');
+    }
+
+    // Se for privado, não permite inclusão direta
+    if (grupo.tipo_privacidade === 'private') {
+      return res.status(403).send('Este grupo é privado. Você só pode entrar se for convidado por um administrador.');
+    }
+
     // Verifica se já é membro
     const jaMembro = await MembroGrupo.findOne({ where: { id_grupo, id_usuario } });
     if (!jaMembro) {
@@ -195,13 +235,9 @@ router.post('/:id/participar', requireLogin, async (req, res) => {
         ativo: true
         // data_entrada é automática
       });
-      console.log('[GRUPOS] Usuário adicionado como membro do grupo');
-    } else {
-      console.log('[GRUPOS] Usuário já é membro do grupo');
     }
     res.redirect(`/grupos/${id_grupo}`);
   } catch (err) {
-    console.error('[GRUPOS][ERRO] Erro ao participar do grupo:', err);
     res.status(500).send('Erro ao participar do grupo: ' + err.message);
   }
 });

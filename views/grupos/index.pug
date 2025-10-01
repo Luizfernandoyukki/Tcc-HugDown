@@ -1,45 +1,102 @@
 extends ../layout
 
-block content
-  .container.py-5
-    h2.mb-4= grupo.nome_grupo
-    if grupo.foto_grupo
-      img(src=grupo.foto_grupo, alt="Foto do grupo", class="mb-3 rounded", style="max-width:200px;max-height:200px;")
-    p.text-muted= grupo.descricao_grupo
+block styles
+  link(rel="stylesheet", href="/stylesheets/grupos/index.css")
 
-    .row.mt-4
-      .col-md-8
-        h4 Tópicos principais
+block content
+  // Header do grupo
+  .grupo-header
+    .container
+      .row.align-items-center
+        .col-md-8
+          .d-flex.align-items-center.gap-4
+            if grupo.foto_grupo
+              img.grupo-avatar(src=grupo.foto_grupo, alt=grupo.nome_grupo)
+            else
+              img.grupo-avatar(src="/images/default-group.png", alt="Grupo padrão")
+            
+            .grupo-info
+              h2.mb-2= grupo.nome_grupo
+              p.text-muted.mb-0= grupo.descricao_grupo
+              .badge.bg-primary.mt-2
+                i.fas.fa-lock.me-2
+                = grupo.tipo_privacidade
+
+        .col-md-4.text-end
+          if usuario && grupo.membrosFormatados
+            - const meuPapel = grupo.membrosFormatados.find(m => m.id === usuario.id_usuario)
+            if meuPapel && meuPapel.isAdmin
+              a.btn.btn-outline-primary(href=`/grupos/${grupo.id_grupo}/configuracoes`)
+                i.fas.fa-cog.me-2
+                | Configurações
+
+  .container.mt-4
+    .row
+      // Área principal - Feed de postagens
+      .col-lg-8
+        // Form para nova postagem
+        .card.mb-4.new-post-card
+          .card-body
+            h5.card-title.mb-3 
+              i.fas.fa-pen.me-2
+              | Nova Postagem
+            a.btn.btn-primary.w-100(href=`/grupos/${grupo.id_grupo}/criarpostagemsecao`)
+              i.fas.fa-plus.me-2
+              | Criar Nova Postagem
+
+        // Feed de postagens
         if postagens && postagens.length
           each post in postagens
-            .card.mb-3
+            .card.mb-4.post-card
               .card-body
-                h5= post.autor ? post.autor.nome_usuario : 'Usuário'
-                p= post.conteudo
-                if post.url_midia
-                  if post.tipo_postagem === 'photo'
-                    img(src=post.url_midia, alt="Imagem da postagem", style="max-width:100%;max-height:300px;margin-top:10px;")
-                  else if post.tipo_postagem === 'video'
-                    video(controls, style="max-width:100%;max-height:300px;margin-top:10px;")
-                      source(src=post.url_midia, type="video/mp4")
-                      | Seu navegador não suporta vídeo.
-        else
-          .card.mb-3
-            .card-body
-              h5 Nenhum tópico ainda
-              p.text-muted Seja o primeiro a postar algo neste grupo!
-        // Botão para criar postagem em sessão
-        a.btn.btn-success.mt-3(href=`/grupos/${grupo.id_grupo}/criarpostagemsecao`) Criar Postagem
+                .d-flex.align-items-center.mb-3
+                  img.member-avatar(src=post.autor_foto, alt=post.autor_nome)
+                  .ms-3
+                    h6.mb-0= post.autor_nome
+                    small.text-muted= post.data_formatada
 
-      .col-md-4
-        h5 Chat em grupo
-        .card
-          .card-body
-            p.text-muted (Em breve: chat em tempo real)
-        h5.mt-4 Membros
-        ul.list-group
-          each m in grupo.membros
-            li.list-group-item= m.usuario ? m.usuario.nome_usuario : m.id_usuario
-        ul.list-group
-          each m in grupo.membros
-            li.list-group-item= m.usuario ? m.usuario.nome_usuario : m.id_usuario
+                .post-content.mt-3
+                  p.mb-3= post.conteudo
+                  if post.url_midia
+                    if post.tipo_postagem === 'photo'
+                      img.img-fluid.rounded(src=post.url_midia)
+                    else if post.tipo_postagem === 'video'
+                      video.w-100.rounded(controls)
+                        source(src=post.url_midia)
+
+                .post-actions.mt-3
+                  button.btn.btn-sm.btn-light.me-2
+                    i.far.fa-heart.me-1
+                    | Curtir
+                  button.btn.btn-sm.btn-light
+                    i.far.fa-comment.me-1
+                    | Comentar
+        else
+          .alert.alert-info.text-center
+            i.fas.fa-info-circle.me-2
+            | Nenhuma postagem ainda. Seja o primeiro a postar!
+
+      // Sidebar - Lista de membros
+      .col-lg-4
+        .card.sticky-top.members-card(style="top: 1rem;")
+          .card-header.bg-transparent
+            h5.mb-0 
+              i.fas.fa-users.me-2
+              | Membros do Grupo
+          .card-body.p-0
+            .list-group.list-group-flush
+              each membro in grupo.membrosFormatados
+                .list-group-item
+                  .d-flex.align-items-center
+                    img.member-avatar.me-3(src=membro.foto, alt=membro.nome)
+                    .member-info.flex-grow-1
+                      .fw-bold= membro.nome
+                      small.text-muted
+                        if membro.isAdmin
+                          i.fas.fa-crown.me-1.text-warning
+                          | Administrador
+                        else
+                          | Membro desde #{new Date(membro.dataEntrada).toLocaleDateString('pt-BR')}
+
+block scripts
+  script(src="/javascripts/grupos/index.js")

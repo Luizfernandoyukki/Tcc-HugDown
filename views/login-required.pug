@@ -1,8 +1,18 @@
 extends layout
 
+block styles
+  link(rel="stylesheet", href="/stylesheets/auth.css")
+
 block content
-  .container.mt-5
-    .alert.alert-warning.text-center
-      h4 Atenção!
-      p #{mensagem}
-      a.btn.btn-primary.mt-3(href=redirectUrl) Fazer login
+  .auth-container
+    .auth-card
+      i.fas.fa-lock.auth-icon
+      h2.auth-title Acesso Restrito
+      p.auth-message #{mensagem || 'Esta área requer autenticação. Por favor, faça login para continuar.'}
+      
+      a.btn.btn-primary.auth-button(href=redirectUrl || '/login')
+        i.fas.fa-sign-in-alt.me-2
+        | Fazer Login
+
+      if redirectUrl && redirectUrl !== '/login'
+        p.mt-3.text-muted Você será redirecionado após o login.

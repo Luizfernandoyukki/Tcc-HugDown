@@ -1,34 +1,149 @@
 /* Layout CSS for HugDown application*/
 /* MENU */
 .menu-icon {
-  height: 45px;
-  width: auto;
-}
-@media (min-width: 576px) and (max-width: 991.98px) { /* médio */
-  .menu-icon {
-    height: 40px !important;
-  }
-}
-@media (max-width: 575.98px) { /* pequeno */
-  .menu-icon {
     height: 35px !important;
-  }
+    width: auto;
+    transition: transform 0.2s ease;
 }
 
-/* RODAPÉ */
-.footer-icon {
-  height: 40px;
-  width: auto;
+.menu-icon:hover {
+    transform: scale(1.1);
 }
+
 @media (min-width: 576px) and (max-width: 991.98px) { /* médio */
-  .footer-icon {
-    height: 37px !important;
-  }
+    .menu-icon {
+        height: 32px !important;
+    }
 }
+
 @media (max-width: 575.98px) { /* pequeno */
-  .footer-icon {
+    .menu-icon {
+        height: 30px !important;
+    }
+}
+
+/* Barra de pesquisa melhorada */
+.search-box {
+    position: relative;
+    width: 300px;
+    margin: 0 1.5rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem 2.5rem 0.5rem 1rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #5af17b;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(90, 241, 123, 0.1);
+}
+
+.search-button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.search-button:hover {
+    color: #5af17b;
+}
+
+/* RODAPÉ ajustado */
+.site-footer {
+    height: 60px !important;
+    min-height: 60px !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.site-footer .container,
+.site-footer .row,
+.site-footer .col-6 {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.site-footer .row {
+    margin: 0;
+    width: 100%;
+}
+
+.footer-icon {
     height: 35px !important;
-  }
+    width: auto;
+    transition: transform 0.2s ease;
+}
+
+.site-footer .rounded-circle {
+    height: 35px !important;
+    width: 35px !important;
+    border: 2px solid #5af17b !important;
+    transition: transform 0.2s ease;
+}
+
+.site-footer a {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    text-decoration: none;
+}
+
+.site-footer .btn {
+    padding: 0.4rem 1.2rem;
+    margin: 0;
+}
+
+/* Ajuste para o conteúdo principal não ficar sob o footer */
+.site-main {
+    padding-bottom: 80px !important; /* Aumentado para dar mais espaço */
+    min-height: calc(100vh - 60px); /* Ajustado para altura do footer */
+    margin-bottom: 0 !important;
+}
+
+@media (max-width: 768px) {
+    .site-main {
+        padding-bottom: 70px !important;
+    }
+    
+    .site-footer {
+        height: 50px !important;
+        min-height: 50px !important;
+    }
+    
+    .footer-icon {
+        height: 30px !important;
+    }
+    
+    .site-footer .rounded-circle {
+        height: 30px !important;
+        width: 30px !important;
+    }
+    
+    .site-main {
+        margin-bottom: 60px !important;
+    }
 }
 
 /* LOGO */

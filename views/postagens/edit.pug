@@ -1,24 +1,25 @@
 extends ../layout
 
 block styles
-  style.
-    body { background: #111; color: #fff; }
-    .edit-card { background: #222; border-radius: 12px; padding: 32px; max-width: 500px; margin: 40px auto; box-shadow: 0 0 24px #000; }
+  link(rel="stylesheet", href="/stylesheets/postagens/edit.css")
 
 block content
-  .edit-card
-    h2.text-center.mb-4 Editar Postagem
-    form#form-edit(method="POST" action=`/postagens/${post.id_postagem}?_method=PUT`)
-      .mb-3
-        label(for="titulo") Título
-        input.form-control(type="text", id="titulo", name="titulo", value=post.titulo)
-      .mb-3
-        label(for="resumo") Resumo
-        textarea.form-control(id="resumo", name="resumo")= post.resumo
-      .mb-3
-        label(for="conteudo") Conteúdo
-        textarea.form-control(id="conteudo", name="conteudo")= post.conteudo
-      button.btn.btn-success.mt-3(type="submit") Salvar Alterações
+  .container
+    .edit-card
+      h2 Editar Postagem
+      form#form-edit(method="POST" action=`/postagens/${post.id_postagem}?_method=PUT`)
+        .mb-3
+          label(for="titulo") Título
+          input.form-control(type="text", id="titulo", name="titulo", value=post.titulo)
+        .mb-3
+          label(for="resumo") Resumo
+          textarea.form-control(id="resumo", name="resumo")= post.resumo
+        .mb-3
+          label(for="conteudo") Conteúdo
+          textarea.form-control(id="conteudo", name="conteudo")= post.conteudo
+        button.btn.btn-success.mt-3(type="submit") 
+          i.fas.fa-save.me-2
+          | Salvar Alterações
 
 block scripts
   script(src="/javascripts/postagens/edit.js")

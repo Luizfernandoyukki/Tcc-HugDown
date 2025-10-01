@@ -1,5 +1,80 @@
-.step-section { display: none; }
-.step-section.active { display: block; }
-.step-buttons { margin-top: 1.5rem; }
-.form-check-label { cursor: pointer; }
-#cadastro-feedback { min-height: 40px; }
+/* Estilos básicos do formulário */
+.card {
+    border: 1px solid rgba(200, 200, 200, 0.15);
+    box-shadow: 0 0 25px rgba(200, 200, 200, 0.2);
+    border-radius: 22px;
+}
+
+.card-body {
+    padding: 2.5rem !important;
+}
+
+/* Títulos */
+h2, h5 {
+    color: #198754;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+/* Campos do formulário */
+.form-control, .form-select {
+    border: 1.5px solid rgba(74, 144, 226, 0.2);
+    border-radius: 12px;
+    padding: 0.8rem 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.1);
+}
+
+.form-label {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Botões */
+.btn-primary {
+    background: linear-gradient(45deg, #ffd700, #daa520);
+    border: none;
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #daa520, #ffd700);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(218, 165, 32, 0.6);
+}
+
+.btn-outline-secondary {
+    border-radius: 50px;
+    padding: 0.8rem 2rem;
+}
+
+/* Etapas do cadastro */
+.step-section {
+    display: none;
+}
+
+.step-section.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Feedback e mensagens */
+#cadastro-feedback {
+    min-height: 40px;
+    border-radius: 12px;
+    padding: 0.5rem;
+}

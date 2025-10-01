@@ -1,0 +1,76 @@
+/* Container e título */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+h2 {
+    color: #198754;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(90, 241, 123, 0.2);
+}
+
+/* Lista de conversas */
+.list-group-item {
+    border: 1px solid rgba(90, 241, 123, 0.1);
+    border-radius: 12px !important;
+    margin-bottom: 0.5rem;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(90, 241, 123, 0.1);
+    background: #f8f9fa;
+}
+
+/* Avatar do usuário */
+.rounded-circle {
+    border: 2px solid #5af17b;
+    transition: transform 0.3s ease;
+}
+
+.list-group-item:hover .rounded-circle {
+    transform: scale(1.1);
+}
+
+/* Nome do usuário e prévia da mensagem */
+.list-group-item strong {
+    color: #333;
+    font-size: 1.1rem;
+    display: block;
+}
+
+.text-muted {
+    color: #666 !important;
+    font-size: 0.9rem;
+}
+
+/* Botão de abrir conversa */
+.btn-outline-primary {
+    border: 2px solid #5af17b;
+    color: #198754;
+    border-radius: 20px;
+    padding: 0.4rem 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(45deg, #43e97b, #38f9d7);
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(67, 233, 123, 0.2);
+}
+
+/* Estado vazio */
+.text-muted:not(.small) {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: #f8f9fa;
+    border-radius: 16px;
+    margin: 2rem 0;
+}

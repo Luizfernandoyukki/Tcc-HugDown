@@ -1,0 +1,60 @@
+.grupo-header {
+  background: linear-gradient(to right, #f8f9fa, #e9ecef);
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.grupo-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.grupo-info {
+  flex: 1;
+}
+
+.member-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.members-card {
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+.post-card {
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+}
+
+.new-post-card {
+  background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+  border: 2px dashed #dee2e6;
+}
+
+.post-actions {
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+.member-info {
+  line-height: 1.2;
+}
+
+.sticky-top {
+  top: 1rem;
+}

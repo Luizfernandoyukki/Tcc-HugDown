@@ -1,4 +1,5 @@
 const { Amizade, Usuario } = require('../models');
+const { Op } = require('sequelize');
 
 exports.listar = async (req, res) => {
   const amizades = await Amizade.findAll({
@@ -141,4 +142,55 @@ exports.solicitar = async (req, res) => {
   // ...notificação...
 
   return res.status(200).json({ mensagem: 'Pedido de amizade enviado.' });
+};
+
+// Novo método para buscar usuários com status de amizade
+exports.listarUsuariosComStatus = async (req, res) => {
+  try {
+    const usuarios = await Usuario.findAll({
+      where: { 
+        ativo: true,
+        id_usuario: { [Op.ne]: req.session.userId }
+      },
+      attributes: ['id_usuario', 'nome_usuario', 'nome_real', 'sobrenome_real', 'foto_perfil', 'biografia', 'verificado']
+    });
+
+    // Buscar todas as amizades relacionadas ao usuário logado
+    const amizades = await Amizade.findAll({
+      where: {
+        [Op.or]: [
+          { id_solicitante: req.session.userId },
+          { id_destinatario: req.session.userId }
+        ]
+      }
+    });
+
+    // Mapear os status de amizade para cada usuário
+    const usuariosComStatus = usuarios.map(usuario => {
+      const amizadeExistente = amizades.find(a => 
+        (a.id_solicitante === usuario.id_usuario && a.id_destinatario === req.session.userId) ||
+        (a.id_destinatario === usuario.id_usuario && a.id_solicitante === req.session.userId)
+      );
+
+      return {
+        ...usuario.toJSON(),
+        amizade: amizadeExistente ? {
+          id_amizade: amizadeExistente.id_amizade,
+          status_amizade: amizadeExistente.status_amizade,
+          id_solicitante: amizadeExistente.id_solicitante
+        } : null
+      };
+    });
+
+    res.render('amizade/index', { 
+      usuarios: usuariosComStatus, 
+      userId: req.session.userId 
+    });
+  } catch (error) {
+    console.error('Erro ao listar usuários:', error);
+    res.status(500).render('error', { 
+      message: 'Erro ao carregar usuários', 
+      error 
+    });
+  }
 };

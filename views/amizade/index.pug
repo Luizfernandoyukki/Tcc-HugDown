@@ -1,38 +1,67 @@
 extends ../layout
 
 block styles
-  link(rel="stylesheet", href="/stylesheets/perfil.css")
+  link(rel="stylesheet", href="/stylesheets/amizade/index.css")
 
 block content
   .container.mt-4
-    h3.text-primary.mb-4 Procurar Usuários
-    // Barra de pesquisa por nome de usuário
-    .mb-3
-      input.form-control(type="text", id="search-usuario", placeholder="Pesquisar por nome de usuário...")
-    if usuarios && usuarios.length
-      table.table.table-hover#usuarios-table
-        thead
-          tr
-            th Foto
-            th Nome de Usuário
-            th Nome Real
-            th Ação
-        tbody
-          each usuario in usuarios
-            tr
-              td
-                img.rounded-circle(src=usuario.foto_perfil || '/images/default-user.png', alt=usuario.nome_usuario, width="40", height="40")
-              td.usuario-nome= usuario.nome_usuario
-              td= usuario.nome_real + ' ' + usuario.sobrenome_real
-              td
-                if usuario.id_usuario != userId
+    .search-header.mb-4
+      h3.text-success
+        i.fas.fa-users.me-2
+        | Encontrar Amigos
+      .search-box
+        input.form-control.search-input(type="text", id="search-usuario", placeholder="Pesquisar por nome de usuário...")
+        i.fas.fa-search.search-icon
+    
+    .users-grid
+      if usuarios && usuarios.length
+        each usuario in usuarios
+          if usuario.id_usuario != userId
+            .user-card
+              .user-avatar
+                img.rounded-circle(src=usuario.foto_perfil || '/images/default-user.png', alt=usuario.nome_usuario)
+                if usuario.verificado
+                  .verified-badge
+                    i.fas.fa-check-circle
+              .user-info
+                h5.user-name= usuario.nome_usuario
+                p.user-real-name= usuario.nome_real + ' ' + usuario.sobrenome_real
+                if usuario.biografia
+                  p.user-bio= usuario.biografia.substring(0, 100) + (usuario.biografia.length > 100 ? '...' : '')
+              
+              .user-actions
+                - const amizade = usuario.amizade // Precisamos adicionar isso no backend
+                if amizade
+                  case amizade.status_amizade
+                    when 'accepted'
+                      button.btn.btn-success.btn-sm.disabled
+                        i.fas.fa-check.me-2
+                        | Amigos
+                    when 'pending'
+                      if amizade.id_solicitante === userId
+                        button.btn.btn-warning.btn-sm.disabled
+                          i.fas.fa-clock.me-2
+                          | Solicitação Enviada
+                      else
+                        .btn-group
+                          button.btn.btn-success.btn-sm.aceitar-amizade(data-id=amizade.id_amizade)
+                            i.fas.fa-check.me-2
+                            | Aceitar
+                          button.btn.btn-danger.btn-sm.rejeitar-amizade(data-id=amizade.id_amizade)
+                            i.fas.fa-times.me-2
+                            | Recusar
+                    when 'rejected'
+                      button.btn.btn-outline-secondary.btn-sm.disabled Recusado
+                else
                   form(action="/amizades/solicitar", method="POST")
                     input(type="hidden", name="id_destinatario", value=usuario.id_usuario)
-                    button.btn.btn-success.btn-sm(type="submit") Solicitar amizade
-                else
-                  span.text-muted Você
-    else
-      p.text-muted Nenhum usuário encontrado.
+                    button.btn.btn-primary.btn-sm(type="submit")
+                      i.fas.fa-user-plus.me-2
+                      | Adicionar Amigo
+      else
+        .empty-state
+          i.fas.fa-users.fa-3x.mb-3
+          p.text-muted Nenhum usuário encontrado.
 
 block scripts
   script.

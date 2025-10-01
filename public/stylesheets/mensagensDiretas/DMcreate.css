@@ -1,0 +1,94 @@
+/* Cabeçalho da conversa */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+h4 {
+    color: #198754;
+    font-weight: 600;
+}
+
+/* Card da conversa */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(90, 241, 123, 0.1);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Container de mensagens */
+.dm-messages {
+    padding: 1rem;
+    background: #fff;
+    border-radius: 12px;
+}
+
+/* Bolhas de mensagem */
+.dm-bubble {
+    padding: 1rem !important;
+    border-radius: 16px !important;
+    max-width: 70%;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Mensagem enviada */
+.justify-content-end .dm-bubble {
+    background: linear-gradient(135deg, #e0ffe6 0%, #b2f7ef 100%) !important;
+    border-bottom-right-radius: 4px !important;
+}
+
+/* Mensagem recebida */
+.justify-content-start .dm-bubble {
+    background: #f8f9fa !important;
+    border-bottom-left-radius: 4px !important;
+}
+
+/* Campo de entrada de mensagem */
+.input-group {
+    margin-top: 1rem;
+}
+
+.form-control {
+    border: 1.5px solid rgba(90, 241, 123, 0.2);
+    border-radius: 12px !important;
+    padding: 0.8rem 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #5af17b;
+    box-shadow: 0 0 0 0.25rem rgba(90, 241, 123, 0.1);
+}
+
+/* Botão de enviar */
+.btn-primary {
+    background: linear-gradient(45deg, #43e97b, #38f9d7);
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #38f9d7, #43e97b);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(67, 233, 123, 0.2);
+}
+
+/* Botão voltar */
+.btn-link {
+    color: #198754;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-link:hover {
+    color: #43e97b;
+    text-decoration: underline;
+}

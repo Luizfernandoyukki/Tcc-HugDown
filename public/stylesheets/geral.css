@@ -1,3 +1,53 @@
+/* Estilos globais básicos */
+body {
+    min-height: 100vh;
+    background: #e8f7ed !important;
+    color: #444;
+}
+
+/* Navbar e footer */
+.navbar, .site-footer {
+    background: #ffffff !important;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Indicador de notificação */
+.notification-indicator {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background: #ff4444;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    display: none;
+}
+
+.has-notifications .notification-indicator {
+    display: block;
+}
+
+/* Container principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Utilitários */
+.text-success {
+    color: #219653 !important;
+}
+
+.btn-success {
+    background: linear-gradient(45deg, #34a853, #27ae60);
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(45deg, #27ae60, #34a853);
+}
+
 /* Card flutuante de login/cadastro */
 #card-flutuante-login {
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);

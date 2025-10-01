@@ -1,7 +1,92 @@
+/* Container principal */
 .container {
-  max-width: 600px;
+  max-width: 800px;
+  margin: 0 auto;
 }
+
+/* Título e descrição */
+h2 {
+  color: #198754;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.text-muted {
+  color: #666 !important;
+}
+
+/* Botões de ação */
 .btn-lg {
+  border-radius: 16px;
+  border: none;
+  transition: all 0.3s ease;
+  text-align: left;
+  background: #fff;
   font-size: 1.2rem;
   padding: 1rem 2rem;
+}
+
+.btn-primary {
+  background: linear-gradient(45deg, #43e97b, #38f9d7) !important;
+  box-shadow: 0 4px 15px rgba(67, 233, 123, 0.2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(67, 233, 123, 0.3);
+}
+
+.btn-outline-success {
+  border: 2px solid #5af17b !important;
+  color: #198754;
+}
+
+.btn-outline-success:hover {
+  background: linear-gradient(45deg, #43e97b, #38f9d7) !important;
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(67, 233, 123, 0.2);
+}
+
+.btn-outline-primary {
+  border: 2px solid #4a90e2 !important;
+  color: #4a90e2;
+}
+
+.btn-outline-primary:hover {
+  background: linear-gradient(45deg, #4a90e2, #81c3fd) !important;
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.2);
+}
+
+/* Ícones */
+.btn i {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.8rem;
+  border-radius: 12px;
+  margin-right: 1rem;
+}
+
+/* Texto dos botões */
+.btn small {
+  opacity: 0.8;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .btn-lg {
+    padding: 1rem !important;
+  }
+
+  .btn i {
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+  }
 }

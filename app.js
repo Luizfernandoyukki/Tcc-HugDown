@@ -59,7 +59,7 @@ app.use(helmet({
     },
   },
 })); // segurança
-app.use(cors()); // habilita CORS (se necessário)
+app.use(cors()); 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

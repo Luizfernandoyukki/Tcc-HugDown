@@ -1,20 +1,28 @@
 extends layout
 
 block styles
-  link(rel='stylesheet', href='/stylesheets/error.css')
+  link(rel="stylesheet", href="/stylesheets/error.css")
 
 block content
-  .container.mt-5
-    #error-container.bg-white.rounded.shadow.p-4.mx-auto(style="max-width: 600px;")
-      h1#error-title.text-danger.mb-3 Ocorreu um erro!
-      h2#error-code.text-secondary.mb-4 Código do erro: #{error.status || 500}
-      p#error-message.text-muted.mb-3 Desculpe, algo inesperado aconteceu. Nossa equipe já foi notificada.
-      if message
-        h3#error-extra-message.text-dark.mb-3= message
-      if error && error.stack
-        details#error-details.mt-4
-          summary#error-details-summary.text-primary.fw-bold(style="cursor:pointer;") Ver detalhes técnicos (log)
-          pre#error-stack.bg-light.text-danger.p-3.rounded.mt-2= error.stack
-      h1.text-danger= error
-      if typeof stack !== 'undefined' && stack
-        pre.text-danger= stack
+  .error-container
+    .error-content
+      if error.status === 404
+        i.fas.fa-search.error-icon
+        h1.error-title Página não encontrada
+        p.error-message A página que você está procurando não existe ou foi movida.
+      else if error.status === 403
+        i.fas.fa-lock.error-icon
+        h1.error-title Acesso negado
+        p.error-message Você não tem permissão para acessar esta página.
+      else
+        i.fas.fa-exclamation-circle.error-icon
+        h1.error-title Ops! Algo deu errado
+        p.error-message Desculpe pelo inconveniente. Nossa equipe foi notificada.
+
+      .error-actions
+        a.btn.btn-primary(href="/")
+          i.fas.fa-home.me-2
+          | Voltar para página inicial
+        a.btn.btn-outline-primary(href="javascript:history.back()")
+          i.fas.fa-arrow-left.me-2
+          | Voltar

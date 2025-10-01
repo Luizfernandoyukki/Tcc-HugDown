@@ -1,0 +1,175 @@
+/* Container e header */
+.search-header {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(90, 241, 123, 0.1);
+}
+
+.search-box {
+    position: relative;
+    max-width: 500px;
+    margin: 1rem auto 0;
+}
+
+.search-input {
+    padding: 1rem 3rem 1rem 1.5rem;
+    border: 2px solid rgba(90, 241, 123, 0.2);
+    border-radius: 50px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #5af17b;
+    box-shadow: 0 0 0 4px rgba(90, 241, 123, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #198754;
+}
+
+/* Grid de usuários */
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Cards de usuário */
+.user-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(90, 241, 123, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.user-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(90, 241, 123, 0.15);
+    border-color: #5af17b;
+}
+
+/* Avatar e badge de verificação */
+.user-avatar {
+    position: relative;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.user-avatar img {
+    width: 100px;
+    height: 100px;
+    border: 3px solid #5af17b;
+    padding: 3px;
+    background: #fff;
+    transition: transform 0.3s ease;
+}
+
+.verified-badge {
+    position: absolute;
+    bottom: 0;
+    right: calc(50% - 45px);
+    background: #5af17b;
+    color: white;
+    border-radius: 50%;
+    padding: 0.25rem;
+    font-size: 1rem;
+}
+
+/* Informações do usuário */
+.user-info {
+    text-align: center;
+    flex-grow: 1;
+}
+
+.user-name {
+    color: #198754;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.user-real-name {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.user-bio {
+    color: #777;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+/* Botões de ação */
+.user-actions {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.btn-sm {
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #43e97b, #38f9d7);
+    border: none;
+    box-shadow: 0 4px 15px rgba(67, 233, 123, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #38f9d7, #43e97b);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 233, 123, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(45deg, #43e97b, #38f9d7);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(45deg, #ffd700, #daa520);
+    border: none;
+    color: #fff;
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #ff6b6b, #ff8787);
+    border: none;
+}
+
+/* Estado vazio */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: #f8f9fa;
+    border-radius: 16px;
+    color: #198754;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .users-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-box {
+        width: 100%;
+    }
+    
+    .user-card {
+        padding: 1rem;
+    }
+}

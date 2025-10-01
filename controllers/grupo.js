@@ -58,3 +58,44 @@ exports.remover = async (req, res) => {
   await grupo.destroy();
   res.json({ mensagem: 'Grupo removido com sucesso' });
 };
+
+// Buscar grupo com membros e suas informações
+exports.buscarGrupoComMembros = async (id_grupo) => {
+  try {
+    const grupo = await Grupo.findByPk(id_grupo, {
+      include: [
+        { 
+          model: Usuario, 
+          as: 'administrador',
+          attributes: ['id_usuario', 'nome_usuario', 'foto_perfil'] 
+        },
+        { 
+          model: MembroGrupo, 
+          as: 'membros',
+          include: [{
+            model: Usuario,
+            as: 'usuario',
+            attributes: ['id_usuario', 'nome_usuario', 'foto_perfil']
+          }]
+        }
+      ]
+    });
+
+    // Formatar dados dos membros
+    if (grupo && grupo.membros) {
+      grupo.membrosFormatados = grupo.membros.map(membro => ({
+        id: membro.usuario.id_usuario,
+        nome: membro.usuario.nome_usuario,
+        foto: membro.usuario.foto_perfil || '/images/default-avatar.png',
+        papel: membro.papel_membro,
+        isAdmin: membro.papel_membro === 'admin',
+        dataEntrada: membro.data_entrada
+      }));
+    }
+
+    return grupo;
+  } catch (err) {
+    console.error('[GRUPO] Erro ao buscar grupo com membros:', err);
+    throw err;
+  }
+};

@@ -1,0 +1,107 @@
+/* Container e cards */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(90, 241, 123, 0.1);
+    background: rgba(255, 255, 255, 0.98);
+    margin-bottom: 1.5rem;
+}
+
+/* Perfil header */
+.card-body.text-center {
+    padding: 2rem;
+}
+
+.rounded-circle {
+    border: 3px solid #5af17b;
+    padding: 3px;
+    background: #fff;
+    transition: transform 0.3s ease;
+}
+
+.rounded-circle:hover {
+    transform: scale(1.05);
+}
+
+/* Nome e informações */
+h4 {
+    color: #198754;
+    font-weight: 600;
+    margin: 1rem 0;
+}
+
+.text-muted {
+    color: #666 !important;
+}
+
+/* Lista de informações */
+.list-unstyled {
+    text-align: left;
+    margin-top: 1.5rem;
+}
+
+.list-unstyled li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.list-unstyled li:last-child {
+    border-bottom: none;
+}
+
+/* Botões de ação */
+.btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #43e97b, #38f9d7);
+    border: none;
+    box-shadow: 0 4px 15px rgba(67, 233, 123, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 233, 123, 0.3);
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #666;
+    border: none;
+}
+
+/* Seção de amigos */
+.amigos-section {
+    padding: 1rem;
+}
+
+.amigos-section img {
+    border: 2px solid #5af17b;
+    transition: transform 0.3s ease;
+}
+
+.amigos-section img:hover {
+    transform: scale(1.1);
+}
+
+/* Seção de postagens */
+.post-card {
+    border: 1px solid rgba(90, 241, 123, 0.1);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(90, 241, 123, 0.1);
+}
+
+.img-fluid {
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}

@@ -1,0 +1,37 @@
+.error-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(to bottom, #f8f9fa, #fff);
+}
+
+.error-content {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.error-icon {
+  font-size: 4rem;
+  color: #dc3545;
+  margin-bottom: 1.5rem;
+}
+
+.error-title {
+  font-size: 2rem;
+  color: #343a40;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.error-actions .btn {
+  margin: 0.5rem;
+  padding: 0.5rem 2rem;
+}

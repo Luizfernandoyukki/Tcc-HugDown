@@ -1,14 +1,92 @@
+/* Container e título */
+.container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 22px;
+  padding: 2rem;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.03);
+}
+
+/* Cards de postagem */
 .post-card {
-  transition: box-shadow 0.2s;
+  background: #fff;
+  border: 1px solid rgba(90, 241, 123, 0.1);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
+
 .post-card:hover {
-  box-shadow: 0 0 0 4px #009e6033;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(90, 241, 123, 0.15);
+  border-color: #5af17b;
 }
+
+.post-card .card-body {
+  padding: 1.5rem;
+}
+
+.post-card .card-title {
+  color: #198754;
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.post-card .card-text {
+  color: #666;
+  line-height: 1.6;
+}
+
+.post-card .text-muted {
+  font-size: 0.9rem;
+}
+
+/* Modal de postagem */
+.modal-content {
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  border-bottom: 2px solid rgba(90, 241, 123, 0.1);
+  padding: 1.5rem;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal-footer {
+  border-top: 2px solid rgba(90, 241, 123, 0.1);
+  padding: 1.5rem;
+}
+
+.list-group-item {
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+}
+
+/* Botão de edição */
 #btnEditarPost {
   min-width: 180px;
-}
-.card.bg-dark {
-  background: #181818 !important;
-  color: #fff !important;
+  background: linear-gradient(45deg, #ffd700, #daa520);
   border: none;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(218, 165, 32, 0.3);
+  transition: all 0.3s ease;
+}
+
+#btnEditarPost:hover {
+  background: linear-gradient(45deg, #daa520, #ffd700);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(218, 165, 32, 0.4);
+}
+
+/* Estado vazio */
+.card.bg-dark {
+  background: linear-gradient(135deg, #198754, #5af17b) !important;
+  border: none;
+  box-shadow: 0 8px 32px rgba(90, 241, 123, 0.2) !important;
 }

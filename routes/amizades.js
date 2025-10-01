@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const amizadeController = require('../controllers/amizade');
 const { Amizade, Usuario } = require('../models');
 const { criarNotificacao } = require('../controllers/notificacao');
 
@@ -10,10 +11,7 @@ function requireLogin(req, res, next) {
 }
 
 // Página de busca de usuários para amizade
-router.get('/', requireLogin, async (req, res) => {
-  const usuarios = await Usuario.findAll({ where: { ativo: true } });
-  res.render('amizade/index', { usuarios, userId: req.session.userId });
-});
+router.get('/', requireLogin, amizadeController.listarUsuariosComStatus);
 
 // Enviar solicitação de amizade
 router.post('/solicitar', requireLogin, async (req, res) => {
