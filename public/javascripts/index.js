@@ -142,19 +142,33 @@ async function fetchRecentActivity() {
     return [];
 }
 
-// Carregar próximos eventos
+// Modificar a função loadUpcomingEvents
 async function loadUpcomingEvents() {
-    const upcomingEvents = document.querySelector('.upcoming-events');
-    const loadingPlaceholder = upcomingEvents.querySelector('.loading-placeholder');
+    const upcomingEventsList = document.querySelector('.upcoming-events-list');
+    if (!upcomingEventsList) {
+        console.warn('Elemento upcoming-events-list não encontrado');
+        return;
+    }
+
+    const loadingPlaceholder = upcomingEventsList.querySelector('.loading-placeholder');
+    
     try {
-        const events = await fetchUpcomingEvents();
-        loadingPlaceholder.remove();
-        const eventsHTML = events.map(event => `
+        const response = await fetch('/api/upcoming-events');
+        if (!response.ok) throw new Error('Erro ao buscar eventos');
+        
+        const events = await response.json();
+        
+        if (events.length === 0) {
+            upcomingEventsList.innerHTML = '<p class="text-muted text-center">Nenhum evento próximo.</p>';
+            return;
+        }
+
+        const eventsHTML = events.slice(0, 4).map(event => `
             <div class="event-item mb-3">
                 <div class="d-flex">
                     <div class="event-date me-3">
-                        <div class="date-day">${formatDay(event.date)}</div>
-                        <div class="date-month">${formatMonth(event.date)}</div>
+                        <div class="date-day">${formatDay(new Date(event.date))}</div>
+                        <div class="date-month">${formatMonth(new Date(event.date))}</div>
                     </div>
                     <div class="event-info">
                         <h6 class="mb-1">${event.title}</h6>
@@ -166,24 +180,15 @@ async function loadUpcomingEvents() {
                 </div>
             </div>
         `).join('');
-        upcomingEvents.innerHTML = eventsHTML;
+
+        upcomingEventsList.innerHTML = eventsHTML;
+        
     } catch (error) {
         console.error('Erro ao carregar eventos:', error);
-        loadingPlaceholder.innerHTML = '<p class="text-muted">Erro ao carregar eventos</p>';
+        if (loadingPlaceholder) {
+            loadingPlaceholder.innerHTML = '<p class="text-danger text-center">Erro ao carregar eventos</p>';
+        }
     }
-}
-
-// Buscar próximos eventos
-async function fetchUpcomingEvents() {
-    const response = await fetch('/api/upcoming-events');
-    if (response.ok) {
-        const data = await response.json();
-        return data.map(ev => ({
-            ...ev,
-            date: new Date(ev.date)
-        }));
-    }
-    return [];
 }
 
 // Efeitos de scroll

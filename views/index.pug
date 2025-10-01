@@ -1,190 +1,154 @@
 extends layout
 
+block styles
+  link(rel="stylesheet" href="/stylesheets/index.css")
+
 block content
-  // Hero Section
-  section.hero-section.mb-5
-    .container
-      .row.align-items-center.min-vh-100
-        .col-lg-6
-          .hero-content
-            h1.hero-title HugDown
-            p.hero-subtitle Conecte-se, participe e transforme sua experiência social
-            p.hero-description Encontre pessoas com interesses similares, participe de eventos incríveis e faça parte de grupos que realmente importam para você.
-            .hero-actions
-              if isLoggedIn
-                a.btn.btn-primary.btn-lg.me-3(href="/feed")
-                  i.fas.fa-rss.me-2
-                  | Feed de Postagens
-                a.btn.btn-outline-light.btn-lg(href="/eventos") 
-                  i.fas.fa-compass.me-2
-                  | Explorar
-              else
-                a.btn.btn-primary.btn-lg.me-3(href="/login")
-                  i.fas.fa-sign-in-alt.me-2
-                  | Entrar
-        .col-lg-6
-          .hero-illustration
-            .floating-cards
-              .card.floating-card.card-1.mb-4
-                .card-body
-                  i.fas.fa-users.text-primary
-                  h6 Grupos Ativos
-                  span.counter#group-count 
-              .card.floating-card.card-2.mb-4
-                .card-body
-                  i.fas.fa-calendar-alt.text-success
-                  h6 Eventos
-                  span.counter#event-count 
-              .card.floating-card.card-3.mb-4
-                .card-body
-                  i.fas.fa-heart.text-danger
-                  h6 Conexões
-                  span.counter#user-count 
+  main.main-wrapper
+    // Hero Section
+    section.hero-section.mb-5
+      .container
+        .row.align-items-center.min-vh-100
+          .col-lg-6
+            .hero-content
+              h1.hero-title HugDown
+              p.hero-subtitle Conecte-se, participe e transforme sua experiência social
+              p.hero-description Encontre pessoas com interesses similares, participe de eventos incríveis e faça parte de grupos que realmente importam para você.
+              .hero-actions
+                if isLoggedIn
+                  a.btn.btn-primary.btn-lg.me-3(href="/feed")
+                    i.fas.fa-rss.me-2
+                    | Feed de Postagens
+                  a.btn.btn-outline-light.btn-lg(href="/eventos") 
+                    i.fas.fa-compass.me-2
+                    | Explorar
+                else
+                  a.btn.btn-primary.btn-lg.me-3(href="/login")
+                    i.fas.fa-sign-in-alt.me-2
+                    | Entrar
+          .col-lg-6
+            .hero-illustration
+              .floating-cards
+                .card.floating-card.card-1.mb-4
+                  .card-body
+                    i.fas.fa-users.text-primary
+                    h6 Grupos Ativos
+                    span.counter#group-count 
+                .card.floating-card.card-2.mb-4
+                  .card-body
+                    i.fas.fa-calendar-alt.text-success
+                    h6 Eventos
+                    span.counter#event-count 
+                .card.floating-card.card-3.mb-4
+                  .card-body
+                    i.fas.fa-heart.text-danger
+                    h6 Conexões
+                    span.counter#user-count 
 
-  // Features Section
-  section#explore.features-section.py-5.mb-5
-    .container
-      .row.text-center.mb-5
-        .col-12
-          h2.section-title Como funciona o HugDown?
-          p.section-subtitle Tudo que você precisa para uma vida social mais rica
-      
-      .row.g-4
-        .col-md-4
-          .feature-card.h-100
-            .feature-icon
-              i.fas.fa-search
-            h4 Descubra
-            p Encontre grupos e eventos que combinam com seus interesses e localização
-            .feature-link
-              if isLoggedIn
-                a.btn.btn-outline-primary(href="/eventos") Ver Eventos
-              else
-                a.btn.btn-outline-primary.disabled(href="#") Faça login para ver
-
-        .col-md-4
-          .feature-card.h-100
-            .feature-icon
-              i.fas.fa-users
-            h4 Conecte-se
-            p Participe de comunidades ativas e faça conexões genuínas
-            .feature-link
-              if isLoggedIn
-                a.btn.btn-outline-primary(href="/grupos") Ver Grupos
-              else
-                a.btn.btn-outline-primary.disabled(href="#") Faça login para ver
-
-        .col-md-4
-          .feature-card.h-100
-            .feature-icon
-              i.fas.fa-rocket
-            h4 Crie
-            p Organize seus próprios eventos e lidere grupos sobre seus temas favoritos
-            .feature-link
-              if isLoggedIn
-                a.btn.btn-outline-primary(href="/eventos/create") Criar Evento
-              else
-                a.btn.btn-outline-primary.disabled(href="#") Faça login para criar
-
-  // Stats Section
-  section.stats-section.py-5.mb-5
-    .container
-      .row.text-center
-        .col-md-3.col-6.mb-4
-          .stat-item
-            .stat-number#total-users 
-            .stat-label Usuários Ativos
-        .col-md-3.col-6.mb-4
-          .stat-item
-            .stat-number#total-events 
-            .stat-label Eventos Realizados
-        .col-md-3.col-6.mb-4
-          .stat-item
-            .stat-number#total-groups 
-            .stat-label Grupos Criados
-        .col-md-3.col-6.mb-4
-          .stat-item
-            .stat-number#total-connections 
-            .stat-label Conexões
-
-  // Recent Activity Section
-  section.activity-section.py-5.mb-5
-    .container
-      .row
-        .col-lg-8
-          h3.mb-4 Atividades Recentes
-          .activity-feed
-            // Será preenchido via JavaScript
-            .loading-placeholder
-              .d-flex.align-items-center
-                .spinner-border.spinner-border-sm.me-2(role="status")
-                span Carregando atividades...
+    // Features Section
+    section#explore.features-section.py-5.mb-5
+      .container
+        .row.text-center.mb-5
+          .col-12
+            h2.section-title Como funciona o HugDown?
+            p.section-subtitle Tudo que você precisa para uma vida social mais rica
         
-        .col-lg-4
-          .sidebar-widget
-            h4.mb-3.text-success.fw-bold
-              i.fas.fa-calendar-day.me-2
-              | Próximos Eventos
-            .upcoming-events-list
-              // Será preenchido via JavaScript
+        .row.g-4
+          .col-md-4
+            .feature-card.h-100
+              .feature-icon
+                i.fas.fa-search
+              h4 Descubra
+              p Encontre grupos e eventos que combinam com seus interesses e localização
+              .feature-link
+                if isLoggedIn
+                  a.btn.btn-outline-primary(href="/eventos") Ver Eventos
+                else
+                  a.btn.btn-outline-primary.disabled(href="#") Faça login para ver
+
+          .col-md-4
+            .feature-card.h-100
+              .feature-icon
+                i.fas.fa-users
+              h4 Conecte-se
+              p Participe de comunidades ativas e faça conexões genuínas
+              .feature-link
+                if isLoggedIn
+                  a.btn.btn-outline-primary(href="/grupos") Ver Grupos
+                else
+                  a.btn.btn-outline-primary.disabled(href="#") Faça login para ver
+
+          .col-md-4
+            .feature-card.h-100
+              .feature-icon
+                i.fas.fa-rocket
+              h4 Crie
+              p Organize seus próprios eventos e lidere grupos sobre seus temas favoritos
+              .feature-link
+                if isLoggedIn
+                  a.btn.btn-outline-primary(href="/eventos/create") Criar Evento
+                else
+                  a.btn.btn-outline-primary.disabled(href="#") Faça login para criar
+
+    // Stats Section
+    section.stats-section.py-5.mb-5
+      .container
+        .row.text-center
+          .col-md-3.col-6.mb-4
+            .stat-item
+              .stat-number#total-users 
+              .stat-label Usuários Ativos
+          .col-md-3.col-6.mb-4
+            .stat-item
+              .stat-number#total-events 
+              .stat-label Eventos Realizados
+          .col-md-3.col-6.mb-4
+            .stat-item
+              .stat-number#total-groups 
+              .stat-label Grupos Criados
+          .col-md-3.col-6.mb-4
+            .stat-item
+              .stat-number#total-connections 
+              .stat-label Conexões
+
+    // Recent Activity Section
+    section.activity-section.py-5.mb-5
+      .container
+        .row
+          .col-lg-8
+            h3.mb-4 Atividades Recentes
+            .activity-feed
               .loading-placeholder
                 .d-flex.align-items-center
                   .spinner-border.spinner-border-sm.me-2(role="status")
-                  span Carregando eventos...
-            a.btn.btn-outline-success.mt-3.w-100(href="/eventos")
-              i.fas.fa-arrow-right.me-2
-              | Ver todos os eventos
+                  span Carregando atividades...
+          
+          .col-lg-4
+            .sidebar-widget
+              h4.mb-3.text-success.fw-bold
+                i.fas.fa-calendar-day.me-2
+                | Próximos Eventos
+              .upcoming-events
+                .upcoming-events-list
+                  .loading-placeholder
+                    .d-flex.align-items-center
+                      .spinner-border.spinner-border-sm.me-2(role="status")
+                      span Carregando eventos...
 
-  // CTA Section
-  section.cta-section.py-5.mb-5
-    .container.text-center
-      if isLoggedIn
-        h2 Você já está pronto!
-        p.lead Aproveite todos os recursos da plataforma.
-      else
-        h2 Pronto para começar?
-        p.lead Junte-se a milhares de pessoas que já encontraram sua comunidade
-        a.btn.btn-primary.btn-lg(href="/cadastro")
-          i.fas.fa-arrow-right.me-2
-          | Criar Minha Conta
+    // CTA Section
+    section.cta-section.py-5.mb-5
+      .container.text-center
+        if isLoggedIn
+          h2 Você já está pronto!
+          p.lead Aproveite todos os recursos da plataforma.
+        else
+          h2 Pronto para começar?
+          p.lead Junte-se a milhares de pessoas que já encontraram sua comunidade
+          a.btn.btn-primary.btn-lg(href="/login")
+            i.fas.fa-arrow-right.me-2
+            | Entrar no HugDown
+            
 
 block scripts
   script(src="/javascripts/index.js")
   script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js")
-  script.
-    // Preenche a lista de próximos eventos na sidebar (apenas 4 mais próximos)
-    document.addEventListener('DOMContentLoaded', async function() {
-      const container = document.querySelector('.upcoming-events-list');
-      if (!container) return;
-      try {
-        const res = await fetch('/api/upcoming-events');
-        if (!res.ok) throw new Error('Erro ao buscar eventos');
-        let events = await res.json();
-        events = events.slice(0, 4); // Apenas os 4 mais próximos
-        if (!events.length) {
-          container.innerHTML = '<p class="text-muted text-center">Nenhum evento próximo.</p>';
-          return;
-        }
-        container.innerHTML = events.map(ev => `
-          <div class="event-preview-card mb-3 p-3 rounded shadow-sm d-flex align-items-center event-link" style="cursor:pointer; background: #f8f9fa; border: 1.5px solid #43e97b22; transition: box-shadow 0.2s;">
-            <div class="event-date-box me-3" style="min-width:54px; background: linear-gradient(135deg, #e0ffe6 0%, #b2f7ef 100%); border-radius: 10px; border: 1.5px solid #43e97b55; text-align:center;">
-              <div class="event-day" style="font-size:1.5rem;font-weight:700;color:#43e97b;">${String(new Date(ev.date).getDate()).padStart(2, '0')}</div>
-              <div class="event-month" style="font-size:0.9rem;color:#198754;font-weight:600;text-transform:uppercase;">${['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][new Date(ev.date).getMonth()]}</div>
-            </div>
-            <div class="flex-grow-1">
-              <div class="fw-bold text-success mb-1" style="font-size:1.08em;">${ev.title}</div>
-              <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${ev.location}</small>
-              <div>
-                <span class="badge bg-primary mt-1" style="font-size:0.95em;">${ev.attendees} participantes</span>
-              </div>
-            </div>
-          </div>
-        `).join('');
-        // Clique em qualquer card leva para /eventos
-        container.querySelectorAll('.event-link').forEach(card => {
-          card.addEventListener('click', () => window.location.href = '/eventos');
-        });
-      } catch (err) {
-        container.innerHTML = '<p class="text-danger text-center">Erro ao carregar eventos.</p>';
-      }
-    });
