@@ -25,4 +25,13 @@ router.post('/:id/ler', requireLogin, async (req, res) => {
   res.redirect('/notificacoes');
 });
 
+router.post('/subscribe', async (req, res) => {
+  // Salve a subscription no banco associada ao usuário logado
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: 'Não autenticado' });
+  // Salve req.body (subscription) no banco, relacionado ao userId
+  // Exemplo: await Subscription.create({ id_usuario: userId, subscription: JSON.stringify(req.body) });
+  res.json({ sucesso: true });
+});
+
 module.exports = router;

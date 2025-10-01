@@ -1,0 +1,32 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/admin/moderador.css")
+
+block content
+  .container.mt-5
+    h2 Painel Moderador
+    p.text-muted Você pode visualizar e censurar denúncias de postagens.
+    if reports && reports.length
+      table.table.table-striped.mt-4
+        thead
+          tr
+            th ID
+            th Usuário
+            th Motivo
+            th Data
+            th Ações
+        tbody
+          each report in reports
+            tr
+              td= report.id_report
+              td= report.usuario?.nome_usuario || 'N/A'
+              td= report.motivo
+              td= report.data_report
+              td
+                form(action=`/admin/moderador/reports/${report.id_report}/censurar`, method="POST", onsubmit="return confirm('Censurar denúncia?');")
+                  button.btn.btn-danger.btn-sm(type="submit") Censurar
+    else
+      p.text-muted Nenhuma denúncia pendente.
+    else
+      p.text-muted Nenhuma denúncia pendente.

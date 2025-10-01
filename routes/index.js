@@ -13,6 +13,7 @@ const {
 const { usuarioController } = require('../controllers');
 const reportsController = require('../controllers/reports');
 const notificacaoService = require('../controllers/notificacaoService');
+
 // Wrapper para async/await
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -52,7 +53,9 @@ router.get('/', asyncHandler(async (req, res) => {
 
 // Rotas de autenticação
 router.get('/cadastro', (req, res) => res.render('cadastro'));
-router.get('/login', (req, res) => res.render('login'));
+router.get('/login', (req, res) => {
+  res.render('login', { msg: req.query.msg });
+});
 router.post('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/');
@@ -342,6 +345,116 @@ router.post('/api/reports', asyncHandler(async (req, res) => {
     });
   }
   // O controller já envia o response
+}));
+
+// Painel Super Admin
+router.get('/admin/super', asyncHandler(async (req, res) => {
+  const { Administrador, Usuario, Postagem } = require('../models');
+  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+  if (!admin || admin.nivel_admin !== 'super_admin') return res.status(403).render('error', { error: 'Acesso negado.' });
+  const usuarios = await Usuario.findAll();
+  const postagens = await Postagem.findAll();
+  res.render('admin/super', { usuarioLogado: res.locals.usuario, isLoggedIn: res.locals.isLoggedIn, usuarios, postagens });
+}));
+
+// Super Admin: excluir usuário
+router.post('/admin/super/usuarios/:id/excluir', asyncHandler(async (req, res) => {
+  const { Administrador, Usuario } = require('../models');
+  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+  if (!admin || admin.nivel_admin !== 'super_admin') return res.status(403).render('error', { error: 'Acesso negado.' });
+  await Usuario.destroy({ where: { id_usuario: req.params.id } });
+  await notificacaoService.criarNotificacao({
+    id_usuario: req.params.id,
+    tipo_notificacao: 'system',
+    titulo: 'Conta excluída',
+    mensagem: 'Sua conta foi excluída pelo administrador.',
+    url_relacionada: null
+  });
+  res.redirect('/admin/super');
+}));
+
+// Painel Moderador
+router.get('/admin/moderador', asyncHandler(async (req, res) => {
+  const { Administrador, Report, Usuario } = require('../models');
+  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+  if (!admin || admin.nivel_admin !== 'moderator') return res.status(403).render('error', { error: 'Acesso negado.' });
+  const reports = await Report.findAll({
+    include: [{ model: Usuario, as: 'usuario' }],
+    where: { status: 'pending' }
+  });
+  res.render('admin/moderador', { usuarioLogado: res.locals.usuario, isLoggedIn: res.locals.isLoggedIn, reports });
+}));
+
+// Moderador: censurar denúncia
+router.post('/admin/moderador/reports/:id/censurar', asyncHandler(async (req, res) => {
+  const { Administrador, Report } = require('../models');
+  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+  if (!admin || admin.nivel_admin !== 'moderator') return res.status(403).render('error', { error: 'Acesso negado.' });
+  const report = await Report.findByPk(req.params.id);
+  if (report) {
+    report.status = 'dismissed';
+    await report.save();
+    await notificacaoService.criarNotificacao({
+      id_usuario: report.id_usuario,
+      tipo_notificacao: 'system',
+      titulo: 'Denúncia analisada',
+      mensagem: 'Sua denúncia foi analisada e a postagem foi censurada.',
+      url_relacionada: null
+    });
+  }
+  res.redirect('/admin/moderador');
+}));
+
+// Painel Verificador
+router.get('/admin/verificador', asyncHandler(async (req, res) => {
+  const { Administrador, DocumentoVerificacao, Usuario } = require('../models');
+  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+  if (!admin || admin.nivel_admin !== 'verifier') return res.status(403).render('error', { error: 'Acesso negado.' });
+  const docs = await DocumentoVerificacao.findAll({
+    include: [{ model: Usuario, as: 'usuario' }],
+    where: { status: 'pending' }
+  });
+  res.render('admin/verificador', { usuarioLogado: res.locals.usuario, isLoggedIn: res.locals.isLoggedIn, docs });
+}));
+
+// Verificador: aprovar documento
+router.post('/admin/verificador/documentos/:id/aprovar', asyncHandler(async (req, res) => {
+  const { Administrador, DocumentoVerificacao } = require('../models');
+  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+  if (!admin || admin.nivel_admin !== 'verifier') return res.status(403).render('error', { error: 'Acesso negado.' });
+  const doc = await DocumentoVerificacao.findByPk(req.params.id);
+  if (doc) {
+    doc.status = 'approved';
+    await doc.save();
+    await notificacaoService.criarNotificacao({
+      id_usuario: doc.id_usuario,
+      tipo_notificacao: 'system',
+      titulo: 'Documento aprovado',
+      mensagem: 'Seu documento foi aprovado pelo verificador.',
+      url_relacionada: null
+    });
+  }
+  res.redirect('/admin/verificador');
+}));
+
+// Verificador: rejeitar documento
+router.post('/admin/verificador/documentos/:id/rejeitar', asyncHandler(async (req, res) => {
+  const { Administrador, DocumentoVerificacao } = require('../models');
+  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+  if (!admin || admin.nivel_admin !== 'verifier') return res.status(403).render('error', { error: 'Acesso negado.' });
+  const doc = await DocumentoVerificacao.findByPk(req.params.id);
+  if (doc) {
+    doc.status = 'rejected';
+    await doc.save();
+    await notificacaoService.criarNotificacao({
+      id_usuario: doc.id_usuario,
+      tipo_notificacao: 'system',
+      titulo: 'Documento rejeitado',
+      mensagem: 'Seu documento foi rejeitado pelo verificador.',
+      url_relacionada: null
+    });
+  }
+  res.redirect('/admin/verificador');
 }));
 
 module.exports = router;

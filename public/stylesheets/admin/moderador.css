@@ -1,0 +1,9 @@
+.container {
+  max-width: 900px;
+}
+h2 {
+  color: #28a745;
+}
+.table th, .table td {
+  vertical-align: middle;
+}

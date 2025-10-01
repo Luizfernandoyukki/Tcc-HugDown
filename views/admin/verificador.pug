@@ -1,0 +1,36 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/admin/verificador.css")
+
+block content
+  .container.mt-5
+    h2 Painel Verificador
+    p.text-muted Você pode aprovar ou rejeitar documentos de verificação.
+    if docs && docs.length
+      table.table.table-striped.mt-4
+        thead
+          tr
+            th ID
+            th Usuário
+            th Tipo
+            th Instituição
+            th Status
+            th Data
+            th Ações
+        tbody
+          each doc in docs
+            tr
+              td= doc.id_documento
+              td= doc.usuario?.nome_usuario || 'N/A'
+              td= doc.tipo_documento
+              td= doc.instituicao
+              td= doc.status
+              td= doc.data_submissao
+              td
+                form(action=`/admin/verificador/documentos/${doc.id_documento}/aprovar`, method="POST", onsubmit="return confirm('Aprovar documento?');")
+                  button.btn.btn-success.btn-sm(type="submit") Aprovar
+                form(action=`/admin/verificador/documentos/${doc.id_documento}/rejeitar`, method="POST", onsubmit="return confirm('Rejeitar documento?');")
+                  button.btn.btn-danger.btn-sm(type="submit") Rejeitar
+    else
+      p.text-muted Nenhum documento pendente.

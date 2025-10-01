@@ -195,17 +195,24 @@ exports.login = async (req, res) => {
 
     // Autenticação bem-sucedida
     req.session.userId = usuario.id_usuario;
-    req.session.isLoggedIn = true; // variável global de login
+    req.session.isLoggedIn = true;
 
-    // Verifica se é administrador
+    // Verifica se é administrador e qual papel
     const { Administrador } = require('../models');
     const admin = await Administrador.findOne({ where: { id_usuario: usuario.id_usuario } });
     if (admin) {
-      // Redireciona para painel admin se for administrador
-      return res.redirect('/administradores');
+      if (admin.nivel_admin === 'super_admin') {
+        return res.redirect('/admin/super');
+      }
+      if (admin.nivel_admin === 'moderator') {
+        return res.redirect('/admin/moderador');
+      }
+      if (admin.nivel_admin === 'verifier') {
+        return res.redirect('/admin/verificador');
+      }
     }
 
-    return res.redirect('/'); // Redireciona para a home após login
+    return res.redirect('/');
   } catch (err) {
     return res.render('login', { error: 'Erro ao realizar login: ' + err.message, isLoggedIn: false });
   }

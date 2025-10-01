@@ -1,0 +1,272 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/admin/super.css")
+
+block content
+  .container.mt-5
+    h2 Painel Super Admin
+    p.text-muted Bem-vindo, você tem acesso total ao sistema.
+
+    // Barra de pesquisa de usuários
+    input.form-control.mb-2(type="text", id="userSearch", placeholder="Pesquisar usuários...", oninput="filtrarUsuarios()")
+
+    h4.mt-4 Usuários do sistema
+    table.table.table-striped
+      thead
+        tr
+          th ID
+          th Nome
+          th Email
+          th Ações
+      tbody(id="usuariosTable")
+        each usuario in usuarios
+          tr
+            td= usuario.id_usuario
+            td= usuario.nome_usuario
+            td= usuario.email
+            td
+              form(action=`/admin/super/usuarios/${usuario.id_usuario}/excluir`, method="POST", onsubmit="return confirm('Excluir usuário?');")
+                button.btn.btn-danger.btn-sm(type="submit") Excluir
+              // Nova opção: Advertir usuário
+              button.btn.btn-warning.btn-sm(type="button", data-advertir-id=usuario.id_usuario, data-advertir-nome=usuario.nome_usuario) Advertir
+
+    // Barra de pesquisa de postagens
+    input.form-control.mb-2(type="text", id="postSearch", placeholder="Pesquisar postagens...", oninput="filtrarPostagens()")
+
+    h4.mt-5 Postagens
+    table.table.table-striped
+      thead
+        tr
+          th ID
+          th Autor
+          th Título
+          th Ações
+      tbody(id="postagensTable")
+        each post in postagens
+          tr
+            td= post.id_postagem
+            td= post.id_autor
+            td
+              a(href="#", data-id=post.id_postagem) #{post.titulo}
+            td
+              form(action=`/admin/super/postagens/${post.id_postagem}/excluir`, method="POST", onsubmit="return confirm('Excluir postagem?');")
+                button.btn.btn-danger.btn-sm(type="submit") Excluir
+
+    // Modal para visualizar postagem
+    div#modalPostagem.modal(style="display:none;")
+      div.modal-dialog
+        div.modal-content
+          div.modal-header
+            h5.modal-title Conteúdo da Postagem
+            button(type="button", class="close", onclick="fecharModalPostagem()") &times;
+          div.modal-body
+            p#modalConteudo
+            img#modalImagem(style="max-width:100%;")
+
+    // Seção de postagens reportadas
+    h4.mt-5(style="margin-top:40px;") Postagens Reportadas
+    div(style="margin-bottom:32px;")
+      table.table.table-striped
+        thead
+          tr
+            th ID
+            th Motivo
+            th Visualizar
+            th Excluir
+        tbody(id="reportadasTable")
+          // Preenchido via JS
+
+    // Modal para visualizar postagem reportada
+    div#modalReportada.modal(style="display:none;")
+      div.modal-dialog
+        div.modal-content
+          div.modal-header
+            h5.modal-title Postagem Reportada
+            button(type="button", class="close", onclick="fecharModalReportada()") &times;
+          div.modal-body
+            p#modalReportadaMotivo
+            div#modalReportadaConteudoBox(style="margin-bottom:10px;")
+              label Título:
+              pre#modalReportadaTitulo(style="white-space:pre-wrap; background:#f8f9fa; padding:8px; border-radius:4px;")
+              label Conteúdo:
+              pre#modalReportadaConteudo(style="white-space:pre-wrap; background:#f8f9fa; padding:8px; border-radius:4px;")
+            div#modalReportadaImagemBox(style="margin-bottom:10px;")
+              label Imagem:
+              img#modalReportadaImagem(style="max-width:100%; border:1px solid #ddd; border-radius:4px; margin-top:4px;")
+            form(id="formExcluirReportada", method="POST")
+              button.btn.btn-danger(type="submit") Excluir
+
+    // Modal para advertir usuário
+    div#modalAdvertir.modal(style="display:none;")
+      div.modal-dialog
+        div.modal-content
+          div.modal-header
+            h5.modal-title Advertir Usuário
+            button(type="button", class="close", onclick="fecharModalAdvertir()") &times;
+          div.modal-body
+            p#modalAdvertirNome
+            textarea.form-control#modalAdvertirMsg(rows="3") Você foi intimado que, caso continue cometendo infrações, sua conta será banida.
+          div.modal-footer
+            button.btn.btn-secondary(type="button", onclick="fecharModalAdvertir()") Cancelar
+            button.btn.btn-warning(type="button", onclick="enviarAdvertencia()") Enviar Advertência
+
+  script.
+    // Filtragem de usuários
+    function filtrarUsuarios() {
+      const q = document.getElementById('userSearch').value.toLowerCase();
+      const rows = document.querySelectorAll('#usuariosTable tr');
+      rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+    // Filtragem de postagens
+    function filtrarPostagens() {
+      const q = document.getElementById('postSearch').value.toLowerCase();
+      const rows = document.querySelectorAll('#postagensTable tr');
+      rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+    // Adiciona eventos aos botões após renderizar a tabela
+    function carregarReportadas() {
+      fetch('/admin/super/postagens/reportadas')
+        .then(res => {
+          if (!res.ok) throw new Error('Erro ao buscar reports');
+          return res.json();
+        })
+        .then(data => {
+          const tbody = document.getElementById('reportadasTable');
+          tbody.innerHTML = '';
+          data.forEach(report => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${report.id_postagem}</td>
+              <td>${report.motivo}</td>
+              <td><button class="btn btn-info btn-sm ver-report" data-id="${report.id_report}" data-motivo="${report.motivo}" data-postagem="${report.id_postagem}">Ver</button></td>
+              <td>
+                <form action="/admin/super/postagens/${report.id_postagem}/excluir" method="POST" onsubmit="return confirm('Excluir postagem reportada?');">
+                  <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
+                </form>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+          // Adiciona eventos aos botões "Ver"
+          document.querySelectorAll('.ver-report').forEach(btn => {
+            btn.addEventListener('click', function() {
+              abrirModalReportada(
+                this.getAttribute('data-id'),
+                this.getAttribute('data-motivo'),
+                this.getAttribute('data-postagem')
+              );
+            });
+          });
+        })
+        .catch(err => {
+          const tbody = document.getElementById('reportadasTable');
+          tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar reports.</td></tr>';
+        });
+    }
+
+    // Adiciona eventos aos links de postagens
+    function adicionarEventosPostagens() {
+      document.querySelectorAll('#postagensTable a[data-id]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          abrirModalPostagem(this.getAttribute('data-id'));
+        });
+      });
+    }
+
+    // Renderiza postagens e adiciona eventos
+    function renderizarPostagens() {
+      // ...renderização da tabela de postagens...
+      adicionarEventosPostagens();
+    }
+
+    // Abrir modal de postagem
+    function abrirModalPostagem(id) {
+      fetch(`/admin/super/postagens/${id}/dados`)
+        .then(res => res.json())
+        .then((data) => {
+          document.getElementById('modalConteudo').innerText = data.conteudo;
+          document.getElementById('modalImagem').src = data.imagem || '';
+          document.getElementById('modalPostagem').style.display = 'block';
+        });
+    }
+    function fecharModalPostagem() {
+      document.getElementById('modalPostagem').style.display = 'none';
+    }
+
+    // Abrir modal de postagem reportada
+    function abrirModalReportada(id_report, motivo, id_postagem) {
+      fetch(`/admin/super/reports/${id_report}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Erro ao buscar report');
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById('modalReportadaMotivo').innerText = 'Motivo: ' + motivo;
+          let snapshot = {};
+          try {
+            snapshot = JSON.parse(data.snapshot_post);
+          } catch (e) {
+            snapshot = {};
+          }
+          document.getElementById('modalReportadaTitulo').innerText = snapshot.titulo || '(sem título)';
+          document.getElementById('modalReportadaConteudo').innerText = snapshot.conteudo || '(sem conteúdo)';
+          document.getElementById('modalReportadaImagem').src = snapshot.url_midia || '';
+          document.getElementById('modalReportadaImagemBox').style.display = snapshot.url_midia ? 'block' : 'none';
+          document.getElementById('formExcluirReportada').action = `/admin/super/postagens/${id_postagem}/excluir`;
+          document.getElementById('modalReportada').style.display = 'block';
+        })
+        .catch(() => {
+          alert('Erro ao abrir report.');
+        });
+    }
+    function fecharModalReportada() {
+      document.getElementById('modalReportada').style.display = 'none';
+    }
+
+    // Modal advertir usuário (mesma lógica: remova onclick inline e use evento JS)
+    function adicionarEventosAdvertir() {
+      document.querySelectorAll('.btn-warning[data-advertir-id]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          abrirModalAdvertir(this.getAttribute('data-advertir-id'), this.getAttribute('data-advertir-nome'));
+        });
+      });
+    }
+
+    // Modal advertir usuário
+    let usuarioAdvertirId = null;
+    function abrirModalAdvertir(id, nome) {
+      usuarioAdvertirId = id;
+      document.getElementById('modalAdvertirNome').innerText = `Advertir usuário: ${nome}`;
+      document.getElementById('modalAdvertirMsg').value = 'Você foi intimado que, caso continue cometendo infrações, sua conta será banida.';
+      document.getElementById('modalAdvertir').style.display = 'block';
+    }
+    function fecharModalAdvertir() {
+      document.getElementById('modalAdvertir').style.display = 'none';
+      usuarioAdvertirId = null;
+    }
+    function enviarAdvertencia() {
+      const msg = document.getElementById('modalAdvertirMsg').value;
+      fetch(`/admin/super/usuarios/${usuarioAdvertirId}/advertir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mensagem: msg })
+      }).then(() => {
+        alert('Advertência enviada!');
+        fecharModalAdvertir();
+      });
+    }
+
+    window.onload = function() {
+      carregarReportadas();
+      adicionarEventosAdvertir();
+      // Se renderizar postagens via JS, chame renderizarPostagens();
+    };

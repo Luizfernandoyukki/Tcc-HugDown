@@ -4,6 +4,8 @@ const { Usuario } = require('../models');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
+const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
 // GET: Formulário para solicitar redefinição
 router.get('/', (req, res) => {
   res.render('esqeuciminhasenha');
@@ -47,7 +49,7 @@ router.post('/', async (req, res) => {
 });
 
 // POST: Verifica token e permite redefinir senha
-router.post('/verificar', async (req, res) => {
+router.post('/verificar', asyncHandler(async (req, res) => {
   const { token, novaSenha } = req.body;
   if (!token) return res.render('esqeuciminhasenha', { error: 'Informe o código recebido.' });
 
@@ -74,7 +76,8 @@ router.post('/verificar', async (req, res) => {
     req.session.resetToken = null;
     req.session.resetUserId = null;
     req.session.resetTokenExpires = null;
-    return res.render('esqeuciminhasenha', { info: 'Senha redefinida com sucesso! Faça login.' });
+    // return res.render('esqeuciminhasenha', { info: 'Senha alterada com sucesso!' });
+    return res.redirect('/login?msg=Senha%20alterada%20com%20sucesso!');
   } else {
     // Usuário optou por não redefinir senha, apenas limpa sessão
     req.session.resetToken = null;
@@ -82,6 +85,6 @@ router.post('/verificar', async (req, res) => {
     req.session.resetTokenExpires = null;
     return res.render('esqeuciminhasenha', { info: 'Você pode continuar usando sua senha antiga.' });
   }
-});
+}));
 
 module.exports = router;

@@ -89,7 +89,9 @@ router.get('/show/:id', requireLogin, async (req, res) => {
       console.warn('[ROUTE] Usuário não encontrado:', req.params.id);
       return res.status(404).render('error', { error: 'Usuário não encontrado' });
     }
-    return res.render('usuarios/show', { usuario });
+    // Adicione usuarioLogado ao render
+    const usuarioLogado = await usuarioController.buscarPerfilCompleto(req.session.userId);
+    return res.render('usuarios/show', { usuario, usuarioLogado, isLoggedIn: true });
   } catch (err) {
     console.error('[ROUTE][ERROR] Erro ao buscar perfil:', err);
     res.status(500).render('error', { error: 'Erro ao buscar perfil: ' + err.message });

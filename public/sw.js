@@ -1,22 +1,22 @@
 // Service Worker para Web Push Notifications (desenvolvimento)
 
 self.addEventListener('push', function(event) {
-  let data = {};
-  try {
-    data = event.data.json();
-  } catch (e) {
-    data = { title: 'Notificação', body: event.data.text() };
-  }
-  self.registration.showNotification(data.title || 'Notificação', {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'Nova notificação';
+  const options = {
     body: data.body || '',
     icon: data.icon || '/images/logo.png',
-    data: data.url ? { url: data.url } : undefined
-  });
+    data: data.url ? { url: data.url } : {}
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Permite clicar na notificação e abrir a URL relacionada (se houver)
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
+  if (event.notification.data && event.notification.data.url) {
+    event.waitUntil(clients.openWindow(event.notification.data.url));
+  }
+});
   if (event.notification.data && event.notification.data.url) {
     event.waitUntil(
       clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
@@ -31,4 +31,3 @@ self.addEventListener('notificationclick', function(event) {
       })
     );
   }
-});

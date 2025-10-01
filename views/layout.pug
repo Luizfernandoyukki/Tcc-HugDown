@@ -39,13 +39,13 @@ html
 
     // Rodapé Bootstrap
     footer.site-footer.bg-light.shadow-sm
-      if isLoggedIn && usuario
+      if isLoggedIn && usuarioLogado
         .container
           .row.align-items-center.justify-content-between
             .col-6.d-flex.align-items-center
-              a.d-flex.align-items-center(href='/usuarios/index/' + usuario.id_usuario, title='Meu Perfil')
+              a.d-flex.align-items-center(href='/usuarios/index/' + usuarioLogado.id_usuario, title='Meu Perfil')
                 img.rounded-circle(
-                  src=usuario.foto_perfil && usuario.foto_perfil.startsWith('/') ? usuario.foto_perfil : ('/perfis/' + (usuario.foto_perfil || 'default-avatar.png')),
+                  src=usuarioLogado.foto_perfil && usuarioLogado.foto_perfil.startsWith('/') ? usuarioLogado.foto_perfil : ('/perfis/' + (usuarioLogado.foto_perfil || 'default-avatar.png')),
                   alt='Perfil'
                 )
             .col-6.d-flex.align-items-center.justify-content-end

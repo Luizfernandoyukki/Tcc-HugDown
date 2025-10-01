@@ -126,6 +126,10 @@ app.use(async (req, res, next) => {
 // Rotas
 app.use('/', indexRouter);
 app.use('/webpush', require('./routes/webpush'));
+
+// Adicione esta linha para expor as rotas de reports para ADM
+app.use(require('./routes/REPORTSPARAADM.JS'));
+
 app.get('/favicon.ico', (req, res) => res.status(204));
 
 // 404 handler

@@ -1,6 +1,26 @@
 const { Notificacao, Usuario, Amizade, ParticipanteEvento, Grupo, MembroGrupo, ProfissionalSaude, DocumentoVerificacao, Postagem, Comentario, Curtida, Compartilhamento, Evento } = require('../models');
 const { Op } = require('sequelize');
 const webpushService = require('./webpushService');
+const webpush = require('web-push');
+
+// Configure suas chaves VAPID
+webpush.setVapidDetails(
+  'mailto:seu@email.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+
+async function enviarPushParaUsuario(id_usuario, titulo, mensagem, url) {
+  // Recupere a subscription do banco
+  // const sub = await Subscription.findOne({ where: { id_usuario } });
+  if (!sub) return;
+  const payload = JSON.stringify({
+    title: titulo,
+    body: mensagem,
+    url: url
+  });
+  await webpush.sendNotification(JSON.parse(sub.subscription), payload);
+}
 
 // Função genérica
 async function criarNotificacao({ id_usuario, tipo_notificacao, titulo, mensagem, url_relacionada = null }) {

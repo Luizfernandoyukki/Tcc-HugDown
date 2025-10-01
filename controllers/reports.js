@@ -52,3 +52,16 @@ exports.listar = async (req, res) => {
     res.status(500).json({ error: 'Erro ao listar reports: ' + err.message });
   }
 };
+
+exports.listarSimples = async (req, res) => {
+  try {
+    // Busca todos os reports ordenados por data_report
+    const reports = await Report.findAll({
+      attributes: ['id_report', 'id_postagem', 'motivo', 'snapshot_post'],
+      order: [['data_report', 'DESC']]
+    });
+    res.json(reports);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao listar reports: ' + err.message });
+  }
+};
