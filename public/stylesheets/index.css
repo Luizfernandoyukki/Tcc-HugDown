@@ -337,6 +337,53 @@
     height: 1rem;
 }
 
+/* Event Preview Card */
+.event-preview-card {
+    background: #f8f9fa;
+    border: 1.5px solid #43e97b22;
+    border-radius: 12px;
+    transition: box-shadow 0.2s, border 0.2s;
+    cursor: pointer;
+}
+
+.event-preview-card:hover {
+    box-shadow: 0 4px 24px #43e97b33, 0 0 0 2px #43e97b33;
+    border-color: #43e97b;
+    background: #e6fff4;
+}
+
+.event-preview-card .event-date-box {
+    margin-right: 12px;
+}
+
+.event-preview-card .event-day {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #43e97b;
+}
+
+.event-preview-card .event-month {
+    font-size: 0.9rem;
+    color: #198754;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.event-preview-card .badge {
+    margin-top: 0.2em;
+}
+
+@media (max-width: 767px) {
+    .event-preview-card {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    .event-preview-card .event-date-box {
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .hero-title {

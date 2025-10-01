@@ -2,7 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const Evento = sequelize.define('Evento', {
     id_evento: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     id_organizador: { type: DataTypes.INTEGER, allowNull: false },
-    id_categoria: DataTypes.INTEGER,
+    nome_categoria_evento: { type: DataTypes.STRING(100) },
     titulo_evento: { type: DataTypes.STRING(200), allowNull: false },
     descricao_evento: DataTypes.TEXT,
     data_inicio: { type: DataTypes.DATE, allowNull: false },
@@ -24,7 +24,6 @@ module.exports = (sequelize, DataTypes) => {
 
   Evento.associate = models => {
     Evento.belongsTo(models.Usuario, { as: 'organizador', foreignKey: 'id_organizador' });
-    Evento.belongsTo(models.Categoria, { as: 'categoria', foreignKey: 'id_categoria' });
     Evento.hasMany(models.ParticipanteEvento, { as: 'participantes', foreignKey: 'id_evento' });
   };
 

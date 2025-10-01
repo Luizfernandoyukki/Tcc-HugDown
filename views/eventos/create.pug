@@ -3,6 +3,43 @@ extends ../layout
 block styles
   link(rel="stylesheet", href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css")
   link(rel="stylesheet", href="/stylesheets/eventos/create.css")
+  style.
+    /* Estilo extra para o formulário de evento */
+    #form-criar-evento {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px #0001;
+      padding: 2rem 2.5rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    #form-criar-evento h2 {
+      color: #198754;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+    #form-criar-evento label {
+      font-weight: 500;
+      color: #198754;
+    }
+    #form-criar-evento .form-control, #form-criar-evento .form-select {
+      border-radius: 8px;
+      border: 1px solid #19875433;
+      font-size: 1.05rem;
+    }
+    #form-criar-evento button[type="submit"] {
+      background: linear-gradient(90deg, #198754 60%, #43e97b 100%);
+      border: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 0.7rem 2.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px #19875422;
+      transition: background 0.2s;
+    }
+    #form-criar-evento button[type="submit"]:hover {
+      background: linear-gradient(90deg, #43e97b 60%, #198754 100%);
+    }
 
 block content
   .container.py-5
@@ -47,11 +84,15 @@ block content
 
       .row
         .col-md-6.mb-3
-          label.form-label(for="id_categoria") Categoria *
-          select.form-select(name="id_categoria", id="id_categoria", required)
+          label.form-label(for="nome_categoria_evento") Categoria *
+          select.form-select(name="nome_categoria_evento", id="nome_categoria_evento", required)
             option(value="") Selecione...
-            each cat in categorias
-              option(value=cat.id_categoria)= cat.nome_categoria
+            option(value="Reuniões") Reuniões
+            option(value="Eventos beneficentes") Eventos beneficentes
+            option(value="Acessível") Acessível
+            option(value="Festas") Festas
+            option(value="Formaturas") Formaturas
+            option(value="Outros") Outros
         .col-md-6.mb-3
           label.form-label(for="max_participantes") Máximo de Participantes
           input.form-control(type="number", name="max_participantes", id="max_participantes", min="1")
@@ -67,3 +108,40 @@ block scripts
   // Adicione Leaflet.js e o script customizado
   script(src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")
   script(src="/javascripts/eventos/create.js")
+  script.
+    // Restrição: Data de início só pode ser 2 dias após agora
+    document.addEventListener('DOMContentLoaded', function() {
+      var dataInicio = document.getElementById('data_inicio');
+      var dataFim = document.getElementById('data_fim');
+      if (dataInicio) {
+        var now = new Date();
+        now.setDate(now.getDate() + 2);
+        var minDate = now.toISOString().slice(0,16);
+        dataInicio.min = minDate;
+        dataInicio.addEventListener('input', function() {
+          if (dataInicio.value < minDate) {
+            dataInicio.setCustomValidity('A data de início deve ser pelo menos 2 dias após hoje.');
+          } else {
+            dataInicio.setCustomValidity('');
+          }
+          // Atualiza o min do data_fim sempre que data_inicio mudar
+          if (dataFim) {
+            dataFim.min = dataInicio.value;
+            if (dataFim.value && dataFim.value < dataInicio.value) {
+              dataFim.value = '';
+            }
+          }
+        });
+      }
+      // Também impede submit se data_fim < data_inicio
+      var form = document.getElementById('form-criar-evento');
+      if (form && dataInicio && dataFim) {
+        form.addEventListener('submit', function(e) {
+          if (dataFim.value && dataFim.value < dataInicio.value) {
+            e.preventDefault();
+            alert('A data de fim não pode ser anterior à data de início do evento.');
+            dataFim.focus();
+          }
+        });
+      }
+    });

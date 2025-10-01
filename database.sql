@@ -235,7 +235,7 @@ CREATE TABLE mensagens_diretas (
 CREATE TABLE eventos (
     id_evento INT AUTO_INCREMENT PRIMARY KEY,
     id_organizador INT NOT NULL,
-    id_categoria INT,
+    nome_categoria_evento VARCHAR(100),
     titulo_evento VARCHAR(200) NOT NULL,
     descricao_evento TEXT,
     data_inicio DATETIME NOT NULL,
@@ -251,7 +251,6 @@ CREATE TABLE eventos (
     latitude DECIMAL(10,7),
     longitude DECIMAL(10,7),
     FOREIGN KEY (id_organizador) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-    FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
     INDEX idx_organizador (id_organizador),
     INDEX idx_data_inicio (data_inicio),
     INDEX idx_tipo_evento (tipo_evento),
@@ -433,4 +432,3 @@ CREATE TABLE reports (
     INDEX idx_usuario (id_usuario),
     INDEX idx_status (status)
 );
-

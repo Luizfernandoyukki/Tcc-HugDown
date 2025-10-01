@@ -21,12 +21,11 @@ router.get('/create', requireLogin, async (req, res) => {
 
 // Listar todos os eventos ordenados por data (GET /eventos)
 router.get('/', requireLogin, async (req, res) => {
-  const { Evento, Usuario, Categoria, ParticipanteEvento } = require('../models');
+  const { Evento, Usuario, ParticipanteEvento } = require('../models');
   try {
     const eventos = await Evento.findAll({
       include: [
         { model: Usuario, as: 'organizador' },
-        { model: Categoria, as: 'categoria' },
         { model: ParticipanteEvento, as: 'participantes' }
       ],
       where: { ativo: true },
@@ -40,12 +39,11 @@ router.get('/', requireLogin, async (req, res) => {
 
 // Exibir detalhes do evento (GET /eventos/:id)
 router.get('/:id', requireLogin, async (req, res) => {
-  const { Evento, Usuario, Categoria, ParticipanteEvento } = require('../models');
+  const { Evento, Usuario, ParticipanteEvento } = require('../models');
   try {
     const evento = await Evento.findByPk(req.params.id, {
       include: [
         { model: Usuario, as: 'organizador' },
-        { model: Categoria, as: 'categoria' },
         { model: ParticipanteEvento, as: 'participantes' }
       ]
     });

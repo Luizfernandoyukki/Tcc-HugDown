@@ -3,32 +3,137 @@ extends ../layout
 block content
   .container.py-5
     if evento
-      h2.mb-3= evento.titulo_evento
-      .mb-2
-        span.badge.bg-primary= evento.categoria ? evento.categoria.nome_categoria : 'Sem categoria'
-        |  
-        span.badge.bg-secondary= evento.tipo_evento === 'online' ? 'Online' : (evento.tipo_evento === 'hybrid' ? 'Híbrido' : 'Presencial')
-      p.text-muted.mb-1
-        | Data: #{new Date(evento.data_inicio).toLocaleString('pt-BR')}
-        if evento.data_fim
-          |  até #{new Date(evento.data_fim).toLocaleString('pt-BR')}
-      p.text-muted.mb-1
-        | Local: #{enderecoCompleto || evento.local_evento || evento.endereco_evento || 'Online'}
-      if evento.max_participantes
-        p.text-muted.mb-1 Máx. participantes: #{evento.max_participantes}
-      if evento.organizador
-        p.text-muted.mb-1 Organizador: #{evento.organizador.nome_usuario}
-      p.mt-3= evento.descricao_evento
+      - const categoria = (evento.nome_categoria_evento || '').toLowerCase();
+      - const temas = { 'reuniões': 'cat-reunioes', 'eventos beneficentes': 'cat-beneficentes', 'acessível': 'cat-acessivel', 'festas': 'cat-festas', 'formaturas': 'cat-formaturas', 'outros': 'cat-outros', '': 'cat-sem-categoria', 'sem categoria': 'cat-sem-categoria' };
+      - const categoriaClass = temas[categoria] || 'cat-sem-categoria';
+      .card.shadow-lg.p-4.mb-5(class=categoriaClass, style="max-width:700px;margin:0 auto;border-radius:18px;")
+        .d-flex.align-items-center.mb-3
+          .event-date-box.me-4.shadow-sm(style="min-width:70px;")
+            .event-day(style="font-size:2.2rem;font-weight:700;")= new Date(evento.data_inicio).getDate().toString().padStart(2, '0')
+            - const meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+            .event-month(style="font-size:1.1rem;font-weight:600;text-transform:uppercase;")= meses[new Date(evento.data_inicio).getMonth()]
+          .flex-grow-1
+            h2.mb-1.fw-bold= evento.titulo_evento
+            .mb-2
+              span.badge.badge-categoria.me-2(class=categoriaClass)= evento.nome_categoria_evento || 'Sem categoria'
+              span.badge.bg-secondary.me-2
+                if evento.tipo_evento === 'online'
+                  i.fas.fa-globe.me-1
+                  | Online
+                else if evento.tipo_evento === 'hybrid'
+                  i.fas.fa-exchange-alt.me-1
+                  | Híbrido
+                else
+                  i.fas.fa-map-marker-alt.me-1
+                  | Presencial
+            small.text-muted
+              i.fas.fa-clock.me-1
+              | #{new Date(evento.data_inicio).toLocaleString('pt-BR')}
+              if evento.data_fim
+                |  até #{new Date(evento.data_fim).toLocaleString('pt-BR')}
+            br
+            small.text-muted
+              i.fas.fa-map-marker-alt.me-1
+              | Local: #{enderecoCompleto || evento.local_evento || evento.endereco_evento || 'Online'}
+            if evento.max_participantes
+              br
+              small.text-muted
+                i.fas.fa-users.me-1
+                | Máx. participantes: #{evento.max_participantes}
+            if evento.organizador
+              br
+              small.text-muted
+                i.fas.fa-user.me-1
+                | Organizador: #{evento.organizador.nome_usuario}
+        hr
+        p.mt-3(style="font-size:1.08em; color:#444;")= evento.descricao_evento
 
-      // Participação
-      if isLoggedIn
-        if evento.usuarioJaInscrito
-          div.alert.alert-success.mt-4 Você já está inscrito neste evento.
+        // Participação
+        if isLoggedIn
+          if usuarioJaInscrito
+            div.alert.alert-success.mt-4 Você já está inscrito neste evento.
+          else
+            form(method="post", action=`/eventos/${evento.id_evento}/participar`)
+              button.btn.btn-success.mt-4(type="submit" style="font-size:1.1em; padding:0.7em 2.5em; border-radius:8px;") Participar do evento
         else
-          form(method="post", action=`/eventos/${evento.id_evento}/participar`)
-            button.btn.btn-success.mt-4(type="submit") Participar do evento
-      else
-        div.alert.alert-warning.mt-4
-          | Faça login para participar deste evento.
+          div.alert.alert-warning.mt-4
+            | Faça login para participar deste evento.
     else
-      p.text-danger Evento não encontrado.
+      p.text-danger.text-center.mt-5 Evento não encontrado.
+
+block styles
+  style.
+    // Temas de categoria para o card e badge
+    .cat-reunioes { background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%) !important; }
+    .cat-beneficentes { background: linear-gradient(135deg, #fffde7 0%, #ffe082 100%) !important; }
+    .cat-acessivel { background: linear-gradient(135deg, #e8f5e9 0%, #a5d6a7 100%) !important; }
+    .cat-festas { background: linear-gradient(135deg, #fce4ec 0%, #f06292 100%) !important; }
+    .cat-formaturas { background: linear-gradient(135deg, #ede7f6 0%, #9575cd 100%) !important; }
+    .cat-outros { background: linear-gradient(135deg, #f5f5f5 0%, #bdbdbd 100%) !important; }
+    .cat-sem-categoria { background: linear-gradient(135deg, #f8fafc 0%, #e0e0e0 100%) !important; }
+
+    .badge-categoria.cat-reunioes {
+      background: linear-gradient(90deg,#00bcd4 0,#43e97b 100%) !important;
+      color: #fff !important;
+    }
+    .badge-categoria.cat-beneficentes {
+      background: linear-gradient(90deg,#ffe082 0,#ff9800 100%) !important;
+      color: #795548 !important;
+    }
+    .badge-categoria.cat-acessivel {
+      background: linear-gradient(90deg,#43e97b 0,#a5d6a7 100%) !important;
+      color: #fff !important;
+    }
+    .badge-categoria.cat-festas {
+      background: linear-gradient(90deg,#f06292 0,#ba68c8 100%) !important;
+      color: #fff !important;
+    }
+    .badge-categoria.cat-formaturas {
+      background: linear-gradient(90deg,#9575cd 0,#43e97b 100%) !important;
+      color: #fff !important;
+    }
+    .badge-categoria.cat-outros {
+      background: linear-gradient(90deg,#bdbdbd 0,#757575 100%) !important;
+      color: #fff !important;
+    }
+    .badge-categoria.cat-sem-categoria {
+      background: linear-gradient(90deg,#e0e0e0 0,#bdbdbd 100%) !important;
+      color: #666 !important;
+    }
+    .event-date-box {
+      min-width: 70px;
+      text-align: center;
+      border-radius: 12px;
+      padding: 14px 0 10px 0;
+      border: 2px solid #43e97b55;
+      box-shadow: 0 2px 8px #43e97b22;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+    }
+    .event-day {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #43e97b;
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+    .event-month {
+      font-size: 1.1rem;
+      color: #198754;
+      font-weight: 700;
+      text-transform: uppercase;
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+    .badge.bg-secondary {
+      background: #198754 !important;
+      color: #fff !important;
+      font-weight: 600;
+      font-size: 1em;
+      border-radius: 8px;
+      padding: 0.4em 1em;
+      margin-left: 0.2em;
+    }

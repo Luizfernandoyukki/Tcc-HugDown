@@ -122,13 +122,18 @@ block content
         
         .col-lg-4
           .sidebar-widget
-            h4 Próximos Eventos
-            .upcoming-events
+            h4.mb-3.text-success.fw-bold
+              i.fas.fa-calendar-day.me-2
+              | Próximos Eventos
+            .upcoming-events-list
               // Será preenchido via JavaScript
               .loading-placeholder
                 .d-flex.align-items-center
                   .spinner-border.spinner-border-sm.me-2(role="status")
                   span Carregando eventos...
+            a.btn.btn-outline-success.mt-3.w-100(href="/eventos")
+              i.fas.fa-arrow-right.me-2
+              | Ver todos os eventos
 
   // CTA Section
   section.cta-section.py-5.mb-5
@@ -146,3 +151,40 @@ block content
 block scripts
   script(src="/javascripts/index.js")
   script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js")
+  script.
+    // Preenche a lista de próximos eventos na sidebar (apenas 4 mais próximos)
+    document.addEventListener('DOMContentLoaded', async function() {
+      const container = document.querySelector('.upcoming-events-list');
+      if (!container) return;
+      try {
+        const res = await fetch('/api/upcoming-events');
+        if (!res.ok) throw new Error('Erro ao buscar eventos');
+        let events = await res.json();
+        events = events.slice(0, 4); // Apenas os 4 mais próximos
+        if (!events.length) {
+          container.innerHTML = '<p class="text-muted text-center">Nenhum evento próximo.</p>';
+          return;
+        }
+        container.innerHTML = events.map(ev => `
+          <div class="event-preview-card mb-3 p-3 rounded shadow-sm d-flex align-items-center event-link" style="cursor:pointer; background: #f8f9fa; border: 1.5px solid #43e97b22; transition: box-shadow 0.2s;">
+            <div class="event-date-box me-3" style="min-width:54px; background: linear-gradient(135deg, #e0ffe6 0%, #b2f7ef 100%); border-radius: 10px; border: 1.5px solid #43e97b55; text-align:center;">
+              <div class="event-day" style="font-size:1.5rem;font-weight:700;color:#43e97b;">${String(new Date(ev.date).getDate()).padStart(2, '0')}</div>
+              <div class="event-month" style="font-size:0.9rem;color:#198754;font-weight:600;text-transform:uppercase;">${['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][new Date(ev.date).getMonth()]}</div>
+            </div>
+            <div class="flex-grow-1">
+              <div class="fw-bold text-success mb-1" style="font-size:1.08em;">${ev.title}</div>
+              <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>${ev.location}</small>
+              <div>
+                <span class="badge bg-primary mt-1" style="font-size:0.95em;">${ev.attendees} participantes</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+        // Clique em qualquer card leva para /eventos
+        container.querySelectorAll('.event-link').forEach(card => {
+          card.addEventListener('click', () => window.location.href = '/eventos');
+        });
+      } catch (err) {
+        container.innerHTML = '<p class="text-danger text-center">Erro ao carregar eventos.</p>';
+      }
+    });

@@ -15,3 +15,6 @@ block content
         details#error-details.mt-4
           summary#error-details-summary.text-primary.fw-bold(style="cursor:pointer;") Ver detalhes técnicos (log)
           pre#error-stack.bg-light.text-danger.p-3.rounded.mt-2= error.stack
+      h1.text-danger= error
+      if typeof stack !== 'undefined' && stack
+        pre.text-danger= stack
