@@ -111,6 +111,37 @@ block content
             button.btn.btn-secondary(type="button", onclick="fecharModalAdvertir()") Cancelar
             button.btn.btn-warning(type="button", onclick="enviarAdvertencia()") Enviar Advertência
 
+    // NOVA SEÇÃO: Pedidos de verificação (documentos pendentes)
+    h4.mt-5(style="margin-top:40px;") Pedidos de Verificação
+    div(style="margin-bottom:32px;")
+      table.table.table-striped
+        thead
+          tr
+            th ID
+            th Usuário
+            th Tipo Documento
+            th Instituição
+            th Status
+            th Visualizar
+            th Aprovar
+            th Rejeitar
+        tbody(id="verificacaoTable")
+          // Preenchido via JS
+
+    // Modal para visualizar documento de verificação
+    div#modalDocumentoVerificacao.modal(style="display:none;")
+      div.modal-dialog
+        div.modal-content
+          div.modal-header
+            h5.modal-title Documento de Verificação
+            button(type="button", class="close", onclick="fecharModalDocumentoVerificacao()") &times;
+          div.modal-body
+            p#modalDocumentoTipo
+            p#modalDocumentoInstituicao
+            p#modalDocumentoStatus
+            p#modalDocumentoObservacoes
+            a#modalDocumentoArquivo(href="", target="_blank") Ver Arquivo PDF
+
   script.
     // Filtragem de usuários
     function filtrarUsuarios() {
@@ -265,8 +296,101 @@ block content
       });
     }
 
+    // Carregar pedidos de verificação (documentos pendentes)
+    function carregarPedidosVerificacao() {
+      fetch('/admin/super/documentos/pendentes')
+        .then(res => {
+          if (!res.ok) throw new Error('Erro ao buscar documentos');
+          return res.json();
+        })
+        .then(data => {
+          const tbody = document.getElementById('verificacaoTable');
+          tbody.innerHTML = '';
+          data.forEach(doc => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${doc.id_documento}</td>
+              <td>${doc.usuario_nome || doc.id_usuario}</td>
+              <td>${doc.tipo_documento}</td>
+              <td>${doc.instituicao || ''}</td>
+              <td>${doc.status}</td>
+              <td>
+                <button class="btn btn-info btn-sm ver-doc" data-id="${doc.id_documento}">Ver</button>
+              </td>
+              <td>
+                <button class="btn btn-success btn-sm aprovar-doc" data-id="${doc.id_documento}">Aprovar</button>
+              </td>
+              <td>
+                <button class="btn btn-danger btn-sm rejeitar-doc" data-id="${doc.id_documento}">Rejeitar</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+          // Eventos dos botões
+          document.querySelectorAll('.ver-doc').forEach(btn => {
+            btn.addEventListener('click', function() {
+              abrirModalDocumentoVerificacao(this.getAttribute('data-id'));
+            });
+          });
+          document.querySelectorAll('.aprovar-doc').forEach(btn => {
+            btn.addEventListener('click', function() {
+              aprovarDocumentoVerificacao(this.getAttribute('data-id'));
+            });
+          });
+          document.querySelectorAll('.rejeitar-doc').forEach(btn => {
+            btn.addEventListener('click', function() {
+              rejeitarDocumentoVerificacao(this.getAttribute('data-id'));
+            });
+          });
+        })
+        .catch(err => {
+          const tbody = document.getElementById('verificacaoTable');
+          tbody.innerHTML = '<tr><td colspan="8">Erro ao carregar pedidos de verificação.</td></tr>';
+        });
+    }
+
+    // Abrir modal documento verificação
+    function abrirModalDocumentoVerificacao(id) {
+      fetch(`/admin/super/documentos/${id}`)
+        .then(res => res.json())
+        .then(doc => {
+          document.getElementById('modalDocumentoTipo').innerText = 'Tipo: ' + doc.tipo_documento;
+          document.getElementById('modalDocumentoInstituicao').innerText = 'Instituição: ' + (doc.instituicao || '');
+          document.getElementById('modalDocumentoStatus').innerText = 'Status: ' + doc.status;
+          document.getElementById('modalDocumentoObservacoes').innerText = 'Observações: ' + (doc.observacoes || '');
+          document.getElementById('modalDocumentoArquivo').href = doc.caminho_arquivo;
+          document.getElementById('modalDocumentoArquivo').innerText = 'Ver Arquivo PDF';
+          document.getElementById('modalDocumentoVerificacao').style.display = 'block';
+        });
+    }
+    function fecharModalDocumentoVerificacao() {
+      document.getElementById('modalDocumentoVerificacao').style.display = 'none';
+    }
+
+    // Aprovar documento
+    function aprovarDocumentoVerificacao(id) {
+      if (!confirm('Aprovar este documento?')) return;
+      fetch(`/admin/super/documentos/${id}/aprovar`, { method: 'POST' })
+        .then(() => {
+          alert('Documento aprovado!');
+          carregarPedidosVerificacao();
+        });
+    }
+
+    // Rejeitar documento
+    function rejeitarDocumentoVerificacao(id) {
+      if (!confirm('Rejeitar este documento?')) return;
+      fetch(`/admin/super/documentos/${id}/rejeitar`, { method: 'POST' })
+        .then(() => {
+          alert('Documento rejeitado!');
+          carregarPedidosVerificacao();
+        });
+    }
+
     window.onload = function() {
       carregarReportadas();
       adicionarEventosAdvertir();
+      carregarPedidosVerificacao();
       // Se renderizar postagens via JS, chame renderizarPostagens();
     };
