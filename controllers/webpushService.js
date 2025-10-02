@@ -4,39 +4,25 @@ const { Usuario } = require('../models');
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 
-// Só configura VAPID se as chaves estiverem presentes
-if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
-  try {
-    webpush.setVapidDetails('mailto:seu-email@dominio.com', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-  } catch (err) {
-    console.error('[WEBPUSH] Falha ao configurar VAPID:', err);
-  }
-} else {
-  console.warn('[WEBPUSH] Chaves VAPID não encontradas em env. Push notifications estarão desabilitadas.');
-}
+webpush.setVapidDetails(
+  'mailto:seu-email@dominio.com',
+  VAPID_PUBLIC_KEY,
+  VAPID_PRIVATE_KEY
+);
 
-// Salve as subscriptions no banco
+// Salve as subscriptions no banco (adicione um campo subscription na tabela usuarios ou crie uma tabela subscriptions)
 exports.saveSubscription = async (id_usuario, subscription) => {
-  try {
-    await Usuario.update({ subscription: JSON.stringify(subscription) }, { where: { id_usuario } });
-  } catch (err) {
-    console.error('[WEBPUSH] Erro ao salvar subscription:', err);
-    throw err;
-  }
+  // Exemplo: salva no campo subscription do usuário (ajuste conforme seu modelo)
+  await Usuario.update({ subscription: JSON.stringify(subscription) }, { where: { id_usuario } });
 };
 
-// Envia push para um usuário (se houver subscription e chaves configuradas)
+// Envia push para um usuário
 exports.sendPushToUser = async (id_usuario, notification) => {
-  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    // Não tentamos enviar se chaves não estiverem configuradas
-    return;
-  }
+  const usuario = await Usuario.findByPk(id_usuario);
+  if (!usuario || !usuario.subscription) return;
   try {
-    const usuario = await Usuario.findByPk(id_usuario);
-    if (!usuario || !usuario.subscription) return;
-    const sub = JSON.parse(usuario.subscription);
-    await webpush.sendNotification(sub, JSON.stringify(notification));
+    await webpush.sendNotification(JSON.parse(usuario.subscription), JSON.stringify(notification));
   } catch (err) {
-    console.error('[WEBPUSH] Erro ao enviar push para usuário', id_usuario, err);
+    console.error('[WEBPUSH] Erro ao enviar push:', err);
   }
 };
