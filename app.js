@@ -73,17 +73,31 @@ app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets'
 // Adicione esta linha para servir a pasta grupos como estática
 app.use('/grupos', express.static(path.join(__dirname, 'grupos')));
 
+// Configuração de sessão (substituir implementação atual por store persistente)
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
+const sessionStore = new SequelizeStore({ db: sequelize });
+
+// Se estiver por trás de proxy (Heroku, NGinx com SSL), habilite trust proxy
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Configuração de sessão
 app.use(session({
   secret: process.env.SESSION_SECRET || 'sua_chave_secreta',
+  store: sessionStore,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // só https em prod
+    secure: process.env.NODE_ENV === 'production', // https apenas em prod
+    sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
     maxAge: 1000 * 60 * 60 * 24 // 1 dia
   }
 }));
+
+// Sincroniza a tabela de sessões (não força drops)
+sessionStore.sync();
 
 // Middleware global para injetar usuário logado e status
 app.use(async (req, res, next) => {
@@ -137,16 +151,8 @@ app.use((req, res, next) => {
   next(err);
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: req.app.get('env') === 'development' ? err : {}
-  });
-});
+// Adiciona handler de erro centralizado
+const errorHandler = require('./middlewares/error-handler');
+app.use(errorHandler);
 
 module.exports = app;

@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - hugdown-net
+
+  app:
+    build: .
+    restart: always
+    env_file: .env
+    depends_on:
+      - db
+    volumes:
+      - .:/usr/src/app:ro
+      - /perfis:/usr/src/app/perfis
+      - /post:/usr/src/app/post
+      - /docs:/usr/src/app/docs
+    environment:
+      - NODE_ENV=production
+    networks:
+      - hugdown-net
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/hugdown.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/ssl/certs:ro
+    depends_on:
+      - app
+    networks:
+      - hugdown-net
+
+volumes:
+  db_data:
+
+networks:
+  hugdown-net:
+    driver: bridge

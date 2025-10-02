@@ -1,42 +1,35 @@
 const { Notificacao, Usuario, Amizade, ParticipanteEvento, Grupo, MembroGrupo, ProfissionalSaude, DocumentoVerificacao, Postagem, Comentario, Curtida, Compartilhamento, Evento } = require('../models');
 const { Op } = require('sequelize');
 const webpushService = require('./webpushService');
-const webpush = require('web-push');
 
-// Configure suas chaves VAPID
-webpush.setVapidDetails(
-  'mailto:seu@email.com',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
-
+// Função para enviar push usando webpushService (recupera subscription do usuário)
 async function enviarPushParaUsuario(id_usuario, titulo, mensagem, url) {
-  // Recupere a subscription do banco
-  // const sub = await Subscription.findOne({ where: { id_usuario } });
-  if (!sub) return;
-  const payload = JSON.stringify({
-    title: titulo,
-    body: mensagem,
-    url: url
-  });
-  await webpush.sendNotification(JSON.parse(sub.subscription), payload);
+	 try {
+	   await webpushService.sendPushToUser(id_usuario, {
+	     title: titulo,
+	     body: mensagem,
+	     url
+	   });
+	 } catch (err) {
+	   console.error('[NOTIFICACAO] Erro ao enviar push para usuário:', id_usuario, err);
+	 }
 }
 
-// Função genérica
+// Função genérica atualizada para criar notificação e tentar enviar push
 async function criarNotificacao({ id_usuario, tipo_notificacao, titulo, mensagem, url_relacionada = null }) {
-  await Notificacao.create({
-    id_usuario,
-    tipo_notificacao,
-    titulo,
-    mensagem,
-    url_relacionada
-  });
-  // Envia push se houver subscription
-  await webpushService.sendPushToUser(id_usuario, {
-    title: titulo,
-    body: mensagem,
-    url: url_relacionada
-  });
+  try {
+    await Notificacao.create({
+      id_usuario,
+      tipo_notificacao,
+      titulo,
+      mensagem,
+      url_relacionada
+    });
+    // tenta enviar push (silencioso em caso de falha)
+    await enviarPushParaUsuario(id_usuario, titulo, mensagem, url_relacionada);
+  } catch (err) {
+    console.error('[NOTIFICACAO] Erro ao criar/enviar notificação:', err);
+  }
 }
 
 // Amizade
@@ -133,7 +126,6 @@ exports.notificarNovoPostAmigo = async (amigos, id_postagem) => {
 
 // Mensagem direta
 exports.notificarMensagemDireta = async (id_destinatario, id_solicitante) => {
-  // Busca o nome do remetente
   let nomeRemetente = 'Um usuário';
   if (id_solicitante) {
     const usuario = await Usuario.findByPk(id_solicitante, { attributes: ['nome_usuario'] });
