@@ -36,7 +36,22 @@ const documentoVerificacaoController = {
   // Criar novo documento de verificação
   criar: async (req, res) => {
     try {
-      const novoDocumento = await DocumentoVerificacao.create(req.body);
+      // permite ser chamado via rota com upload (req.file) ou via API com body.caminho_arquivo
+      const id_usuario = req.session?.userId || req.body.id_usuario;
+      if (!id_usuario) return res.status(401).json({ error: 'Usuário não autenticado' });
+
+      const caminho_arquivo = req.file ? ('/docs/' + req.file.filename) : (req.body.caminho_arquivo || null);
+      if (!caminho_arquivo) return res.status(400).json({ error: 'Arquivo obrigatório' });
+
+      const novoDocumento = await DocumentoVerificacao.create({
+        id_usuario,
+        tipo_documento: req.body.tipo_documento,
+        numero_documento: req.body.numero_documento,
+        instituicao: req.body.instituicao,
+        caminho_arquivo,
+        status: req.body.status || 'pending',
+        observacoes: req.body.observacoes || null
+      });
       res.status(201).json(novoDocumento);
     } catch (err) {
       res.status(500).json({ error: 'Erro ao criar documento: ' + err.message });

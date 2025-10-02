@@ -1,9 +1,20 @@
+/* Herda os estilos base do super.css */
+@import url('./super.css');
+
+/* Customizações específicas para moderador */
 .container {
   max-width: 900px;
 }
 h2 {
+  border-bottom-color: #e74c3c;
   color: #28a745;
+}
+h4 {
+  border-left-color: #e74c3c;
 }
 .table th, .table td {
   vertical-align: middle;
+}
+.stats-card {
+  border-left: 4px solid #e74c3c;
 }

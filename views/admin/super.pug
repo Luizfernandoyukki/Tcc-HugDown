@@ -4,54 +4,78 @@ block styles
   link(rel="stylesheet", href="/stylesheets/admin/super.css")
 
 block content
-  .container.mt-5
-    h2 Painel Super Admin
-    p.text-muted Bem-vindo, você tem acesso total ao sistema.
+  .container.mt-4
+    // Cabeçalho com estatísticas
+    .row
+      .col-md-3
+        .stats-card
+          .stats-number #{usuarios ? usuarios.length : 0}
+          .stats-label Usuários Totais
+      .col-md-3
+        .stats-card
+          .stats-number #{postagens ? postagens.length : 0}
+          .stats-label Postagens
+      .col-md-3
+        .stats-card
+          .stats-number#reportCount 0
+          .stats-label Reports Pendentes
+      .col-md-3
+        .stats-card
+          .stats-number#verificationCount 0
+          .stats-label Verificações Pendentes
 
-    // Barra de pesquisa de usuários
-    input.form-control.mb-2(type="text", id="userSearch", placeholder="Pesquisar usuários...", oninput="filtrarUsuarios()")
-
+    // Seção de Usuários
+    h2.mt-4
+      i.fas.fa-users.mr-2
+      | Gerenciamento de Usuários
+    .search-box
+      input.form-control#userSearch(type="text", placeholder="Buscar usuários...", oninput="filtrarUsuarios()")
     h4.mt-4 Usuários do sistema
-    table.table.table-striped
-      thead
-        tr
-          th ID
-          th Nome
-          th Email
-          th Ações
-      tbody(id="usuariosTable")
-        each usuario in usuarios
+    .table-scroll(style="max-height:260px; overflow:auto;")
+      table.table.table-striped
+        thead
           tr
-            td= usuario.id_usuario
-            td= usuario.nome_usuario
-            td= usuario.email
-            td
-              form(action=`/admin/super/usuarios/${usuario.id_usuario}/excluir`, method="POST", onsubmit="return confirm('Excluir usuário?');")
-                button.btn.btn-danger.btn-sm(type="submit") Excluir
-              // Nova opção: Advertir usuário
-              button.btn.btn-warning.btn-sm(type="button", data-advertir-id=usuario.id_usuario, data-advertir-nome=usuario.nome_usuario) Advertir
+            th ID
+            th Nome
+            th Email
+            th Ações
+        tbody(id="usuariosTable")
+          each usuario in usuarios
+            tr
+              td= usuario.id_usuario
+              td= usuario.nome_usuario
+              td= usuario.email
+              td
+                .btn-group
+                  form.d-inline(action=`/admin/super/usuarios/${usuario.id_usuario}/excluir`, method="POST", class="confirm-form", data-confirm="Excluir usuário?")
+                    button.btn.btn-danger.btn-sm.mr-1(type="submit") Excluir
+                  button.btn.btn-warning.btn-sm(type="button", data-advertir-id=usuario.id_usuario, data-advertir-nome=usuario.nome_usuario) Advertir
 
-    // Barra de pesquisa de postagens
-    input.form-control.mb-2(type="text", id="postSearch", placeholder="Pesquisar postagens...", oninput="filtrarPostagens()")
-
+    // Seção de Postagens
+    h2.mt-5
+      i.fas.fa-file-alt.mr-2
+      | Gerenciamento de Postagens
+    .search-box
+      input.form-control#postSearch(type="text", placeholder="Buscar postagens...", oninput="filtrarPostagens()")
     h4.mt-5 Postagens
-    table.table.table-striped
-      thead
-        tr
-          th ID
-          th Autor
-          th Título
-          th Ações
-      tbody(id="postagensTable")
-        each post in postagens
+    .table-scroll(style="max-height:260px; overflow:auto;")
+      table.table.table-striped
+        thead
           tr
-            td= post.id_postagem
-            td= post.id_autor
-            td
-              a(href="#", data-id=post.id_postagem) #{post.titulo}
-            td
-              form(action=`/admin/super/postagens/${post.id_postagem}/excluir`, method="POST", onsubmit="return confirm('Excluir postagem?');")
-                button.btn.btn-danger.btn-sm(type="submit") Excluir
+            th ID
+            th Autor
+            th Título
+            th Ações
+        tbody(id="postagensTable")
+          each post in postagens
+            tr
+              td= post.id_postagem
+              td= post.id_autor
+              td
+                a(href="#", data-id=post.id_postagem) #{post.titulo}
+              td
+                form(action=`/admin/super/postagens/${post.id_postagem}/excluir`, method="POST", class="confirm-form", data-confirm="Excluir postagem?")
+                  button.btn.btn-danger.btn-sm(type="submit") Excluir
 
     // Modal para visualizar postagem
     div#modalPostagem.modal(style="display:none;")
@@ -59,14 +83,18 @@ block content
         div.modal-content
           div.modal-header
             h5.modal-title Conteúdo da Postagem
-            button(type="button", class="close", onclick="fecharModalPostagem()") &times;
+            // botao close sem onclick inline; data-target aponta para id do modal
+            button(type="button", class="close btn-close-modal", data-target="modalPostagem") &times;
           div.modal-body
             p#modalConteudo
             img#modalImagem(style="max-width:100%;")
 
-    // Seção de postagens reportadas
+    // Seção de Reports
+    h2.mt-5
+      i.fas.fa-flag.mr-2
+      | Postagens Reportadas
     h4.mt-5(style="margin-top:40px;") Postagens Reportadas
-    div(style="margin-bottom:32px;")
+    .table-scroll(style="max-height:260px; overflow:auto; margin-bottom:32px;")
       table.table.table-striped
         thead
           tr
@@ -75,7 +103,7 @@ block content
             th Visualizar
             th Excluir
         tbody(id="reportadasTable")
-          // Preenchido via JS
+          // Preenchido via JS (JS ajustado abaixo para inserir class/data-confirm)
 
     // Modal para visualizar postagem reportada
     div#modalReportada.modal(style="display:none;")
@@ -83,7 +111,7 @@ block content
         div.modal-content
           div.modal-header
             h5.modal-title Postagem Reportada
-            button(type="button", class="close", onclick="fecharModalReportada()") &times;
+            button(type="button", class="close btn-close-modal", data-target="modalReportada") &times;
           div.modal-body
             p#modalReportadaMotivo
             div#modalReportadaConteudoBox(style="margin-bottom:10px;")
@@ -103,16 +131,19 @@ block content
         div.modal-content
           div.modal-header
             h5.modal-title Advertir Usuário
-            button(type="button", class="close", onclick="fecharModalAdvertir()") &times;
+            button(type="button", class="close btn-close-modal", data-target="modalAdvertir") &times;
           div.modal-body
             p#modalAdvertirNome
             textarea.form-control#modalAdvertirMsg(rows="3") Você foi intimado que, caso continue cometendo infrações, sua conta será banida.
           div.modal-footer
-            button.btn.btn-secondary(type="button", onclick="fecharModalAdvertir()") Cancelar
-            button.btn.btn-warning(type="button", onclick="enviarAdvertencia()") Enviar Advertência
+            button.btn.btn-secondary(type="button", class="btn-cancel-advertir", data-target="modalAdvertir") Cancelar
+            // removido onclick inline; usa id para JS
+            button.btn.btn-warning(type="button", id="btn-enviar-advertencia") Enviar Advertência
 
-    // NOVA SEÇÃO: Pedidos de verificação (documentos pendentes)
-    h4.mt-5(style="margin-top:40px;") Pedidos de Verificação
+    // Seção de Verificações
+    h2.mt-5
+      i.fas.fa-check-circle.mr-2
+      | Pedidos de Verificação
     div(style="margin-bottom:32px;")
       table.table.table-striped
         thead
@@ -178,7 +209,7 @@ block content
               <td>${report.motivo}</td>
               <td><button class="btn btn-info btn-sm ver-report" data-id="${report.id_report}" data-motivo="${report.motivo}" data-postagem="${report.id_postagem}">Ver</button></td>
               <td>
-                <form action="/admin/super/postagens/${report.id_postagem}/excluir" method="POST" onsubmit="return confirm('Excluir postagem reportada?');">
+                <form action="/admin/super/postagens/${report.id_postagem}/excluir" method="POST" class="confirm-form" data-confirm="Excluir postagem reportada?">
                   <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
                 </form>
               </td>
@@ -194,6 +225,14 @@ block content
                 this.getAttribute('data-motivo'),
                 this.getAttribute('data-postagem')
               );
+            });
+          });
+
+          // Reaplica confirmação em forms criados dinamicamente
+          tbody.querySelectorAll('form.confirm-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+              const msg = this.dataset.confirm || 'Confirmar ação?';
+              if (!confirm(msg)) e.preventDefault();
             });
           });
         })
@@ -388,9 +427,114 @@ block content
         });
     }
 
-    window.onload = function() {
+    // Filtragem de usuários
+    function filtrarUsuarios() {
+      const q = document.getElementById('userSearch').value.toLowerCase();
+      const rows = document.querySelectorAll('#usuariosTable tr');
+      rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+    // Filtragem de postagens
+    function filtrarPostagens() {
+      const q = document.getElementById('postSearch').value.toLowerCase();
+      const rows = document.querySelectorAll('#postagensTable tr');
+      rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Carrega listas via AJAX
       carregarReportadas();
       adicionarEventosAdvertir();
       carregarPedidosVerificacao();
-      // Se renderizar postagens via JS, chame renderizarPostagens();
-    };
+
+      // Inicializa botões que fecham modais (sem inline)
+      document.querySelectorAll('.btn-close-modal, .btn-cancel-advertir').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          const targetId = this.dataset.target;
+          if (targetId) {
+            const el = document.getElementById(targetId);
+            if (el) el.style.display = 'none';
+          }
+        });
+      });
+
+      // Fecha modal ao clicar no backdrop
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) this.style.display = 'none';
+        });
+      });
+
+      // Confirm prompts para forms que antes usavam onsubmit inline
+      document.querySelectorAll('form.confirm-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+          const msg = this.dataset.confirm || 'Confirmar ação?';
+          if (!confirm(msg)) e.preventDefault();
+        });
+      });
+
+      // Enviar advertência (liga ao botão)
+      const btnEnviar = document.getElementById('btn-enviar-advertencia');
+      if (btnEnviar) {
+        btnEnviar.addEventListener('click', function() {
+          enviarAdvertencia();
+        });
+      }
+
+      // Re-aplica eventos nas linhas carregadas dinamicamente (quando necessário)
+      // observe/reattach: quando carregarReportadas() inserir linhas, ele já cria botões .ver-report que chamam abrirModalReportada
+    });
+
+    // Ajuste no carregamento de reports: crie forms sem onsubmit inline e com data-confirm
+    function carregarReportadas() {
+      fetch('/admin/super/postagens/reportadas')
+        .then(res => {
+          if (!res.ok) throw new Error('Erro ao buscar reports');
+          return res.json();
+        })
+        .then(data => {
+          const tbody = document.getElementById('reportadasTable');
+          tbody.innerHTML = '';
+          data.forEach(report => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${report.id_postagem}</td>
+              <td>${report.motivo}</td>
+              <td><button class="btn btn-info btn-sm ver-report" data-id="${report.id_report}" data-motivo="${report.motivo}" data-postagem="${report.id_postagem}">Ver</button></td>
+              <td>
+                <form action="/admin/super/postagens/${report.id_postagem}/excluir" method="POST" class="confirm-form" data-confirm="Excluir postagem reportada?">
+                  <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
+                </form>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+          // Adiciona eventos aos botões "Ver"
+          document.querySelectorAll('.ver-report').forEach(btn => {
+            btn.addEventListener('click', function() {
+              abrirModalReportada(
+                this.getAttribute('data-id'),
+                this.getAttribute('data-motivo'),
+                this.getAttribute('data-postagem')
+              );
+            });
+          });
+
+          // Reaplica confirmação em forms criados dinamicamente
+          tbody.querySelectorAll('form.confirm-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+              const msg = this.dataset.confirm || 'Confirmar ação?';
+              if (!confirm(msg)) e.preventDefault();
+            });
+          });
+        })
+        .catch(err => {
+          const tbody = document.getElementById('reportadasTable');
+          tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar reports.</td></tr>';
+        });
+    }

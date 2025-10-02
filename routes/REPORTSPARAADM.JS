@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const reportsController = require('../controllers/reports');
 const { Report, Postagem, Usuario, Notificacao, DocumentoVerificacao, Administrador } = require('../models');
+const fs = require('fs');
+const path = require('path');
 
 // Listar todos os reports para o painel ADM (dados simples)
 router.get('/admin/super/postagens/reportadas', reportsController.listarSimples);
@@ -18,12 +20,27 @@ router.get('/admin/super/reports/:id', async (req, res) => {
   }
 });
 
-// Excluir postagem referida (cascata)
+// Excluir postagem referida (cascata) - agora remove arquivo físico antes
 router.post('/admin/super/postagens/:id/excluir', async (req, res) => {
   const { id } = req.params;
   try {
     const postagem = await Postagem.findByPk(id);
     if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
+
+    // Remove arquivo de mídia se existir e for local (ex: /post/..., /grupos/..., /perfis/...)
+    try {
+      const midia = postagem.url_midia;
+      if (midia && typeof midia === 'string') {
+        const candidate = midia.replace(/^\//, '');
+        const filePath = path.join(__dirname, '..', candidate);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+    } catch (err) {
+      console.warn('[ADM][EXCLUIR_POSTAGEM] erro ao remover arquivo de mídia:', err.message);
+    }
+
     await postagem.destroy(); // Remove postagem e tudo que tem ON DELETE CASCADE
     res.redirect('/admin/super'); // Redireciona para painel após exclusão
   } catch (err) {

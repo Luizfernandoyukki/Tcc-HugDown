@@ -81,3 +81,59 @@ body[style*="overflow: hidden"]::before {
     padding: 8px;
   }
 }
+
+/* Garante que itens da navbar fiquem em linha mesmo com CSS externo */
+.navbar-nav.flex-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 0.6rem;
+}
+
+/* Certifica que cada nav-item use layout flex para centralizar seu conteúdo */
+.navbar-nav .nav-item {
+  display: flex;
+  align-items: center;
+}
+
+/* Tamanho e espaçamento dos ícones do menu (notificações / nova postagem) */
+.menu-icon {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  display: inline-block;
+  margin: 0;
+  padding: 4px;
+}
+
+/* Ajuste da caixa de pesquisa para não crescer demais e empurrar itens */
+.search-box {
+  max-width: 520px;
+  width: 60%;
+  min-width: 220px;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Pequeno ajuste para o botão de busca interno */
+.search-box .search-button {
+  border: none;
+  background: transparent;
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Evita que a imagem do logo aumente demais e cause quebra de linha */
+#logo-hugdown {
+  max-height: 64px;
+  width: auto;
+}
+
+/* Em telas muito pequenas, permita que a navegação colapse normalmente */
+@media (max-width: 576px) {
+  .search-box { width: 100%; max-width: none; margin: 0.5rem 0; }
+  .navbar-nav.flex-row { flex-direction: column; gap: 0.25rem; }
+  .menu-icon { width: 28px; height: 28px; }
+}

@@ -4,6 +4,7 @@ const controllers = require('../controllers/index.js');
 const { eventoController } = controllers;
 const { ParticipanteEvento } = require('../models');
 const requireLogin = require('../middlewares/auth');
+const https = require('https');
 
 // Exibir formulário de criação de evento (GET /eventos/create)
 router.get('/create', requireLogin, async (req, res) => {
@@ -47,17 +48,38 @@ router.get('/:id', requireLogin, async (req, res) => {
         { model: ParticipanteEvento, as: 'participantes' }
       ]
     });
-    if (!evento) return res.status(404).render('error', { error: 'Evento não encontrado' });
+    if (!evento) {
+      return res.status(404).render('error', { error: 'Evento não encontrado' });
+    }
+
+    // helper: reverse geocode via Nominatim usando https nativo (com timeout e fallback)
+    const reverseGeocode = (lat, lon, timeout = 4000) => {
+      return new Promise((resolve) => {
+        if (!lat || !lon) return resolve(null);
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+        const req = https.get(url, { headers: { 'User-Agent': 'HugDown/1.0 (+https://example.com)' } }, (resp) => {
+          let data = '';
+          resp.on('data', chunk => data += chunk);
+          resp.on('end', () => {
+            try {
+              const json = JSON.parse(data);
+              resolve(json);
+            } catch (e) {
+              resolve(null);
+            }
+          });
+        });
+        req.on('error', () => resolve(null));
+        req.setTimeout(timeout, () => { req.abort(); resolve(null); });
+      });
+    };
 
     // Busca endereço corrido via Nominatim se houver latitude/longitude
     let enderecoCompleto = '';
     if (evento.latitude && evento.longitude) {
-      const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${evento.latitude}&lon=${evento.longitude}`;
       try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.address) {
+        const data = await reverseGeocode(evento.latitude, evento.longitude);
+        if (data && data.address) {
           enderecoCompleto = [
             data.address.road,
             data.address.neighbourhood,
@@ -68,6 +90,7 @@ router.get('/:id', requireLogin, async (req, res) => {
           ].filter(Boolean).join(', ');
         }
       } catch (err) {
+        console.error('[EVENTOS][GET /:id] erro no reverseGeocode:', err && err.stack ? err.stack : err);
         enderecoCompleto = '';
       }
     }
@@ -75,20 +98,33 @@ router.get('/:id', requireLogin, async (req, res) => {
     // Verifica se o usuário já está inscrito
     let usuarioJaInscrito = false;
     if (req.session.userId) {
-      const inscrito = await ParticipanteEvento.findOne({
-        where: { id_evento: evento.id_evento, id_usuario: req.session.userId }
-      });
-      usuarioJaInscrito = !!inscrito;
+      try {
+        const inscrito = await ParticipanteEvento.findOne({
+          where: { id_evento: evento.id_evento, id_usuario: req.session.userId }
+        });
+        usuarioJaInscrito = !!inscrito;
+      } catch (err) {
+        console.error('[EVENTOS][GET /:id] erro ao verificar inscricao:', err && err.stack ? err.stack : err);
+      }
     }
 
+    // render com callback para capturar erro de template
     res.render('eventos/show', {
       evento,
       isLoggedIn: !!req.session.userId,
       usuarioJaInscrito,
-      enderecoCompleto // <-- passa para a view
+      enderecoCompleto,
+      usuario: res.locals.usuario
+    }, function(renderErr, html) {
+      if (renderErr) {
+        console.error('[EVENTOS][RENDER][ERRO] ao renderizar eventos/show:', renderErr && renderErr.stack ? renderErr.stack : renderErr);
+        return res.status(500).render('error', { error: 'Erro ao renderizar evento: ' + (renderErr.message || renderErr) });
+      }
+      res.send(html);
     });
   } catch (err) {
-    res.status(500).render('error', { error: 'Erro ao buscar evento: ' + err.message });
+    console.error('[EVENTOS][GET /:id][ERRO]', err && err.stack ? err.stack : err);
+    res.status(500).render('error', { error: 'Erro ao buscar evento: ' + (err.message || err) });
   }
 });
 

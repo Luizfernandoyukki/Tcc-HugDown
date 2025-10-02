@@ -25,6 +25,18 @@ router.post('/:id/ler', requireLogin, async (req, res) => {
   res.redirect('/notificacoes');
 });
 
+// API: contagem de notificações não-lidas (usada por geral.js)
+router.get('/api/notificacoes/nao-lidas/count', async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: 'Não autenticado' });
+  try {
+    const count = await Notificacao.count({ where: { id_usuario: userId, lida: false } });
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao contar notificações: ' + err.message });
+  }
+});
+
 router.post('/subscribe', async (req, res) => {
   // Salve a subscription no banco associada ao usuário logado
   const userId = req.session.userId;

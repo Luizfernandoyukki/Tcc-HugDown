@@ -78,3 +78,12 @@ h2, h5 {
     border-radius: 12px;
     padding: 0.5rem;
 }
+
+/* Corrige alinhamento do ícone de mostrar/ocultar senha */
+.toggle-password {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  right: 12px;
+  cursor: pointer;
+  z-index: 3;
+}

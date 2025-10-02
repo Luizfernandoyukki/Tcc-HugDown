@@ -32,9 +32,18 @@ block content
               if evento.data_fim
                 |  até #{new Date(evento.data_fim).toLocaleString('pt-BR')}
             br
+            // endereço + link para Google Maps (mantém o texto do endereço)
+            - const endereco = enderecoCompleto || evento.local_evento || evento.endereco_evento;
             small.text-muted
               i.fas.fa-map-marker-alt.me-1
-              | Local: #{enderecoCompleto || evento.local_evento || evento.endereco_evento || 'Online'}
+              | Local:
+              span.ms-1= endereco || 'Online'
+              if endereco
+                |  
+                - const gHref = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(endereco);
+                a.ms-2(href=gHref, target="_blank", rel="noopener noreferrer")
+                  i.fab.fa-google.me-1
+                  | Ver no Maps
             if evento.max_participantes
               br
               small.text-muted

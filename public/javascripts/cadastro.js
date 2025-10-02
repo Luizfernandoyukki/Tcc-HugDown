@@ -145,11 +145,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Se for profissional de saúde, valida campos extras
     if (profissionalCheck && profissionalCheck.checked) {
       const camposProfissional = [
-        'tipo_registro', 'numero_registro', 'uf_registro', 'instituicao', 'documento_comprobatorio'
+        'tipo_registro', 'numero_registro', 'uf_registro', 'instituicao'
+        // 'documento_comprobatorio' removido: funcionalidade futura
       ];
       camposProfissional.forEach(nome => {
         const campo = form.querySelector(`[name="${nome}"]`);
-        if (!campo || !campo.value.trim() || (campo.type === 'file' && campo.files.length === 0)) {
+        if (!campo || !campo.value.trim()) {
           camposFaltando.push(nome);
         }
       });

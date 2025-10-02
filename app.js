@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const helmet = require('helmet');
 const cors = require('cors');
+const cron = require('./cron'); // Importa o cron
 
 // Banco de dados (Sequelize)
 const sequelize = require('./database/database');
@@ -89,15 +90,12 @@ app.use(async (req, res, next) => {
   try {
     res.locals.isLoggedIn = !!req.session.isLoggedIn;
     if (req.session.userId) {
-      // Sempre busca do banco para garantir atualização da foto e dados
       const usuario = await Usuario.findByPk(req.session.userId);
       res.locals.usuario = usuario;
-      req.session.usuario = usuario; // Atualiza na sessão também (opcional)
-      console.log('[DEBUG] Usuário logado:', usuario ? usuario.email : null);
+      req.session.usuario = usuario;
     } else {
       res.locals.usuario = null;
       req.session.usuario = null;
-      console.log('[DEBUG] Nenhum usuário logado');
     }
   } catch (err) {
     console.error('[DEBUG] Erro ao buscar usuário logado:', err);
@@ -106,6 +104,9 @@ app.use(async (req, res, next) => {
   }
   next();
 });
+
+// Roda verificação de eventos próximos ao inicializar o app
+cron.verificarEventosProximos();
 
 // Remova o middleware de eventos próximos (deixe só o cron rodando externamente)
 
@@ -125,13 +126,10 @@ app.use(async (req, res, next) => {
 
 // Rotas
 app.use('/', indexRouter);
+app.use('/documentos-verificacao', require('./routes/documentosVerificacao'));
 app.use('/webpush', require('./routes/webpush'));
-
-// Adicione esta linha para expor as rotas de reports para ADM
 app.use(require('./routes/REPORTSPARAADM.JS'));
-
 app.get('/favicon.ico', (req, res) => res.status(204));
-
 // 404 handler
 app.use((req, res, next) => {
   const err = new Error('Página não encontrada');

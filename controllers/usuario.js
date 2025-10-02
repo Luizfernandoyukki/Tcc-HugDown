@@ -1,6 +1,8 @@
 const { Usuario, Idioma, Amizade, Postagem, ProfissionalSaude } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
 
 // Listar todos os usuários
 exports.listar = async (req, res) => {
@@ -123,7 +125,25 @@ exports.atualizar = async (req, res) => {
     const id = req.params.id;
     const usuario = await Usuario.findByPk(id);
     if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    // Se houver upload de foto_perfil via multer, atualiza o caminho
+    if (req.files && req.files.foto_perfil && req.files.foto_perfil[0]) {
+      // Remove a foto antiga se existir e for um arquivo local em /perfis
+      try {
+        const antiga = usuario.foto_perfil;
+        if (antiga && (antiga.startsWith('/perfis') || antiga.startsWith('perfis'))) {
+          const antigaPath = path.join(__dirname, '..', antiga.replace(/^\//, ''));
+          if (fs.existsSync(antigaPath)) fs.unlinkSync(antigaPath);
+        }
+      } catch (err) {
+        console.warn('[USUARIO][ATUALIZAR] não foi possível remover foto antiga:', err.message);
+      }
+      const nova = '/perfis/' + req.files.foto_perfil[0].filename;
+      req.body.foto_perfil = nova;
+    }
+
     await usuario.update(req.body);
+    // retorna objeto atualizado
     res.json(usuario);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao atualizar usuário: ' + err.message });
@@ -136,6 +156,37 @@ exports.remover = async (req, res) => {
     const id = req.params.id;
     const usuario = await Usuario.findByPk(id);
     if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    // Apaga foto de perfil física se existir localmente
+    try {
+      const foto = usuario.foto_perfil;
+      if (foto && (foto.startsWith('/perfis') || foto.startsWith('perfis'))) {
+        const fotoPath = path.join(__dirname, '..', foto.replace(/^\//, ''));
+        if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+      }
+    } catch (err) {
+      console.warn('[USUARIO][REMOVER] erro ao remover foto de perfil:', err.message);
+    }
+
+    // Remove mídias associadas às postagens deste usuário (se houver)
+    try {
+      const postagens = await Postagem.findAll({ where: { id_autor: id } });
+      for (const post of postagens) {
+        const midia = post.url_midia;
+        if (midia && typeof midia === 'string') {
+          // suporta caminhos que começam com /post, /grupos ou /perfis
+          const candidate = midia.replace(/^\//, ''); // remove barra inicial
+          const midiaPath = path.join(__dirname, '..', candidate);
+          if (fs.existsSync(midiaPath)) {
+            fs.unlinkSync(midiaPath);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[USUARIO][REMOVER] erro ao remover mídias de postagens:', err.message);
+    }
+
+    // Agora remove o usuário (CASCATA deve remover postagens/relacionados no DB)
     await usuario.destroy();
     res.json({ mensagem: 'Usuário removido com sucesso' });
   } catch (err) {

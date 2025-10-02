@@ -101,16 +101,19 @@ router.get('/show/:id', requireLogin, async (req, res) => {
 // Editar perfil padrão
 router.get('/edit/:id', requireLogin, podeEditarOuVerPerfil, async (req, res) => {
   try {
-    const usuario = await usuarioController.buscarPorId({ params: { id: req.params.id } }, {});
+    const { Usuario } = require('../models');
+    const usuario = await Usuario.findByPk(req.params.id);
     if (!usuario) return res.status(404).render('error', { error: 'Usuário não encontrado' });
+    // Renderiza a view de edição com o objeto Sequelize (compatível com edit.pug)
     res.render('usuarios/edit', { usuario });
   } catch (err) {
+    console.error('[ROUTE][USUARIOS][EDIT] Erro:', err);
     res.status(500).render('error', { error: 'Erro ao buscar usuário: ' + err.message });
   }
 });
 
-// Atualizar usuário
-router.put('/:id', requireLogin, usuarioController.atualizar);
+// Atualizar usuário (agora aceita upload de foto_perfil)
+router.put('/:id', requireLogin, uploadCadastro.fields([{ name: 'foto_perfil', maxCount: 1 }]), usuarioController.atualizar);
 
 // Remover usuário
 router.delete('/:id', requireLogin, usuarioController.remover);
@@ -130,7 +133,4 @@ async function redirecionarParaPerfil(req, res, next) {
 // Rota para buscar qualquer usuário pelo id e redirecionar para o perfil correto
 router.get('/find/:id', requireLogin, redirecionarParaPerfil);
 
-module.exports = router;
-router.use('/perfis', express.static(path.join(__dirname, '../perfis')));
-router.use('/post', express.static(path.join(__dirname, '../post')));
 module.exports = router;

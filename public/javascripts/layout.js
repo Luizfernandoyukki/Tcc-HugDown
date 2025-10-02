@@ -3,21 +3,20 @@
   const card = document.getElementById('card-flutuante-login');
   const fecharBtn = document.getElementById('fechar-card-flutuante');
 
-  // Mostrar card flutuante
   function mostrarCardFlutuante() {
+    if (!card) return;
     card.style.display = 'block';
     document.body.style.overflow = 'hidden';
   }
 
-  // Fechar card flutuante
   if (fecharBtn) {
     fecharBtn.addEventListener('click', () => {
+      if (!card) return;
       card.style.display = 'none';
       document.body.style.overflow = '';
     });
   }
 
-  // Bloqueio de ações restritas
   document.querySelectorAll('.acao-restrita').forEach(btn => {
     btn.addEventListener('click', function(e) {
       if (!window.usuarioLogado) {
@@ -25,7 +24,6 @@
         mostrarCardFlutuante();
         return false;
       }
-      // Ação normal se logado
     });
   });
 })();
@@ -46,10 +44,7 @@ function initSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
         if (!searchTerm) return;
 
-        // Remove destaques anteriores
         clearHighlights();
-        
-        // Realiza a pesquisa
         searchInContent(searchTerm);
     });
 }
@@ -57,37 +52,46 @@ function initSearch() {
 function clearHighlights() {
     document.querySelectorAll('.search-highlight').forEach(el => {
         const parent = el.parentNode;
-        parent.textContent = parent.textContent;
+        if (parent) parent.textContent = parent.textContent;
     });
 }
 
+// Escapa termo para usar em RegExp
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function searchInContent(term) {
+    const main = document.querySelector('.site-main');
+    if (!main) return;
+
+    // walker é declarado aqui (dentro da função) para evitar ReferenceError externo
     const walker = document.createTreeWalker(
-        document.querySelector('.site-main'),
+        main,
         NodeFilter.SHOW_TEXT,
         {
             acceptNode: function(node) {
-                return node.parentNode.tagName !== 'SCRIPT' && 
-                       node.parentNode.tagName !== 'STYLE' ? 
-                       NodeFilter.FILTER_ACCEPT : 
-                       NodeFilter.FILTER_REJECT;
+                const parentTag = node.parentNode && node.parentNode.tagName ? node.parentNode.tagName.toUpperCase() : '';
+                return (parentTag !== 'SCRIPT' && parentTag !== 'STYLE') ?
+                    NodeFilter.FILTER_ACCEPT :
+                    NodeFilter.FILTER_REJECT;
             }
         }
     );
 
+    let node;
     let found = false;
     let firstMatch = null;
-    let node;
 
-    while (node = walker.nextNode()) {
+    while ((node = walker.nextNode())) {
         if (node.textContent.toLowerCase().includes(term)) {
             const span = document.createElement('span');
             span.innerHTML = node.textContent.replace(
-                new RegExp(`(${term})`, 'gi'),
+                new RegExp(`(${escapeRegExp(term)})`, 'gi'),
                 '<mark class="search-highlight">$1</mark>'
             );
             node.parentNode.replaceChild(span, node);
-            
+
             if (!found) {
                 firstMatch = span;
                 found = true;
@@ -102,10 +106,6 @@ function searchInContent(term) {
         });
     }
 }
-    let found = false;
-    let firstMatch = null;
-    let node;
-
     while (node = walker.nextNode()) {
         if (node.textContent.toLowerCase().includes(term)) {
             const span = document.createElement('span');

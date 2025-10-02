@@ -19,6 +19,12 @@ block content
               button.btn.btn-success.w-100(type="submit") Entrar
               .mt-2.text-center
                 a(href="/esqueciminhasenha") Esqueci minha senha
+
+            // novo bloco: convite para cadastro
+            .mt-4.text-center
+              p.mb-2 Não tem cadastro?
+              a.btn.btn-outline-primary(href="/cadastro") Cadastre-se aqui
+
             if isLoggedIn
               .alert.alert-success.mt-3 Você já está logado!
             else

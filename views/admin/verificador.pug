@@ -20,17 +20,17 @@ block content
             th Ações
         tbody
           each doc in docs
-            tr
-              td= doc.id_documento
-              td= doc.usuario?.nome_usuario || 'N/A'
-              td= doc.tipo_documento
-              td= doc.instituicao
-              td= doc.status
-              td= doc.data_submissao
-              td
-                form(action=`/admin/verificador/documentos/${doc.id_documento}/aprovar`, method="POST", onsubmit="return confirm('Aprovar documento?');")
-                  button.btn.btn-success.btn-sm(type="submit") Aprovar
-                form(action=`/admin/verificador/documentos/${doc.id_documento}/rejeitar`, method="POST", onsubmit="return confirm('Rejeitar documento?');")
-                  button.btn.btn-danger.btn-sm(type="submit") Rejeitar
+            if doc.status === 'approved'
+              tr
+                td= doc.id_documento
+                td= doc.usuario?.nome_usuario || 'N/A'
+                td= doc.tipo_documento
+                td= doc.instituicao
+                td= doc.status
+                td= doc.data_submissao
+                td
+                  // Nenhuma ação para documentos já verificados
+    else
+      p.text-muted Nenhum documento verificado.
     else
       p.text-muted Nenhum documento pendente.

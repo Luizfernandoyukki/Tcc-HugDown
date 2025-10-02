@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const router = express.Router();
-const { Usuario, Comentario, Curtida, Postagem, Evento, Grupo, ParticipanteEvento, Amizade } = require('../models');
+const { Usuario, Comentario, Curtida, Postagem, Evento, Grupo, ParticipanteEvento, Amizade, Notificacao } = require('../models');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const controllers = require('../controllers/index.js');
 const {
@@ -300,22 +300,27 @@ router.get('/api/recent-activity', asyncHandler(async (req, res) => {
 
 // API: Próximos eventos (ordem por data)
 router.get('/api/upcoming-events', asyncHandler(async (req, res) => {
-  const events = await Evento.findAll({
-    where: { ativo: true },
-    order: [['data_inicio', 'ASC']],
-    limit: 5
-  });
-  // Busca número de participantes para cada evento
-  const result = await Promise.all(events.map(async ev => {
-    const attendees = await ParticipanteEvento.count({ where: { id_evento: ev.id_evento } });
-    return {
-      title: ev.titulo_evento,
-      location: ev.local_evento || ev.endereco_evento || 'Online',
-      date: ev.data_inicio,
-      attendees
-    };
-  }));
-  res.json(result);
+  try {
+    const events = await Evento.findAll({
+      where: { ativo: true },
+      order: [['data_inicio', 'ASC']],
+      limit: 5
+    });
+    // Busca número de participantes para cada evento
+    const result = await Promise.all(events.map(async ev => {
+      const attendees = await ParticipanteEvento.count({ where: { id_evento: ev.id_evento } });
+      return {
+        title: ev.titulo_evento,
+        location: ev.local_evento || ev.endereco_evento || 'Online',
+        date: ev.data_inicio,
+        attendees
+      };
+    }));
+    res.json(result);
+  } catch (err) {
+    console.error('[API][upcoming-events][ERRO]', err && err.stack ? err.stack : err);
+    res.status(500).json({ error: 'Erro ao buscar próximos eventos' });
+  }
 }));
 
 // API: Comentários de uma postagem
@@ -347,6 +352,14 @@ router.post('/api/reports', asyncHandler(async (req, res) => {
   // O controller já envia o response
 }));
 
+// API: contagem de notificações não-lidas (compatível com geral.js)
+router.get('/api/notificacoes/nao-lidas/count', asyncHandler(async (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) return res.status(401).json({ error: 'Não autenticado' });
+  const count = await Notificacao.count({ where: { id_usuario: userId, lida: false } });
+  res.json({ count });
+}));
+
 // Painel Super Admin
 router.get('/admin/super', asyncHandler(async (req, res) => {
   const { Administrador, Usuario, Postagem } = require('../models');
@@ -357,20 +370,33 @@ router.get('/admin/super', asyncHandler(async (req, res) => {
   res.render('admin/super', { usuarioLogado: res.locals.usuario, isLoggedIn: res.locals.isLoggedIn, usuarios, postagens });
 }));
 
-// Super Admin: excluir usuário
+// Super Admin: excluir usuário (agora com verificação para não excluir outros admins)
 router.post('/admin/super/usuarios/:id/excluir', asyncHandler(async (req, res) => {
   const { Administrador, Usuario } = require('../models');
   const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
   if (!admin || admin.nivel_admin !== 'super_admin') return res.status(403).render('error', { error: 'Acesso negado.' });
-  await Usuario.destroy({ where: { id_usuario: req.params.id } });
-  await notificacaoService.criarNotificacao({
-    id_usuario: req.params.id,
-    tipo_notificacao: 'system',
-    titulo: 'Conta excluída',
-    mensagem: 'Sua conta foi excluída pelo administrador.',
-    url_relacionada: null
-  });
-  res.redirect('/admin/super');
+
+  const alvoId = Number(req.params.id);
+  try {
+    const alvoAdmin = await Administrador.findOne({ where: { id_usuario: alvoId } });
+    if (alvoAdmin) {
+      // impede exclusão de qualquer administrador por segurança (apenas super_admin pode gerenciar, e aqui já é super_admin)
+      return res.status(403).render('error', { error: 'Não é permitido excluir contas de administradores.' });
+    }
+
+    await Usuario.destroy({ where: { id_usuario: alvoId } });
+    await require('../controllers/notificacaoService').criarNotificacao({
+      id_usuario: alvoId,
+      tipo_notificacao: 'system',
+      titulo: 'Conta excluída',
+      mensagem: 'Sua conta foi excluída pelo administrador.',
+      url_relacionada: null
+    });
+    res.redirect('/admin/super');
+  } catch (err) {
+    console.error('[ADMIN][EXCLUIR_USUARIO][ERRO]', err);
+    res.status(500).render('error', { error: 'Erro ao excluir usuário: ' + err.message });
+  }
 }));
 
 // Painel Moderador
