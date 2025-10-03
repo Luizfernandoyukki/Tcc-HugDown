@@ -67,18 +67,18 @@ block scripts
   script.
     window.usuarios = !{JSON.stringify(usuarios)};
     window.userId = !{JSON.stringify(userId)};
-    // Filtro de pesquisa por nome de usuário
+    // Filtro de pesquisa por nome de usuário (funciona para cards)
     document.addEventListener('DOMContentLoaded', function() {
       const input = document.getElementById('search-usuario');
-      const table = document.getElementById('usuarios-table');
-      if (!input || !table) return;
+      if (!input) return;
       input.addEventListener('input', function() {
         const termo = input.value.trim().toLowerCase();
-        const linhas = table.querySelectorAll('tbody tr');
-        linhas.forEach(tr => {
-          const nomeTd = tr.querySelector('.usuario-nome');
-          if (!nomeTd) return;
-          const nome = nomeTd.textContent.trim().toLowerCase();
+        document.querySelectorAll('.user-card').forEach(card => {
+          const nome = card.querySelector('.user-name')?.textContent.trim().toLowerCase() || '';
+          card.style.display = nome.includes(termo) ? '' : 'none';
+        });
+      });
+    });
           tr.style.display = nome.includes(termo) ? '' : 'none';
         });
       });

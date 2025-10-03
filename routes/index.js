@@ -13,6 +13,7 @@ const {
 const { usuarioController } = require('../controllers');
 const reportsController = require('../controllers/reports');
 const notificacaoService = require('../controllers/notificacaoService');
+const reportComentarioController = require('../controllers/reportComentario');
 
 // Wrapper para async/await
 const asyncHandler = (fn) => (req, res, next) => {
@@ -352,6 +353,11 @@ router.post('/api/reports', asyncHandler(async (req, res) => {
   // O controller já envia o response
 }));
 
+// API para criar report de comentário
+router.post('/api/reports-comentarios', asyncHandler(async (req, res) => {
+  await reportComentarioController.criar(req, res);
+}));
+
 // API: contagem de notificações não-lidas (compatível com geral.js)
 router.get('/api/notificacoes/nao-lidas/count', asyncHandler(async (req, res) => {
   const userId = req.session.userId;
@@ -367,7 +373,8 @@ router.get('/admin/super', asyncHandler(async (req, res) => {
   if (!admin || admin.nivel_admin !== 'super_admin') return res.status(403).render('error', { error: 'Acesso negado.' });
   const usuarios = await Usuario.findAll();
   const postagens = await Postagem.findAll();
-  res.render('admin/super', { usuarioLogado: res.locals.usuario, isLoggedIn: res.locals.isLoggedIn, usuarios, postagens });
+  // Corrija: envie 'usuarios' e 'postagens' para o template
+  res.render('admin/super', { usuarios, postagens, usuario: res.locals.usuario, isLoggedIn: res.locals.isLoggedIn });
 }));
 
 // Super Admin: excluir usuário (agora com verificação para não excluir outros admins)

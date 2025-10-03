@@ -84,11 +84,11 @@ router.get('/', requireLogin, async (req, res) => {
   const categorias = await categoriaController.listar(req, { raw: true });
   const tags = await tagController.listar(req, { raw: true });
 
+  // Corrija aqui: envie todas as categorias e o usuário completo
   res.render('feed', {
-    categorias: categorias.slice(0, 4),
-    todasCategorias: categorias,
+    categorias,
     tags,
-    usuario: req.session.userId ? req.session.usuario : null,
+    usuario: req.session.usuario || res.locals.usuario || null,
     posts
   });
 });

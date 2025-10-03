@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const reportsController = require('../controllers/reports');
-const { Report, Postagem, Usuario, Notificacao, DocumentoVerificacao, Administrador } = require('../models');
+const reportComentarioController = require('../controllers/reportComentario');
+const { Report, Postagem, Usuario, Notificacao, DocumentoVerificacao, Administrador, ReportGrupo } = require('../models');
 const fs = require('fs');
 const path = require('path');
 
@@ -143,6 +144,42 @@ router.post('/admin/super/documentos/:id/rejeitar', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao rejeitar documento: ' + err.message });
+  }
+});
+
+// Listar todos os reports de comentários para o painel ADM (dados simples)
+router.get('/admin/super/comentarios/reportados', reportComentarioController.listarSimples);
+
+// Visualizar detalhes de um report de comentário específico
+router.get('/admin/super/reports-comentarios/:id', reportComentarioController.buscarPorId);
+
+// Excluir comentário reportado (exemplo, ajuste conforme sua lógica)
+router.post('/admin/super/comentarios/:id/excluir', async (req, res) => {
+  const { id } = req.params;
+  const { Comentario } = require('../models');
+  const comentario = await Comentario.findByPk(id);
+  if (!comentario) return res.status(404).json({ error: 'Comentário não encontrado' });
+  await comentario.destroy();
+  res.redirect('/admin/super');
+});
+
+// Excluir usuário (verifica se é admin antes)
+router.post('/admin/super/usuarios/:id/excluir', async (req, res) => {
+  const { Administrador, Usuario } = require('../models');
+  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+  if (!admin || admin.nivel_admin !== 'super_admin') return res.status(403).render('error', { error: 'Acesso negado.' });
+
+  const alvoId = Number(req.params.id);
+  try {
+    const alvoAdmin = await Administrador.findOne({ where: { id_usuario: alvoId } });
+    if (alvoAdmin) {
+      return res.status(403).render('error', { error: 'Não é permitido excluir contas de administradores.' });
+    }
+    await Usuario.destroy({ where: { id_usuario: alvoId } });
+    res.redirect('/admin/super'); // Redireciona para o painel admin
+  } catch (err) {
+    console.error('[ADMIN][EXCLUIR_USUARIO][ERRO]', err); // Adicione este log para debug
+    res.status(500).render('error', { error: 'Erro ao excluir usuário: ' + err.message });
   }
 });
 

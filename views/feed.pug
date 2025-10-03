@@ -65,7 +65,12 @@ block content
               if post.conteudo
                 .conteudo-post= post.conteudo
               if post.url_midia
-                img.foto-post(src=post.url_midia, alt="Foto da postagem")
+                if post.tipo_postagem === 'video' || (post.tipo_midia && post.tipo_midia.startsWith('video'))
+                  video.foto-post(controls, style="width:100%;max-height:400px;object-fit:cover;margin:1rem 0;")
+                    source(src=post.url_midia, type=post.tipo_midia || 'video/mp4')
+                    | Seu navegador não suporta vídeo.
+                else
+                  img.foto-post(src=post.url_midia, alt="Foto da postagem")
               // Rodapé do card: botões e contadores
               .card-footer.d-flex.justify-content-between.align-items-center(style="background:transparent;border:none;padding:0;margin-top:1rem;")
                 .acoes-post.d-flex.gap-2
@@ -84,10 +89,17 @@ block content
                     span(style="margin-left:4px;")= post.visualizacoes || 0
 
       .comentarios-aba#comentarios-aba
-        .comentarios-list-aba
+        .comentarios-list-aba(style="padding: 0.5rem 0;")
           // Comentários serão carregados via JS
-        form.comentar-form-aba
-          textarea(name="conteudo" placeholder="Digite seu comentário...")
-          button.btn.btn-success(type="submit") Enviar
+          // Exemplo de estrutura de comentário (JS deve renderizar assim):
+          // .comentario-item.d-flex.align-items-start.mb-2
+          //   .comentario-conteudo-box.flex-grow-1
+          //     span.comentario-autor Nome
+          //     span.comentario-data 01/01/2024
+          //     div.comentario-text Texto do comentário
+          //   button.btn.btn-outline-danger.btn-sm.reportar-comentario-btn.ml-2(data-id-comentario="ID") Reportar
+        form.comentar-form-aba(style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;")
+          textarea.form-control(name="conteudo" placeholder="Digite seu comentário..." style="resize:vertical;min-height:40px;max-height:120px;border-radius:8px;flex:1;padding:8px 12px;")
+          button.btn.btn-success(type="submit" style="height:40px;") Enviar
 
   script(src="/javascripts/feed.js", defer)

@@ -26,12 +26,37 @@ const storagePostagem = multer.diskStorage({
     cb(null, postDir); // usa a variável já garantida
   },
   filename: function (req, file, cb) {
+    // Garante extensão correta
     const ext = path.extname(file.originalname);
     const nome = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
     cb(null, nome);
   }
 });
-const uploadPostagem = multer({ storage: storagePostagem });
+
+// Novo filtro para aceitar tipos corretos conforme tipo_postagem
+const uploadPostagem = multer({ 
+  storage: storagePostagem,
+  fileFilter: function (req, file, cb) {
+    // Se não houver tipo_postagem, aceita tudo (fallback)
+    const tipo = req.body.tipo_postagem;
+    if (!tipo) return cb(null, true);
+
+    // Mapas de tipos permitidos
+    const imageMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const videoMimes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-matroska'];
+
+    if (tipo === 'photo') {
+      if (imageMimes.includes(file.mimetype)) return cb(null, true);
+      return cb(new Error('Apenas imagens são permitidas para postagens do tipo foto.'));
+    }
+    if (tipo === 'video') {
+      if (videoMimes.includes(file.mimetype)) return cb(null, true);
+      return cb(new Error('Apenas vídeos são permitidos para postagens do tipo vídeo.'));
+    }
+    // Para outros tipos (text, article), não exige arquivo, mas se vier, aceita qualquer coisa
+    return cb(null, true);
+  }
+});
 
 // Painel de postagens
 router.get('/', requireLogin, async (req, res) => {
@@ -74,7 +99,14 @@ router.get('/config', requireLogin, async (req, res) => {
 // Minhas postagens (show)
 router.get('/show', requireLogin, async (req, res) => {
   const postagens = await postagemController.listar(req, { raw: true });
-  const minhasPostagens = postagens.filter(p => p.id_autor === res.locals.usuario.id_usuario);
+  // Busca ids de postagens que estão em alguma seção
+  const PostagemSecao = require('../models').PostagemSecao;
+  const postagensSecao = await PostagemSecao.findAll({ attributes: ['id_postagem'] });
+  const idsEmSecao = new Set(postagensSecao.map(ps => ps.id_postagem));
+  // Filtra: só mostra postagens do usuário que NÃO estão em seção
+  const minhasPostagens = postagens.filter(
+    p => p.id_autor === res.locals.usuario.id_usuario && !idsEmSecao.has(p.id_postagem)
+  );
   res.render('postagens/show', {
     usuario: res.locals.usuario,
     isLoggedIn: res.locals.isLoggedIn,

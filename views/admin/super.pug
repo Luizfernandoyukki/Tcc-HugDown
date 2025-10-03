@@ -173,6 +173,39 @@ block content
             p#modalDocumentoObservacoes
             a#modalDocumentoArquivo(href="", target="_blank") Ver Arquivo PDF
 
+    // Seção de Reports de Comentários
+    h2.mt-5
+      i.fas.fa-flag.mr-2
+      | Comentários Reportados
+    h4.mt-5(style="margin-top:40px;") Comentários Reportados
+    .table-scroll(style="max-height:260px; overflow:auto; margin-bottom:32px;")
+      table.table.table-striped
+        thead
+          tr
+            th ID
+            th Motivo
+            th Visualizar
+            th Excluir
+        tbody(id="comentariosReportadosTable")
+          // Preenchido via JS
+
+    // Modal para visualizar comentário reportado
+    div#modalComentarioReportado.modal(style="display:none;")
+      div.modal-dialog
+        div.modal-content
+          div.modal-header
+            h5.modal-title Comentário Reportado
+            button(type="button", class="close btn-close-modal", data-target="modalComentarioReportado") &times;
+          div.modal-body
+            p#modalComentarioReportadoMotivo
+            div#modalComentarioReportadoConteudoBox(style="margin-bottom:10px;")
+              label Autor:
+              pre#modalComentarioReportadoAutor(style="white-space:pre-wrap; background:#f8f9fa; padding:8px; border-radius:4px;")
+              label Conteúdo:
+              pre#modalComentarioReportadoConteudo(style="white-space:pre-wrap; background:#f8f9fa; padding:8px; border-radius:4px;")
+            form(id="formExcluirComentarioReportado", method="POST")
+              button.btn.btn-danger(type="submit") Excluir
+
   script.
     // Filtragem de usuários
     function filtrarUsuarios() {
@@ -192,7 +225,52 @@ block content
       });
     }
 
-    // Adiciona eventos aos botões após renderizar a tabela
+    document.addEventListener('DOMContentLoaded', function() {
+      // Carrega listas via AJAX
+      carregarReportadas();
+      adicionarEventosAdvertir();
+      carregarPedidosVerificacao();
+      carregarComentariosReportados();
+
+      // Inicializa botões que fecham modais (sem inline)
+      document.querySelectorAll('.btn-close-modal, .btn-cancel-advertir').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          const targetId = this.dataset.target;
+          if (targetId) {
+            const el = document.getElementById(targetId);
+            if (el) el.style.display = 'none';
+          }
+        });
+      });
+
+      // Fecha modal ao clicar no backdrop
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) this.style.display = 'none';
+        });
+      });
+
+      // Confirm prompts para forms que antes usavam onsubmit inline
+      document.querySelectorAll('form.confirm-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+          const msg = this.dataset.confirm || 'Confirmar ação?';
+          if (!confirm(msg)) e.preventDefault();
+        });
+      });
+
+      // Enviar advertência (liga ao botão)
+      const btnEnviar = document.getElementById('btn-enviar-advertencia');
+      if (btnEnviar) {
+        btnEnviar.addEventListener('click', function() {
+          enviarAdvertencia();
+        });
+      }
+
+      // Re-aplica eventos nas linhas carregadas dinamicamente (quando necessário)
+      // observe/reattach: quando carregarReportadas() inserir linhas, ele já cria botões .ver-report que chamam abrirModalReportada
+    });
+
+    // Ajuste no carregamento de reports: crie forms sem onsubmit inline e com data-confirm
     function carregarReportadas() {
       fetch('/admin/super/postagens/reportadas')
         .then(res => {
@@ -427,59 +505,132 @@ block content
         });
     }
 
-    // Filtragem de usuários
-    function filtrarUsuarios() {
-      const q = document.getElementById('userSearch').value.toLowerCase();
-      const rows = document.querySelectorAll('#usuariosTable tr');
-      rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-      });
+    // Carregar comentários reportados
+    function carregarComentariosReportados() {
+      fetch('/admin/super/comentarios/reportados')
+        .then(res => {
+          if (!res.ok) throw new Error('Erro ao buscar reports de comentários');
+          return res.json();
+        })
+        .then(data => {
+          const tbody = document.getElementById('comentariosReportadosTable');
+          tbody.innerHTML = '';
+          data.forEach(report => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${report.id_comentario}</td>
+              <td>${report.motivo}</td>
+              <td><button class="btn btn-info btn-sm ver-comentario-report" data-id="${report.id_report}" data-motivo="${report.motivo}" data-comentario="${report.id_comentario}">Ver</button></td>
+              <td>
+                <form action="/admin/super/comentarios/${report.id_comentario}/excluir" method="POST" class="confirm-form" data-confirm="Excluir comentário reportado?">
+                  <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
+                </form>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+
+          // Adiciona eventos aos botões "Ver"
+          document.querySelectorAll('.ver-comentario-report').forEach(btn => {
+            btn.addEventListener('click', function() {
+              abrirModalComentarioReportado(
+                this.getAttribute('data-id'),
+                this.getAttribute('data-motivo'),
+                this.getAttribute('data-comentario')
+              );
+            });
+          });
+
+          // Reaplica confirmação em forms criados dinamicamente
+          tbody.querySelectorAll('form.confirm-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+              const msg = this.dataset.confirm || 'Confirmar ação?';
+              if (!confirm(msg)) e.preventDefault();
+            });
+          });
+        })
+        .catch(err => {
+          const tbody = document.getElementById('comentariosReportadosTable');
+          tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar reports de comentários.</td></tr>';
+        });
     }
 
-    // Filtragem de postagens
-    function filtrarPostagens() {
-      const q = document.getElementById('postSearch').value.toLowerCase();
-      const rows = document.querySelectorAll('#postagensTable tr');
-      rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      // Carrega listas via AJAX
-      carregarReportadas();
-      adicionarEventosAdvertir();
-      carregarPedidosVerificacao();
-
-      // Inicializa botões que fecham modais (sem inline)
-      document.querySelectorAll('.btn-close-modal, .btn-cancel-advertir').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          const targetId = this.dataset.target;
-          if (targetId) {
-            const el = document.getElementById(targetId);
-            if (el) el.style.display = 'none';
+    // Modal para visualizar comentário reportado
+    function abrirModalComentarioReportado(id_report, motivo, id_comentario) {
+      fetch(`/admin/super/reports-comentarios/${id_report}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Erro ao buscar report');
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById('modalComentarioReportadoMotivo').innerText = 'Motivo: ' + motivo;
+          let snapshot = {};
+          try {
+            snapshot = JSON.parse(data.snapshot_comentario);
+          } catch (e) {
+            snapshot = {};
           }
+          document.getElementById('modalComentarioReportadoAutor').innerText = snapshot.autor || '(sem autor)';
+          document.getElementById('modalComentarioReportadoConteudo').innerText = snapshot.conteudo || '(sem conteúdo)';
+          document.getElementById('formExcluirComentarioReportado').action = `/admin/super/comentarios/${id_comentario}/excluir`;
+          document.getElementById('modalComentarioReportado').style.display = 'block';
+        })
+        .catch(() => {
+          alert('Erro ao abrir report de comentário.');
         });
-      });
+    }
+    function fecharModalComentarioReportado() {
+      document.getElementById('modalComentarioReportado').style.display = 'none';
+    }
+              abrirModalComentarioReportado(
+                this.getAttribute('data-id'),
+                this.getAttribute('data-motivo'),
+                this.getAttribute('data-comentario')
+              );
+            });
+          });
 
-      // Fecha modal ao clicar no backdrop
-      document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-          if (e.target === this) this.style.display = 'none';
+          // Reaplica confirmação em forms criados dinamicamente
+          tbody.querySelectorAll('form.confirm-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+              const msg = this.dataset.confirm || 'Confirmar ação?';
+              if (!confirm(msg)) e.preventDefault();
+            });
+          });
+        })
+        .catch(err => {
+          const tbody = document.getElementById('comentariosReportadosTable');
+          tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar reports de comentários.</td></tr>';
         });
-      });
+    }
 
-      // Confirm prompts para forms que antes usavam onsubmit inline
-      document.querySelectorAll('form.confirm-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-          const msg = this.dataset.confirm || 'Confirmar ação?';
-          if (!confirm(msg)) e.preventDefault();
+    // Modal para visualizar comentário reportado
+    function abrirModalComentarioReportado(id_report, motivo, id_comentario) {
+      fetch(`/admin/super/reports-comentarios/${id_report}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Erro ao buscar report');
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById('modalComentarioReportadoMotivo').innerText = 'Motivo: ' + motivo;
+          let snapshot = {};
+          try {
+            snapshot = JSON.parse(data.snapshot_comentario);
+          } catch (e) {
+            snapshot = {};
+          }
+          document.getElementById('modalComentarioReportadoAutor').innerText = snapshot.autor || '(sem autor)';
+          document.getElementById('modalComentarioReportadoConteudo').innerText = snapshot.conteudo || '(sem conteúdo)';
+          document.getElementById('formExcluirComentarioReportado').action = `/admin/super/comentarios/${id_comentario}/excluir`;
+          document.getElementById('modalComentarioReportado').style.display = 'block';
+        })
+        .catch(() => {
+          alert('Erro ao abrir report de comentário.');
         });
-      });
-
-      // Enviar advertência (liga ao botão)
-      const btnEnviar = document.getElementById('btn-enviar-advertencia');
-      if (btnEnviar) {
+    }
+    function fecharModalComentarioReportado() {
+      document.getElementById('modalComentarioReportado').style.display = 'none';
+    }
         btnEnviar.addEventListener('click', function() {
           enviarAdvertencia();
         });

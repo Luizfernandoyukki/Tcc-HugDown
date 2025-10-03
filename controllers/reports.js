@@ -32,9 +32,10 @@ exports.criar = async (req, res) => {
       snapshot_post: snapshot
     });
 
-    res.status(201).json({ sucesso: true, report });
+    // Sempre retorna JSON
+    return res.status(201).json({ sucesso: true, report });
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao criar report: ' + err.message });
+    return res.status(500).json({ error: 'Erro ao criar report: ' + err.message });
   }
 };
 

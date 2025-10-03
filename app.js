@@ -129,6 +129,7 @@ app.use('/', indexRouter);
 app.use('/documentos-verificacao', require('./routes/documentosVerificacao'));
 app.use('/webpush', require('./routes/webpush'));
 app.use(require('./routes/REPORTSPARAADM.JS'));
+app.use('/postagens', require('./routes/postagens'));
 app.get('/favicon.ico', (req, res) => res.status(204));
 // 404 handler
 app.use((req, res, next) => {

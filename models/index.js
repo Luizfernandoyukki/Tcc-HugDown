@@ -34,6 +34,10 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
+// Importa e registra o novo model
+const ReportComentario = require('./ReportComentario')(sequelize, Sequelize.DataTypes);
+db.ReportComentario = ReportComentario;
+
 // Associações (caso existam nos models)
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {

@@ -171,3 +171,8 @@ h4 {
 .table-scroll tbody {
   display: table-row-group;
 }
+
+.table, .table th, .table td, .table-scroll, .stats-card, .modal-content {
+  color: #222 !important;
+  background: #fff !important;
+}

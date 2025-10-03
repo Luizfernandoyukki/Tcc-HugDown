@@ -72,15 +72,30 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(comentarios => {
           const lista = aba.querySelector('.comentarios-list-aba');
           lista.innerHTML = '';
-          // Inverta a ordem para mostrar os mais recentes no topo
+          // Renderiza cada comentário com botão reportar
           comentarios.reverse().forEach(c => {
             const div = document.createElement('div');
-            div.innerHTML = `<b>@${c.autor.nome_usuario}</b>: ${c.conteudo}`;
+            div.className = 'comentario-item d-flex align-items-start mb-2';
+            div.innerHTML = `
+              <div class="comentario-conteudo-box flex-grow-1" style="color:#222;">
+                <span class="comentario-autor"><b>@${c.autor.nome_usuario}</b></span>
+                <span class="comentario-data" style="font-size:0.85em;color:#888;margin-left:8px;">${c.data_criacao ? new Date(c.data_criacao).toLocaleString('pt-BR') : ''}</span>
+                <div class="comentario-text">${c.conteudo}</div>
+              </div>
+              <button class="btn btn-outline-danger btn-sm reportar-comentario-btn ml-2" data-id-comentario="${c.id_comentario}" title="Reportar comentário">Reportar</button>
+            `;
             lista.appendChild(div);
           });
-          lista.scrollTop = 0; // Foca no topo
+          lista.scrollTop = 0;
+
+          // Adiciona eventos aos botões de reportar comentário
+          lista.querySelectorAll('.reportar-comentario-btn').forEach(btn => {
+            btn.addEventListener('click', function(ev) {
+              ev.stopPropagation();
+              abrirModalReportComentario(this.dataset.idComentario);
+            });
+          });
         });
-      // Foca textarea
       setTimeout(() => {
         aba.querySelector('textarea').focus();
       }, 200);
@@ -215,8 +230,77 @@ document.addEventListener('DOMContentLoaded', function () {
     if (res.ok) {
       alert('Report enviado! Obrigado pelo feedback.');
       modalReport.style.display = 'none';
+      modalReport.querySelector('#motivo-report').value = '';
     } else {
       alert('Erro ao enviar report.');
+    }
+  };
+
+  // Modal de report de comentário
+  let modalReportComentario = document.getElementById('modal-report-comentario');
+  if (!modalReportComentario) {
+    modalReportComentario = document.createElement('div');
+    modalReportComentario.id = 'modal-report-comentario';
+    modalReportComentario.style.display = 'none';
+    modalReportComentario.style.position = 'fixed';
+    modalReportComentario.style.top = '0';
+    modalReportComentario.style.left = '0';
+    modalReportComentario.style.width = '100vw';
+    modalReportComentario.style.height = '100vh';
+    modalReportComentario.style.background = 'rgba(0,0,0,0.3)';
+    modalReportComentario.style.zIndex = '5000';
+    modalReportComentario.innerHTML = `
+      <div style="background:#fff;max-width:350px;margin:10vh auto;padding:1.5rem 1rem;border-radius:12px;box-shadow:0 2px 16px #0002;position:relative;">
+        <button id="fechar-modal-report-comentario" style="position:absolute;top:8px;right:12px;background:none;border:none;font-size:1.3rem;">&times;</button>
+        <h5>Reportar comentário</h5>
+        <form id="form-report-comentario">
+          <label for="motivo-report-comentario">Motivo:</label>
+          <select id="motivo-report-comentario" required style="width:100%;margin-bottom:1rem;">
+            <option value="">Selecione...</option>
+            <option value="Conteúdo impróprio">Conteúdo impróprio</option>
+            <option value="Spam ou publicidade">Spam ou publicidade</option>
+            <option value="Assédio ou bullying">Assédio ou bullying</option>
+            <option value="Informação falsa">Informação falsa</option>
+            <option value="Violação de direitos autorais">Violação de direitos autorais</option>
+            <option value="Outro">Outro</option>
+          </select>
+          <button type="submit" class="btn btn-danger w-100">Enviar report</button>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(modalReportComentario);
+  }
+
+  // Função para abrir modal de report de comentário
+  function abrirModalReportComentario(idComentario) {
+    modalReportComentario.style.display = 'block';
+    modalReportComentario.dataset.idComentario = idComentario;
+  }
+
+  // Fechar modal de report de comentário
+  modalReportComentario.addEventListener('click', function(e) {
+    if (e.target === modalReportComentario || e.target.id === 'fechar-modal-report-comentario') {
+      modalReportComentario.style.display = 'none';
+    }
+  });
+
+  // Enviar report de comentário
+  modalReportComentario.querySelector('#form-report-comentario').onsubmit = async function(ev) {
+    ev.preventDefault();
+    const motivo = modalReportComentario.querySelector('#motivo-report-comentario').value;
+    const id_comentario = modalReportComentario.dataset.idComentario;
+    if (!motivo || !id_comentario) return;
+    // Envia para API
+    const res = await fetch('/api/reports-comentarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_comentario, motivo })
+    });
+    if (res.ok) {
+      alert('Report de comentário enviado! Obrigado pelo feedback.');
+      modalReportComentario.style.display = 'none';
+    } else {
+      alert('Erro ao enviar report de comentário.');
     }
   };
 

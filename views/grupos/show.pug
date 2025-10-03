@@ -90,6 +90,55 @@ block content
                   button.btn.btn-success.btn-lg(type="submit")
                     i.fas.fa-user-plus.me-2
                     | Participar do grupo
+              // if usuario
+                // button.btn.btn-danger.mt-3(type="button", onclick=`abrirModalReportGrupo(${grupo.id_grupo}, '${grupo.nome_grupo}')`) Reportar Grupo
+
+    // Modal para reportar grupo
+    // div#modalReportGrupo.modal(style="display:none;")
+    //   div.modal-dialog
+    //     div.modal-content
+    //       div.modal-header
+    //         h5.modal-title Reportar Grupo
+    //         button(type="button", class="close btn-close-modal", data-target="modalReportGrupo") &times;
+    //       div.modal-body
+    //         p#modalReportGrupoNome
+    //         textarea.form-control#modalReportGrupoMotivo(rows="3" placeholder="Descreva o motivo do report")
+    //       div.modal-footer
+    //         button.btn.btn-secondary(type="button", class="btn-cancel-report-grupo", data-target="modalReportGrupo") Cancelar
+    //         button.btn.btn-danger(type="button", id="btn-enviar-report-grupo") Enviar Report
+
+  // script.
+  //   let grupoReportId = null;
+  //   function abrirModalReportGrupo(id, nome) {
+  //     grupoReportId = id;
+  //     document.getElementById('modalReportGrupoNome').innerText = `Reportar grupo: ${nome}`;
+  //     document.getElementById('modalReportGrupoMotivo').value = '';
+  //     document.getElementById('modalReportGrupo').style.display = 'block';
+  //   }
+  //   function fecharModalReportGrupo() {
+  //     document.getElementById('modalReportGrupo').style.display = 'none';
+  //     grupoReportId = null;
+  //   }
+  //   document.getElementById('btn-enviar-report-grupo').onclick = function() {
+  //     const motivo = document.getElementById('modalReportGrupoMotivo').value;
+  //     if (!motivo) return alert('Informe o motivo.');
+  //     fetch('/admin/super/grupos/reportar', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ id_grupo: grupoReportId, motivo })
+  //     }).then(res => {
+  //       if (res.ok) {
+  //         alert('Report enviado!');
+  //         fecharModalReportGrupo();
+  //       } else {
+  //         alert('Erro ao enviar report.');
+  //       }
+  //     });
+  //   };
+  //   document.querySelectorAll('.btn-cancel-report-grupo, .btn-close-modal').forEach(btn => {
+  //     btn.addEventListener('click', fecharModalReportGrupo);
+  //   });
+
 
 block scripts
   script(src="/javascripts/grupos/show.js")

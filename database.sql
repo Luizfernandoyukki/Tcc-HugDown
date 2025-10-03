@@ -432,3 +432,31 @@ CREATE TABLE reports (
     INDEX idx_usuario (id_usuario),
     INDEX idx_status (status)
 );
+
+CREATE TABLE reports_comentarios (
+    id_report INT AUTO_INCREMENT PRIMARY KEY,
+    id_comentario INT NOT NULL,
+    id_usuario INT NOT NULL,
+    motivo TEXT NOT NULL,
+    snapshot_comentario TEXT NOT NULL,
+    data_report TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'reviewed', 'dismissed') DEFAULT 'pending',
+    FOREIGN KEY (id_comentario) REFERENCES comentarios(id_comentario) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    INDEX idx_comentario (id_comentario),
+    INDEX idx_usuario (id_usuario),
+    INDEX idx_status (status)
+);
+CREATE TABLE reports_grupos (
+    id_report INT AUTO_INCREMENT PRIMARY KEY,
+    id_grupo INT NOT NULL,
+    id_usuario INT NOT NULL,
+    motivo TEXT NOT NULL,
+    data_report TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'reviewed', 'dismissed') DEFAULT 'pending',
+    FOREIGN KEY (id_grupo) REFERENCES grupos(id_grupo) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    INDEX idx_grupo (id_grupo),
+    INDEX idx_usuario (id_usuario),
+    INDEX idx_status (status)
+);

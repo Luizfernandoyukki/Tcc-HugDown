@@ -89,7 +89,11 @@ exports.criar = async (req, res) => {
       titulo: req.body.titulo,
       resumo: req.body.resumo,
       artigo_cientifico: req.body.artigo_cientifico === 'true',
-      url_midia: req.file ? '/post/' + req.file.filename : null,
+      // Salva url_midia e tipo_midia se houver arquivo
+      url_midia: (req.body.tipo_postagem === 'photo' || req.body.tipo_postagem === 'video') && req.file
+        ? '/post/' + req.file.filename
+        : null,
+      tipo_midia: req.file ? req.file.mimetype : null,
       latitude: req.body.latitude || null,
       longitude: req.body.longitude || null
     };
