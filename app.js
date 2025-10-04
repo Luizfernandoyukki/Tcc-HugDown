@@ -70,12 +70,14 @@ app.use('/perfis', express.static(path.join(__dirname, 'perfis')));
 app.use('/post', express.static(path.join(__dirname, 'post')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets')));
+// Adicione esta linha para servir a pasta docs como estática
+app.use('/docs', express.static(path.join(__dirname, 'docs')));
 // Adicione esta linha para servir a pasta grupos como estática
 app.use('/grupos', express.static(path.join(__dirname, 'grupos')));
 
 // Configuração de sessão
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'sua_chave_secreta',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -149,5 +151,8 @@ app.use((err, req, res, next) => {
     error: req.app.get('env') === 'development' ? err : {}
   });
 });
+
+// Log de rotas carregadas
+console.log('[DEBUG][ROUTES] Rotas carregadas:', app._router.stack.filter(r => r.route).map(r => r.route.path));
 
 module.exports = app;

@@ -3,7 +3,7 @@ USE HugDown_rede_social;
 
 CREATE TABLE usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255)  NOT NULL,
+    email VARCHAR(255)  NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
     nome_real VARCHAR(100) NOT NULL,
     sobrenome_real VARCHAR(100) NOT NULL,

@@ -11,7 +11,17 @@ block content
           .card-body.text-center
             if usuario.foto_perfil
               img.rounded-circle.mb-3(src=usuario.foto_perfil, alt=usuario.nome_usuario, width="120", height="120")
-            h4= usuario.nome_usuario
+            h4
+              = usuario.nome_usuario
+              if usuario.verificado
+                span.ms-2.text-success(title="Usuário verificado")
+                  i.fas.fa-check-circle
+              if usuario.profissionalSaude
+                span.ms-2.text-primary(title="Profissional de Saúde")
+                  i.fas.fa-user-md
+              // Ícone de configurações
+              a.ms-2.text-secondary(href=`/usuarios/configuracoes`, title="Configurações")
+                i.fas.fa-cog
             p.text-muted= usuario.email
             if usuario.biografia
               p.mt-2= usuario.biografia
@@ -63,4 +73,5 @@ block content
 block scripts
   script(src="/javascripts/usuarios/index.js")
     window.usuario = !{JSON.stringify(usuario)};
+  script(src="/blokdepalavroes.js")
 

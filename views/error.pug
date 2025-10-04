@@ -19,6 +19,27 @@ block content
         h1.error-title Ops! Algo deu errado
         p.error-message Desculpe pelo inconveniente. Nossa equipe foi notificada.
 
+        // Bloco de depuração: mostra erro detalhado se existir
+        if error && error.message
+          .error-debug-box(style="background:#f8d7da;color:#721c24;padding:1rem;border-radius:8px;margin-top:24px;")
+            h4 Erro Interno (Debug)
+            p
+              b Mensagem:
+              | #{error.message}
+            if error.stack
+              pre(style="white-space:pre-wrap;font-size:0.9em;") #{error.stack}
+            if error.type
+              p
+                b Tipo:
+                | #{error.type}
+            if error.status
+              p
+                b Status:
+                | #{error.status}
+            // Mostra o objeto completo se for útil
+            if error
+              pre(style="white-space:pre-wrap;font-size:0.8em;") #{JSON.stringify(error, null, 2)}
+
       .error-actions
         a.btn.btn-primary(href="/")
           i.fas.fa-home.me-2

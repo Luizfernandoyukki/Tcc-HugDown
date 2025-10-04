@@ -121,16 +121,42 @@ router.post('/admin/super/documentos/:id/aprovar', async (req, res) => {
   try {
     const doc = await DocumentoVerificacao.findByPk(req.params.id);
     if (!doc) return res.status(404).json({ error: 'Documento não encontrado' });
-    await doc.update({ status: 'approved', data_verificacao: new Date() });
 
-    // Atualiza o usuário para verificado
+    // Cria ProfissionalSaude se não existir
+    const { ProfissionalSaude, Usuario, Administrador } = require('../models');
     const usuario = await Usuario.findByPk(doc.id_usuario);
-    if (usuario && !usuario.verificado) {
-      await usuario.update({ verificado: true });
+    if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    // Busca o id_admin do administrador logado
+    const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+    if (!admin) return res.status(403).json({ error: 'Administrador não encontrado.' });
+
+    // Evita duplicidade
+    const jaExiste = await ProfissionalSaude.findOne({ where: { id_usuario: usuario.id_usuario } });
+    if (!jaExiste) {
+      await ProfissionalSaude.create({
+        id_usuario: usuario.id_usuario,
+        tipo_registro: doc.tipo_documento?.toUpperCase() || 'OUTRO',
+        numero_registro: doc.numero_documento,
+        uf_registro: '', // Não tem no documento, pode pedir para preencher depois
+        especialidade: doc.observacoes,
+        instituicao: doc.instituicao,
+        data_registro: new Date(),
+        status_verificacao: 'aprovado',
+        data_verificacao: new Date(),
+        verificado_por: admin.id_admin, // Corrigido: usa id_admin do admin logado
+      });
     }
 
-    res.json({ success: true });
+    await doc.update({ status: 'approved', data_verificacao: new Date() });
+    if (!usuario.verificado) await usuario.update({ verificado: true });
+
+    res.json({ success: true, mensagem: 'Documento aprovado com sucesso!' });
   } catch (err) {
+    // Mensagem amigável para erro de FK
+    if (err.message && err.message.includes('a foreign key constraint fails')) {
+      return res.status(500).json({ error: 'Erro interno: não foi possível aprovar o documento. Verifique se o administrador está cadastrado corretamente.' });
+    }
     res.status(500).json({ error: 'Erro ao aprovar documento: ' + err.message });
   }
 });
@@ -141,9 +167,11 @@ router.post('/admin/super/documentos/:id/rejeitar', async (req, res) => {
     const doc = await DocumentoVerificacao.findByPk(req.params.id);
     if (!doc) return res.status(404).json({ error: 'Documento não encontrado' });
     await doc.update({ status: 'rejected', data_verificacao: new Date() });
-    res.json({ success: true });
+    // Mensagem amigável de sucesso
+    res.json({ success: true, mensagem: 'Documento rejeitado com sucesso!' });
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao rejeitar documento: ' + err.message });
+    // Mensagem amigável de erro
+    res.json({ success: false, mensagem: 'Não foi possível rejeitar o documento. Tente novamente mais tarde.' });
   }
 });
 

@@ -3,17 +3,15 @@ const palavrasProibidas = [
   'palavrão1', 'palavrão2', 'idiota', 'burro', 'otário', 'merda', 'bosta', 'porra', 'caralho', 'puta', 'fdp'
 ];
 
-// Inicializa filtro bad-words se disponível (via CDN)
-let filter = null;
-if (window.BadWords) {
-  filter = new window.BadWords();
-  filter.addWords(...palavrasProibidas);
-}
-
 function contemPalavraProibida(texto) {
   if (!texto) return false;
-  if (filter) {
-    return filter.isProfane(texto);
+  // Usa blokdepalavroes.js se disponível
+  if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
+    // Simula um campo para reusar a função
+    const fakeInput = document.createElement('input');
+    fakeInput.value = texto;
+    window.verificarConteudoOfensivo(fakeInput);
+    return fakeInput.value.includes('***');
   }
   // fallback simples
   const lower = texto.toLowerCase();
@@ -65,6 +63,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const existe = window.tagsExistentes.some(tag => tag.nome_tag.toLowerCase() === nome);
     const proibidoNome = contemPalavraProibida(nome);
     const proibidoDesc = contemPalavraProibida(descInput.value);
+
+    // Filtro de palavrões global (blokdepalavroes.js)
+    if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
+      window.verificarConteudoOfensivo(nomeInput);
+      window.verificarConteudoOfensivo(descInput);
+      if ((nomeInput.value && nomeInput.value.includes('***')) || (descInput.value && descInput.value.includes('***'))) {
+        e.preventDefault();
+        alert('Remova palavras ofensivas dos campos antes de enviar.');
+        return;
+      }
+    }
 
     if (existe || proibidoNome) {
       nomeError.classList.remove('d-none');

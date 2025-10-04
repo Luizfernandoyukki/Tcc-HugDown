@@ -23,6 +23,10 @@ block content
                 if usuario.verificado
                   .verified-badge
                     i.fas.fa-check-circle
+                if usuario.profissionalSaude
+                  .user-saude-area
+                    i.fas.fa-user-md.me-1
+                    | #{usuario.profissionalSaude.especialidade || usuario.profissionalSaude.tipo_registro}
               .user-info
                 h5.user-name= usuario.nome_usuario
                 p.user-real-name= usuario.nome_real + ' ' + usuario.sobrenome_real

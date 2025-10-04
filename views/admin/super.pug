@@ -43,9 +43,9 @@ block content
           each usuario in usuarios
             tr
               td= usuario.id_usuario
-              td= usuario.nome_usuario
-              td= usuario.email
-              td
+              td= usuario.nome_usuario || ''
+              td= usuario.email || ''
+              td= usuario.id_usuario || ''
                 .btn-group
                   form.d-inline(action=`/admin/super/usuarios/${usuario.id_usuario}/excluir`, method="POST", class="confirm-form", data-confirm="Excluir usuário?")
                     button.btn.btn-danger.btn-sm.mr-1(type="submit") Excluir
@@ -153,11 +153,33 @@ block content
             th Tipo Documento
             th Instituição
             th Status
-            th Visualizar
+            th Arquivo
             th Aprovar
             th Rejeitar
-        tbody(id="verificacaoTable")
-          // Preenchido via JS
+        tbody
+          if docsVerificacao && docsVerificacao.length
+            each doc in docsVerificacao
+              tr
+                td= doc.id_documento
+                td= doc.usuario && doc.usuario.nome_usuario ? doc.usuario.nome_usuario : doc.id_usuario
+                td= doc.tipo_documento
+                td= doc.instituicao
+                td= doc.status
+                td
+                  if doc.caminho_arquivo && doc.caminho_arquivo.endsWith('.pdf')
+                    a(href=doc.caminho_arquivo, target="_blank") Ver PDF
+                  else if doc.caminho_arquivo
+                    a(href=doc.caminho_arquivo, target="_blank")
+                      img(src=doc.caminho_arquivo, alt="Documento", style="max-width:80px;max-height:80px;")
+                td
+                  form.d-inline(method="POST", action=`/admin/super/documentos/${doc.id_documento}/aprovar`)
+                    button.btn.btn-success.btn-sm(type="submit") Aprovar
+                td
+                  form.d-inline(method="POST", action=`/admin/super/documentos/${doc.id_documento}/rejeitar`)
+                    button.btn.btn-danger.btn-sm(type="submit") Rejeitar
+          else
+            tr
+              td(colspan="8") Nenhum documento de verificação pendente.
 
     // Modal para visualizar documento de verificação
     div#modalDocumentoVerificacao.modal(style="display:none;")
@@ -171,7 +193,11 @@ block content
             p#modalDocumentoInstituicao
             p#modalDocumentoStatus
             p#modalDocumentoObservacoes
-            a#modalDocumentoArquivo(href="", target="_blank") Ver Arquivo PDF
+            if modalDocumentoArquivo && modalDocumentoArquivo.endsWith('.pdf')
+              a#modalDocumentoArquivo(href=modalDocumentoArquivo, target="_blank") Ver Arquivo PDF
+            else if modalDocumentoArquivo
+              a(href=modalDocumentoArquivo, target="_blank")
+                img(src=modalDocumentoArquivo, alt="Documento", style="max-width:200px;max-height:200px;")
 
     // Seção de Reports de Comentários
     h2.mt-5
@@ -206,6 +232,7 @@ block content
             form(id="formExcluirComentarioReportado", method="POST")
               button.btn.btn-danger(type="submit") Excluir
 
+  script(src="/blokdepalavroes.js")
   script.
     // Filtragem de usuários
     function filtrarUsuarios() {
@@ -689,3 +716,4 @@ block content
           tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar reports.</td></tr>';
         });
     }
+

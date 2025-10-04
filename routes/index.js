@@ -14,6 +14,8 @@ const { usuarioController } = require('../controllers');
 const reportsController = require('../controllers/reports');
 const notificacaoService = require('../controllers/notificacaoService');
 const reportComentarioController = require('../controllers/reportComentario');
+const fs = require('fs');
+const marked = require('marked');
 
 // Wrapper para async/await
 const asyncHandler = (fn) => (req, res, next) => {
@@ -28,6 +30,8 @@ router.use(async (req, res, next) => {
   } else {
     res.locals.usuario = null;
   }
+  // Injeta o caminho do filtro de palavrões para todas as views
+  res.locals.blokdepalavroesJs = '/blokdepalavroes.js';
   next();
 });
 
@@ -368,13 +372,45 @@ router.get('/api/notificacoes/nao-lidas/count', asyncHandler(async (req, res) =>
 
 // Painel Super Admin
 router.get('/admin/super', asyncHandler(async (req, res) => {
-  const { Administrador, Usuario, Postagem } = require('../models');
+  const { Administrador, Usuario, Postagem, DocumentoVerificacao } = require('../models');
+  console.log('[DEBUG] Entrando em /admin/super');
   const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
-  if (!admin || admin.nivel_admin !== 'super_admin') return res.status(403).render('error', { error: 'Acesso negado.' });
-  const usuarios = await Usuario.findAll();
-  const postagens = await Postagem.findAll();
-  // Corrija: envie 'usuarios' e 'postagens' para o template
-  res.render('admin/super', { usuarios, postagens, usuario: res.locals.usuario, isLoggedIn: res.locals.isLoggedIn });
+  console.log('[DEBUG] Admin encontrado:', admin ? admin.nivel_admin : null, '| userId:', req.session.userId);
+  if (!admin || admin.nivel_admin !== 'super_admin') {
+    console.log('[DEBUG] Acesso negado ao painel super admin');
+    return res.status(403).render('error', { error: 'Acesso negado.' });
+  }
+  try {
+    const usuarios = await Usuario.findAll();
+    const postagens = await Postagem.findAll();
+    const docsVerificacao = await DocumentoVerificacao.findAll({
+      where: { status: 'pending' },
+      include: [{ model: Usuario, as: 'usuario', required: false }]
+    });
+
+    // LOGS DE DEPURAÇÃO ANTES DO RENDER
+    console.log('[DEBUG][PUG] typeof usuarios:', typeof usuarios, '| Array:', Array.isArray(usuarios), '| length:', usuarios ? usuarios.length : 'undefined');
+    console.log('[DEBUG][PUG] typeof postagens:', typeof postagens, '| Array:', Array.isArray(postagens), '| length:', postagens ? postagens.length : 'undefined');
+    console.log('[DEBUG][PUG] typeof docsVerificacao:', typeof docsVerificacao, '| Array:', Array.isArray(docsVerificacao) ? 'sim' : 'não', '| length:', docsVerificacao ? docsVerificacao.length : 'undefined');
+    const usuarioComNivel = res.locals.usuario ? { ...res.locals.usuario.dataValues, nivel_admin: admin.nivel_admin } : null;
+    console.log('[DEBUG][PUG] usuario:', usuarioComNivel ? usuarioComNivel.nome_usuario : 'undefined', '| id:', usuarioComNivel ? usuarioComNivel.id_usuario : 'undefined', '| nivel_admin:', usuarioComNivel ? usuarioComNivel.nivel_admin : 'undefined');
+    console.log('[DEBUG][PUG] isLoggedIn:', res.locals.isLoggedIn);
+    res.render('admin/super', {
+      usuarios,
+      postagens,
+      docsVerificacao,
+      usuario: usuarioComNivel,
+      isLoggedIn: res.locals.isLoggedIn
+    });
+  } catch (err) {
+    console.error('[ADMIN/SUPER][ERRO]', err);
+    if (err && err.stack) {
+      console.error('[ADMIN/SUPER][STACK]', err.stack);
+    }
+    // Adicione log do tipo do erro
+    console.error('[ADMIN/SUPER][TYPE]', typeof err, '|', err && err.constructor && err.constructor.name);
+    res.status(500).render('error', { error: { status: 500, message: err.message || err } });
+  }
 }));
 
 // Super Admin: excluir usuário (agora com verificação para não excluir outros admins)
@@ -489,5 +525,26 @@ router.post('/admin/verificador/documentos/:id/rejeitar', asyncHandler(async (re
   }
   res.redirect('/admin/verificador');
 }));
+
+// Exibir Termos de Uso (Markdown)
+router.get('/termos-de-uso', (req, res) => {
+  const md = fs.readFileSync(path.join(__dirname, '../TERMODEUSO.md'), 'utf8');
+  const html = marked.parse(md);
+  res.render('termo-md', { titulo: 'Termos de Uso', html });
+});
+
+// Exibir Política de Dados (Markdown)
+router.get('/politica-de-dados', (req, res) => {
+  const md = fs.readFileSync(path.join(__dirname, '../POLITICADETRATAMENTODEDADOS.md'), 'utf8');
+  const html = marked.parse(md);
+  res.render('termo-md', { titulo: 'Política de Tratamento de Dados', html });
+});
+
+// Exibir Manual de Instruções (Markdown)
+router.get('/instrucoes-uso', (req, res) => {
+  const md = fs.readFileSync(path.join(__dirname, '../INSTRUCOESDEUSODEACESSIBILIDADE.md'), 'utf8');
+  const html = marked.parse(md);
+  res.render('termo-md', { titulo: 'Manual de Instruções', html });
+});
 
 module.exports = router;

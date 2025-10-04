@@ -96,7 +96,7 @@ block content
                 h5.mb-3.text-warning Profissional da Saúde
                 .mb-3
                   .form-check
-                    input.form-check-input(type="checkbox", id="profissional_saude", name="profissional_saude")
+                    input.form-check-input(type="checkbox", id="profissional_saude", name="profissional_saude", value="1")
                     label.form-check-label(for="profissional_saude") Sou profissional da saúde
                 .mt-3#saude-extra(style="display:none;")
                   .mb-3
@@ -125,10 +125,9 @@ block content
                     label.form-label(for="data_registro") Data do Registro *
                     input.form-control(type="date", id="data_registro", name="data_registro")
                   .mb-3
-                    label.form-label(for="documento_comprobatorio") Documento Comprobatório *
-                    // campo ocultado para funcionalidade futura
-                    // input.form-control(type="file", id="documento_comprobatorio", name="documento_comprobatorio", required)
-                    small.text-muted.mt-2 Este recurso (envio de documento de verificação) estará disponível em breve.
+                    label.form-label(for="documento_comprobatorio") Documento Comprobatório (PDF, PNG ou JPG) *
+                    input.form-control(type="file", id="documento_comprobatorio", name="documento_comprobatorio", accept=".pdf,image/png,image/jpeg", required)
+                    small.text-muted.mt-2 Envie um documento válido em PDF, PNG ou JPG.
                 .step-buttons.d-flex.justify-content-between
                   button.btn.btn-outline-secondary(type="button", id="btn-voltar-4") Voltar
                   button.btn.btn-primary(type="button", id="btn-avancar-4") Avançar
@@ -147,6 +146,18 @@ block content
                     option(value="pt-BR") Português
                     option(value="en-US") Inglês
                     option(value="es-ES") Espanhol
+                .mb-3
+                  label.form-label Aceite dos Termos *
+                  .form-check
+                    input.form-check-input(type="checkbox", id="aceite_termo_uso", name="aceite_termo_uso", required)
+                    label.form-check-label(for="aceite_termo_uso")
+                      | Li e aceito os 
+                      a(href="/termos-de-uso", target="_blank") Termos de Uso
+                  .form-check
+                    input.form-check-input(type="checkbox", id="aceite_termo_dados", name="aceite_termo_dados", required)
+                    label.form-check-label(for="aceite_termo_dados")
+                      | Li e aceito a 
+                      a(href="/politica-de-dados", target="_blank") Política de Tratamento de Dados
                 .step-buttons.d-flex.justify-content-between
                   button.btn.btn-outline-secondary(type="button", id="btn-voltar-5") Voltar
                   button.btn.btn-success(type="submit") Finalizar Cadastro

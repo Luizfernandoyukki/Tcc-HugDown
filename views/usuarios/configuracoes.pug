@@ -1,0 +1,72 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/usuarios/configuracoes.css")
+
+block content
+  .container.mt-5
+    h2.mb-4
+      i.fas.fa-cog.me-2
+      | Configurações da Conta
+    .row
+      .col-md-6
+        .card.mb-4.shadow-sm
+          .card-body
+            h4.mb-3.text-danger Excluir Conta
+            p.text-muted.mb-3 Para excluir sua conta, clique abaixo. Você receberá um código por e-mail para confirmar.
+            form#form-excluir-conta(method="POST", action="/usuarios/excluir-conta")
+              button.btn.btn-danger(type="submit") Solicitar Exclusão
+            if infoExcluir
+              .alert.alert-info.mt-3 #{infoExcluir}
+            if errorExcluir
+              .alert.alert-danger.mt-3 #{errorExcluir}
+            if tokenSolicitado
+              form.mt-4(method="POST", action="/usuarios/excluir-conta/confirmar")
+                .mb-3
+                  label(for="token") Código recebido no e-mail
+                  input.form-control(type="text", name="token", required, maxlength="6")
+                button.btn.btn-danger(type="submit") Confirmar Exclusão
+            // Mensagem de despedida após exclusão
+            if msgDespedida
+              .alert.alert-success.mt-4
+                h5.mb-2 Conta excluída com sucesso!
+                p.mb-0 Sentiremos sua falta. Esperamos ver você novamente em breve! 💚
+
+      .col-md-6
+        .card.mb-4.shadow-sm
+          .card-body
+            h4.mb-3.text-success Quero ser profissional de saúde
+            p.text-muted.mb-3 Envie seu documento de comprovação (PDF) para análise. Os campos abaixo podem ser preenchidos automaticamente se você já informou no cadastro.
+            form(method="POST", action="/usuarios/solicitar-profissional", enctype="multipart/form-data")
+              .mb-3
+                label(for="tipo_documento") Tipo de documento
+                input.form-control(type="text", name="tipo_documento", required, maxlength="50", value=usuario?.profissionalSaude?.tipo_registro || '')
+                small.text-muted Ex: CRM, COREN, CRF, CREFITO, CRP, OUTRO
+              .mb-3
+                label(for="numero_documento") Número do documento
+                input.form-control(type="text", name="numero_documento", required, maxlength="50", value=usuario?.profissionalSaude?.numero_registro || '')
+                small.text-muted Máximo 50 caracteres
+              .mb-3
+                label(for="instituicao") Instituição
+                input.form-control(type="text", name="instituicao", maxlength="200", value=usuario?.profissionalSaude?.instituicao || '')
+                small.text-muted Máximo 200 caracteres
+              .mb-3
+                label(for="documento") Documento PDF
+                input.form-control(type="file", name="documento", accept="application/pdf", required)
+                small.text-muted Apenas arquivos PDF
+              .mb-3
+                label(for="observacoes") Observações
+                textarea.form-control(name="observacoes", maxlength="200")= usuario?.profissionalSaude?.especialidade || ''
+                small.text-muted Máximo 200 caracteres
+              button.btn.btn-success(type="submit") Enviar Solicitação
+            if infoProfissional
+              .alert.alert-info.mt-3 #{infoProfissional}
+            if errorProfissional
+              .alert.alert-danger.mt-3 #{errorProfissional}
+
+    hr.my-5
+
+    .container.text-center
+      a.btn.btn-outline-secondary.mt-3(href="/instrucoes-uso", target="_blank")
+        i.fas.fa-book.me-2
+        | Manual de Instruções do Site

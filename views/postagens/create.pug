@@ -3,6 +3,9 @@ extends ../layout
 block content
   .container.mt-5
     h2 Nova Postagem
+    if usuario && usuario.verificado
+      span.ms-2.text-success(title="Usuário verificado")
+        i.fas.fa-check-circle
 
     form#form-postagem(method="POST" enctype="multipart/form-data")
       .mb-3

@@ -51,6 +51,12 @@ block content
                     alt="Foto do autor"
                   )
                   span.nome-autor @#{post.autor.nome_usuario}
+                  if post.autor.verificado
+                    span.ms-2.text-success(title="Usuário verificado")
+                      i.fas.fa-check-circle
+                  if post.autor.profissionalSaude
+                    span.ms-2.text-primary(title="Profissional de Saúde")
+                      i.fas.fa-user-md
               h3.titulo-post= post.titulo
               .resumo-post= post.resumo
               .datas-post
@@ -69,6 +75,11 @@ block content
                   video.foto-post(controls, style="width:100%;max-height:400px;object-fit:cover;margin:1rem 0;")
                     source(src=post.url_midia, type=post.tipo_midia || 'video/mp4')
                     | Seu navegador não suporta vídeo.
+                else if post.tipo_postagem === 'article' && post.url_midia.endsWith('.pdf')
+                  // Prévia do PDF usando PDF.js
+                  .pdf-preview-box(style="margin:1rem 0;")
+                    canvas.pdf-preview-canvas(data-pdf=post.url_midia, style="width:100%;max-width:400px;height:auto;border-radius:8px;box-shadow:0 2px 8px #0001;")
+                    a.btn.btn-outline-primary.mt-2(href=post.url_midia, target="_blank") Abrir PDF Completo
                 else
                   img.foto-post(src=post.url_midia, alt="Foto da postagem")
               // Rodapé do card: botões e contadores
@@ -102,4 +113,26 @@ block content
           textarea.form-control(name="conteudo" placeholder="Digite seu comentário..." style="resize:vertical;min-height:40px;max-height:120px;border-radius:8px;flex:1;padding:8px 12px;")
           button.btn.btn-success(type="submit" style="height:40px;") Enviar
 
-  script(src="/javascripts/feed.js", defer)
+  block scripts
+    script(src="/javascripts/feed.js", defer)
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js")
+    script.
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.pdf-preview-canvas').forEach(function(canvas) {
+          const pdfUrl = canvas.dataset.pdf;
+          if (!pdfUrl) return;
+          // Carrega PDF.js e renderiza a primeira página
+          const loadingTask = window['pdfjsLib'].getDocument(pdfUrl);
+          loadingTask.promise.then(function(pdf) {
+            pdf.getPage(1).then(function(page) {
+              const viewport = page.getViewport({ scale: 1.2 });
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+              const context = canvas.getContext('2d');
+              page.render({ canvasContext: context, viewport: viewport });
+            });
+          }).catch(function(err) {
+            canvas.parentNode.innerHTML = '<div style="color:#d9534f;">Não foi possível carregar prévia do PDF.</div>';
+          });
+        });
+      });

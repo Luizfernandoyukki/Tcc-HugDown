@@ -42,18 +42,22 @@ document.addEventListener('DOMContentLoaded', function() {
     profissionalCheck.addEventListener('change', function() {
       if (this.checked) {
         saudeExtra.style.display = '';
-        // Adiciona required nos campos do bloco
         saudeExtra.querySelectorAll('input, select').forEach(input => {
           if (input.name !== 'especialidade') { // especialidade é opcional
             input.required = true;
           }
         });
+        // Documento obrigatório
+        const docInput = document.getElementById('documento_comprobatorio');
+        if (docInput) docInput.required = true;
       } else {
         saudeExtra.style.display = 'none';
-        // Remove required dos campos do bloco
         saudeExtra.querySelectorAll('input, select').forEach(input => {
           input.required = false;
         });
+        // Documento não obrigatório
+        const docInput = document.getElementById('documento_comprobatorio');
+        if (docInput) docInput.required = false;
       }
     });
     // Inicializa o estado dos required ao carregar a página
@@ -62,11 +66,15 @@ document.addEventListener('DOMContentLoaded', function() {
       saudeExtra.querySelectorAll('input, select').forEach(input => {
         if (input.name !== 'especialidade') input.required = true;
       });
+      const docInput = document.getElementById('documento_comprobatorio');
+      if (docInput) docInput.required = true;
     } else {
       saudeExtra.style.display = 'none';
       saudeExtra.querySelectorAll('input, select').forEach(input => {
         input.required = false;
       });
+      const docInput = document.getElementById('documento_comprobatorio');
+      if (docInput) docInput.required = false;
     }
   }
 
@@ -129,6 +137,24 @@ document.addEventListener('DOMContentLoaded', function() {
     errorAlert.classList.add('d-none');
     errorAlert.innerHTML = '';
 
+    // Filtro de palavrões (usa blokdepalavroes.js)
+    const camposTexto = form.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
+    let encontrouOfensiva = false;
+    camposTexto.forEach(campo => {
+      if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
+        window.verificarConteudoOfensivo(campo);
+        // Se o campo foi modificado, considera que havia palavrão
+        if ((campo.value && campo.value.includes('***')) || (campo.textContent && campo.textContent.includes('***'))) {
+          encontrouOfensiva = true;
+        }
+      }
+    });
+    if (encontrouOfensiva) {
+      errorAlert.textContent = 'Remova palavras ofensivas dos campos antes de enviar.';
+      errorAlert.classList.remove('d-none');
+      return;
+    }
+
     // Validação dos campos obrigatórios
     const camposObrigatorios = [
       'nome_real', 'sobrenome_real', 'nome_usuario', 'email', 'senha', 'confirma_senha',
@@ -179,6 +205,15 @@ document.querySelector('input[name="fuso_horario"]').value =
 
     const cep = cepInput.value.replace(/\D/g, ''); // só números
     cepInput.value = cep;
+
+    // Validação dos termos de uso e dados
+    const aceiteTermoUso = document.getElementById('aceite_termo_uso');
+    const aceiteTermoDados = document.getElementById('aceite_termo_dados');
+    if (!aceiteTermoUso?.checked || !aceiteTermoDados?.checked) {
+      errorAlert.textContent = 'Você deve aceitar os Termos de Uso e a Política de Tratamento de Dados para se cadastrar.';
+      errorAlert.classList.remove('d-none');
+      return;
+    }
 
     // Enviar formulário
     try {

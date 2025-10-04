@@ -5,11 +5,17 @@ document.addEventListener('DOMContentLoaded', function() {
       const docId = this.dataset.id;
       if (!confirm('Aprovar este documento?')) return;
       const res = await fetch(`/administradores/documentos/${docId}/aprovar`, { method: 'POST' });
-      if (res.ok) {
-        alert('Documento aprovado!');
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = {};
+      }
+      if (res.ok && data.success) {
+        alert(data.mensagem || 'Documento aprovado com sucesso!');
         location.reload();
       } else {
-        alert('Erro ao aprovar documento.');
+        alert(data.error || 'Erro ao aprovar documento.');
       }
     });
   });
@@ -19,11 +25,17 @@ document.addEventListener('DOMContentLoaded', function() {
       const docId = this.dataset.id;
       if (!confirm('Rejeitar este documento?')) return;
       const res = await fetch(`/administradores/documentos/${docId}/rejeitar`, { method: 'POST' });
-      if (res.ok) {
-        alert('Documento rejeitado!');
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = {};
+      }
+      if (res.ok && data.success) {
+        alert(data.mensagem || 'Documento rejeitado com sucesso!');
         location.reload();
       } else {
-        alert('Erro ao rejeitar documento.');
+        alert(data.mensagem || data.error || 'Erro ao rejeitar documento.');
       }
     });
   });

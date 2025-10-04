@@ -99,22 +99,31 @@ exports.criar = async (req, res) => {
       fuso_horario // <-- Salva aqui
     });
 
-    // Se for profissional de saúde, cria registro na tabela correta
+    // Se for profissional de saúde, cria documento de verificação (NÃO cria ProfissionalSaude ainda)
     if (req.body.profissional_saude) {
-      await ProfissionalSaude.create({
+      const { DocumentoVerificacao } = require('../models');
+      let caminho_arquivo = null;
+      if (req.files && req.files.documento_comprobatorio && req.files.documento_comprobatorio[0]) {
+        caminho_arquivo = '/docs/' + req.files.documento_comprobatorio[0].filename;
+      }
+      await DocumentoVerificacao.create({
         id_usuario: novoUsuario.id_usuario,
-        tipo_registro: req.body.tipo_registro,
-        numero_registro: req.body.numero_registro,
-        uf_registro: req.body.uf_registro,
-        especialidade: req.body.especialidade,
+        tipo_documento: req.body.tipo_registro,
+        numero_documento: req.body.numero_registro,
         instituicao: req.body.instituicao,
-        data_registro: req.body.data_registro,
-        documento_comprobatorio: req.files?.documento_comprobatorio?.[0]?.filename // ou caminho salvo
+        caminho_arquivo,
+        status: 'pending',
+        observacoes: req.body.especialidade || null
       });
     }
 
     res.redirect('/');
   } catch (err) {
+    // Tratamento de erro de validação do Sequelize
+    if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
+      const mensagens = err.errors ? err.errors.map(e => e.message).join('; ') : err.message;
+      return res.status(400).json({ error: 'Erro de validação: ' + mensagens });
+    }
     res.status(500).json({ error: 'Erro ao criar usuário: ' + err.message });
   }
 };
@@ -275,7 +284,7 @@ exports.buscarPerfilCompleto = async (id) => {
   try {
     const usuario = await Usuario.findByPk(id, {
       attributes: [
-        'id_usuario', 'nome_usuario', 'nome_real', 'sobrenome_real', 'email', 'foto_perfil', 'biografia', 'cidade', 'estado', 'pais'
+        'id_usuario', 'nome_usuario', 'nome_real', 'sobrenome_real', 'email', 'foto_perfil', 'biografia', 'cidade', 'estado', 'pais', 'verificado'
       ],
       include: [
         {
@@ -304,6 +313,12 @@ exports.buscarPerfilCompleto = async (id) => {
             as: 'solicitante', // amigo é o solicitante
             attributes: ['id_usuario', 'nome_usuario', 'foto_perfil']
           }]
+        },
+        {
+          model: require('../models').ProfissionalSaude,
+          as: 'profissionalSaude',
+          where: { status_verificacao: 'aprovado' },
+          required: false
         }
       ]
     });
@@ -332,6 +347,8 @@ exports.buscarPerfilCompleto = async (id) => {
       cidade: usuario.cidade,
       estado: usuario.estado,
       pais: usuario.pais,
+      verificado: usuario.verificado,
+      profissionalSaude: usuario.profissionalSaude ? usuario.profissionalSaude[0] : null,
       postagens: usuario.postagens || [],
       amigos
     };

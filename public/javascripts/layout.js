@@ -30,6 +30,10 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     initSearch();
+    // Filtro de palavrões global (blokdepalavroes.js)
+    if (window.bloquearPalavrasOfensivas && typeof window.bloquearPalavrasOfensivas === 'function') {
+      window.bloquearPalavrasOfensivas();
+    }
 });
 
 // Sistema de pesquisa na página

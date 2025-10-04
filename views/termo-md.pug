@@ -1,0 +1,13 @@
+extends layout
+
+block styles
+  style.
+    .termo-md-container { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 16px rgba(0,0,0,0.07);}
+    .termo-md-container h1, .termo-md-container h2, .termo-md-container h3 { color: #198754; }
+    .termo-md-container a { color: #007bff; }
+
+block content
+  .termo-md-container
+    h2= titulo
+    .markdown-content !{html}
+    a.btn.btn-outline-secondary.mt-4(href="javascript:window.close()") Fechar

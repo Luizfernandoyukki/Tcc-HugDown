@@ -55,6 +55,32 @@ router.post('/usuarios/:id/banir', requireLogin, requireAdmin, async (req, res) 
 });
 
 // Aprovar profissional de saúde
-router.post('/profissionais/:id/aprovar', requireLogin, requireAdmin, administradorController.aprovarProfissional);
+router.post('/profissionais/:id/aprovar', requireLogin, requireAdmin, async (req, res) => {
+  const { ProfissionalSaude, Usuario } = require('../models');
+  const profissional = await ProfissionalSaude.findByPk(req.params.id);
+  if (!profissional) return res.status(404).json({ error: 'Profissional não encontrado' });
+  await profissional.update({
+    status_verificacao: 'aprovado',
+    data_verificacao: new Date(),
+    verificado_por: req.session.userId
+  });
+  // Atualiza usuário como verificado
+  const usuario = await Usuario.findByPk(profissional.id_usuario);
+  if (usuario) await usuario.update({ verificado: true });
+  res.json({ sucesso: true });
+});
+
+// Rejeitar profissional de saúde
+router.post('/profissionais/:id/rejeitar', requireLogin, requireAdmin, async (req, res) => {
+  const { ProfissionalSaude } = require('../models');
+  const profissional = await ProfissionalSaude.findByPk(req.params.id);
+  if (!profissional) return res.status(404).json({ error: 'Profissional não encontrado' });
+  await profissional.update({
+    status_verificacao: 'rejeitado',
+    data_verificacao: new Date(),
+    verificado_por: req.session.userId
+  });
+  res.json({ sucesso: true });
+});
 
 module.exports = router;
