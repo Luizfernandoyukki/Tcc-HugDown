@@ -84,3 +84,111 @@
    - Documente cada endpoint novo neste README.
 
 ---
+
+# Manual de Funcionamento do HugDown
+
+## Visão Geral
+
+O HugDown é uma rede social inclusiva voltada para famílias, cuidadores, profissionais de saúde e pessoas com síndrome de Down.  
+O objetivo é promover conexões, compartilhar experiências, criar grupos, participar de eventos e garantir acessibilidade e segurança para todos.
+
+---
+
+## Como o site está estruturado
+
+- **Página Inicial:**  
+  Apresenta as principais funcionalidades, estatísticas, atividades recentes e botões para login/cadastro.
+
+- **Feed de Postagens:**  
+  Onde você vê postagens de outros usuários, pode curtir, comentar, reportar e filtrar por categorias/tags.
+
+- **Grupos:**  
+  Espaço para criar ou participar de comunidades temáticas.
+
+- **Eventos:**  
+  Área para explorar, criar e participar de eventos presenciais ou online.
+
+- **Perfil do Usuário:**  
+  Mostra suas informações, postagens, selos de verificado/profissional de saúde, e opções de edição/configuração.
+
+- **Configurações:**  
+  Permite editar dados, excluir conta (com verificação por e-mail) e solicitar status de profissional de saúde.
+
+- **Manual de Instruções:**  
+  Disponível no rodapé e nas configurações, explica passo a passo como usar cada recurso.
+
+---
+
+## Esquemagrama de Navegação
+
+```mermaid
+graph TD
+    A[Login/Cadastro] --> B[Feed de Postagens]
+    B --> C[Grupos]
+    B --> D[Eventos]
+    B --> E[Perfil do Usuário]
+    E --> F[Editar Perfil]
+    E --> G[Configurações]
+    G --> H[Excluir Conta]
+    G --> I[Solicitar Profissional de Saúde]
+    B --> J[Manual de Instruções]
+    B --> K[Reportar Conteúdo]
+    B --> L[Comentar/Curtir]
+    C --> M[Participar de Grupo]
+    D --> N[Participar de Evento]
+```
+
+---
+
+## Progressão e Funcionalidades
+
+1. **Cadastro/Login:**  
+   - Crie sua conta, informe dados pessoais e aceite os termos.
+   - Pode optar por se tornar profissional de saúde já no cadastro.
+
+2. **Explorar o Feed:**  
+   - Veja postagens, filtre por interesses, interaja com outros usuários.
+
+3. **Participar de Grupos e Eventos:**  
+   - Entre em grupos temáticos e eventos relevantes.
+   - Crie seus próprios grupos/eventos se desejar.
+
+4. **Interagir:**  
+   - Comente, curta, reporte conteúdos.
+   - Receba notificações e mensagens.
+
+5. **Perfil e Configurações:**  
+   - Edite suas informações, foto, biografia.
+   - Solicite exclusão de conta ou status de profissional de saúde.
+
+6. **Acessibilidade e Segurança:**  
+   - Navegação por teclado, alto contraste, botões grandes.
+   - Todas ações sensíveis exigem confirmação por e-mail.
+
+7. **Manual de Instruções:**  
+   - Consulte sempre que tiver dúvidas.
+   - Explica cada passo e funcionalidade do site.
+
+---
+
+## Principais Recursos
+
+- Postagens (texto, imagem, vídeo, PDF para profissionais)
+- Comentários e curtidas
+- Denúncia de conteúdo
+- Grupos e eventos
+- Perfil com selos de verificado e profissional de saúde
+- Configurações avançadas (exclusão, solicitação de profissional)
+- Notificações e mensagens diretas
+- Manual de instruções e acessibilidade
+
+---
+
+## Dúvidas e Suporte
+
+- Consulte o manual de instruções ou envie e-mail para:  
+  **SuporteHugDown@gmail.com**
+
+---
+
+**O HugDown é feito para você se conectar, aprender e compartilhar com segurança e inclusão!**

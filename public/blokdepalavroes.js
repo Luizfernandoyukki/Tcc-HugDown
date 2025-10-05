@@ -208,6 +208,8 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     palavrasOfensivas,
     bloquearPalavrasOfensivas,
-    verificarConteudoOfensivo
+    verificarConteudoOfensivo,
+    gerarPalavrasOfensivasAssincrono,
+    criarExpressoesOfensivas
   };
 }

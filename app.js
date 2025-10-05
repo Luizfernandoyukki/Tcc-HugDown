@@ -107,6 +107,20 @@ app.use(async (req, res, next) => {
   next();
 });
 
+// Carrega e processa o filtro de palavrões uma vez no backend
+const blokdepalavroes = require('./public/blokdepalavroes.js');
+let palavrasOfensivasGlobal = [];
+blokdepalavroes.gerarPalavrasOfensivasAssincrono(() => {
+  palavrasOfensivasGlobal = blokdepalavroes.palavrasOfensivas;
+  console.log('[MODERATION] Lista de palavras ofensivas carregada no backend:', palavrasOfensivasGlobal.length);
+});
+
+// Middleware global para injetar lista de palavras ofensivas
+app.use((req, res, next) => {
+  res.locals.palavrasOfensivas = palavrasOfensivasGlobal;
+  next();
+});
+
 // Roda verificação de eventos próximos ao inicializar o app
 cron.verificarEventosProximos();
 
