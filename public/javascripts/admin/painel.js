@@ -16,7 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Enviar notificação
   const formNotif = document.getElementById('form-notificacao');
   if (formNotif) {
-    formNotif.addEventListener('submit', async function(e) {
+    if (window._notificacaoSubmitHandler) {
+      formNotif.removeEventListener('submit', window._notificacaoSubmitHandler);
+    }
+    window._notificacaoSubmitHandler = async function(e) {
       e.preventDefault();
       const formData = new FormData(formNotif);
       const res = await fetch('/notificacoes', {
@@ -29,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         alert('Erro ao enviar notificação.');
       }
-    });
+    };
+    formNotif.addEventListener('submit', window._notificacaoSubmitHandler);
   }
 });

@@ -75,6 +75,8 @@ exports.buscarPorId = async (req, resOrOptions) => {
 // Criar nova postagem
 exports.criar = async (req, res) => {
   try {
+    req._postagemCriarChamadas = (req._postagemCriarChamadas || 0) + 1;
+    console.log(`[POSTAGEM][CRIAR] chamada #${req._postagemCriarChamadas} para userId=${req.session.userId}`);
     console.log('[LOG] postagemController.criar chamado. Body:', req.body, 'File:', req.file);
     // Verifica se o usuário está logado
     if (!req.session || !req.session.userId) {

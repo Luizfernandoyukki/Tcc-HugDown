@@ -131,72 +131,76 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Enviar formulário
-  form?.addEventListener('submit', async function(e) {
-    console.log('Evento submit disparado!');
-    e.preventDefault();
-    errorAlert.classList.add('d-none');
-    errorAlert.innerHTML = '';
-
-    // Filtro de palavrões (usa blokdepalavroes.js)
-    const camposTexto = form.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
-    let encontrouOfensiva = false;
-    camposTexto.forEach(campo => {
-      if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
-        window.verificarConteudoOfensivo(campo);
-        // Se o campo foi modificado, considera que havia palavrão
-        if ((campo.value && campo.value.includes('***')) || (campo.textContent && campo.textContent.includes('***'))) {
-          encontrouOfensiva = true;
-        }
-      }
-    });
-    if (encontrouOfensiva) {
-      errorAlert.textContent = 'Remova palavras ofensivas dos campos antes de enviar.';
-      errorAlert.classList.remove('d-none');
-      return;
+  if (form) {
+    if (window._cadastroSubmitHandler) {
+      form.removeEventListener('submit', window._cadastroSubmitHandler);
     }
+    window._cadastroSubmitHandler = async function(e) {
+      console.log('Evento submit disparado!');
+      e.preventDefault();
+      errorAlert.classList.add('d-none');
+      errorAlert.innerHTML = '';
 
-    // Validação dos campos obrigatórios
-    const camposObrigatorios = [
-      'nome_real', 'sobrenome_real', 'nome_usuario', 'email', 'senha', 'confirma_senha',
-      'telefone', 'endereco', 'cidade', 'estado', 'cep', 'data_nascimento', 'genero'
-    ];
-    let camposFaltando = [];
-    camposObrigatorios.forEach(nome => {
-      const campo = form.querySelector(`[name="${nome}"]`);
-      if (!campo || !campo.value.trim()) {
-        camposFaltando.push(nome);
+      // Filtro de palavrões (usa blokdepalavroes.js)
+      const camposTexto = form.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
+      let encontrouOfensiva = false;
+      camposTexto.forEach(campo => {
+        if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
+          window.verificarConteudoOfensivo(campo);
+          // Se o campo foi modificado, considera que havia palavrão
+          if ((campo.value && campo.value.includes('***')) || (campo.textContent && campo.textContent.includes('***'))) {
+            encontrouOfensiva = true;
+          }
+        }
+      });
+      if (encontrouOfensiva) {
+        errorAlert.textContent = 'Remova palavras ofensivas dos campos antes de enviar.';
+        errorAlert.classList.remove('d-none');
+        return;
       }
-    });
 
-    // Se for profissional de saúde, valida campos extras
-    if (profissionalCheck && profissionalCheck.checked) {
-      const camposProfissional = [
-        'tipo_registro', 'numero_registro', 'uf_registro', 'instituicao'
-        // 'documento_comprobatorio' removido: funcionalidade futura
+      // Validação dos campos obrigatórios
+      const camposObrigatorios = [
+        'nome_real', 'sobrenome_real', 'nome_usuario', 'email', 'senha', 'confirma_senha',
+        'telefone', 'endereco', 'cidade', 'estado', 'cep', 'data_nascimento', 'genero'
       ];
-      camposProfissional.forEach(nome => {
+      let camposFaltando = [];
+      camposObrigatorios.forEach(nome => {
         const campo = form.querySelector(`[name="${nome}"]`);
         if (!campo || !campo.value.trim()) {
           camposFaltando.push(nome);
         }
       });
-    }
 
-    if (camposFaltando.length > 0) {
-      errorAlert.innerHTML = 'Preencha todos os campos obrigatórios:<br>' +
-        camposFaltando.map(c => `<b>${c}</b>`).join(', ');
-      errorAlert.classList.remove('d-none');
-      return;
-    }
+      // Se for profissional de saúde, valida campos extras
+      if (profissionalCheck && profissionalCheck.checked) {
+        const camposProfissional = [
+          'tipo_registro', 'numero_registro', 'uf_registro', 'instituicao'
+          // 'documento_comprobatorio' removido: funcionalidade futura
+        ];
+        camposProfissional.forEach(nome => {
+          const campo = form.querySelector(`[name="${nome}"]`);
+          if (!campo || !campo.value.trim()) {
+            camposFaltando.push(nome);
+          }
+        });
+      }
 
-    // Validação de senha
-    const senha = document.getElementById('senha').value;
-    const confirmaSenha = document.getElementById('confirma_senha').value;
-    if (senha !== confirmaSenha) {
-      errorAlert.textContent = 'As senhas não conferem';
-      errorAlert.classList.remove('d-none');
-      return;
-    }
+      if (camposFaltando.length > 0) {
+        errorAlert.innerHTML = 'Preencha todos os campos obrigatórios:<br>' +
+          camposFaltando.map(c => `<b>${c}</b>`).join(', ');
+        errorAlert.classList.remove('d-none');
+        return;
+      }
+
+      // Validação de senha
+      const senha = document.getElementById('senha').value;
+      const confirmaSenha = document.getElementById('confirma_senha').value;
+      if (senha !== confirmaSenha) {
+        errorAlert.textContent = 'As senhas não conferem';
+        errorAlert.classList.remove('d-none');
+        return;
+      }
 document.querySelector('input[name="fuso_horario"]').value =
   Intl.DateTimeFormat().resolvedOptions().timeZone;
     // Remover máscara do telefone e CEP antes de enviar
@@ -238,5 +242,7 @@ document.querySelector('input[name="fuso_horario"]').value =
       errorAlert.textContent = 'Erro de conexão ou envio: ' + err.message;
       errorAlert.classList.remove('d-none');
     }
-  });
+    };
+    form.addEventListener('submit', window._cadastroSubmitHandler);
+  }
 });

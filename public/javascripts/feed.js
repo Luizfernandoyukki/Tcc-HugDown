@@ -105,47 +105,39 @@ document.addEventListener('DOMContentLoaded', function () {
   // Enviar comentário na aba inferior
   const aba = document.getElementById('comentarios-aba');
   const formAba = aba.querySelector('.comentar-form-aba');
-  const textareaAba = formAba.querySelector('textarea');
-
-  // Envia ao pressionar Enter (tecla comum), mas não Enter do teclado numérico
-  textareaAba.addEventListener('keydown', function(ev) {
-    if (
-      ev.key === 'Enter' &&
-      !ev.shiftKey &&
-      ev.code === 'Enter' && // Garante que é o Enter principal
-      ev.location === 0 // 0 = teclado principal, 3 = numpad
-    ) {
-      ev.preventDefault();
-      formAba.requestSubmit();
+  // Remova listener antigo antes de adicionar
+  if (formAba) {
+    if (window._comentarioSubmitHandler) {
+      formAba.removeEventListener('submit', window._comentarioSubmitHandler);
     }
-  });
-
-  formAba.onsubmit = async function (ev) {
-    ev.preventDefault();
-    const id = aba.dataset.idPostagem;
-    const conteudo = formAba.querySelector('textarea').value;
-    if (!conteudo) return;
-    await fetch(`/api/postagens/${id}/comentar`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ conteudo })
-    });
-    formAba.querySelector('textarea').value = '';
-    // Atualiza comentários
-    fetch(`/api/postagens/${id}/comentarios`)
-      .then(res => res.json())
-      .then(comentarios => {
-        const lista = aba.querySelector('.comentarios-list-aba');
-        lista.innerHTML = '';
-        // Inverta a ordem para mostrar os mais recentes no topo
-        comentarios.reverse().forEach(c => {
-          const div = document.createElement('div');
-          div.innerHTML = `<b>@${c.autor.nome_usuario}</b>: ${c.conteudo}`;
-          lista.appendChild(div);
-        });
-        lista.scrollTop = 0; // Foca no topo
+    window._comentarioSubmitHandler = async function (ev) {
+      ev.preventDefault();
+      const id = aba.dataset.idPostagem;
+      const conteudo = formAba.querySelector('textarea').value;
+      if (!conteudo) return;
+      await fetch(`/api/postagens/${id}/comentar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conteudo })
       });
-  };
+      formAba.querySelector('textarea').value = '';
+      // Atualiza comentários
+      fetch(`/api/postagens/${id}/comentarios`)
+        .then(res => res.json())
+        .then(comentarios => {
+          const lista = aba.querySelector('.comentarios-list-aba');
+          lista.innerHTML = '';
+          // Inverta a ordem para mostrar os mais recentes no topo
+          comentarios.reverse().forEach(c => {
+            const div = document.createElement('div');
+            div.innerHTML = `<b>@${c.autor.nome_usuario}</b>: ${c.conteudo}`;
+            lista.appendChild(div);
+          });
+          lista.scrollTop = 0; // Foca no topo
+        });
+    };
+    formAba.addEventListener('submit', window._comentarioSubmitHandler);
+  }
 
   // Fechar aba de comentários ao clicar fora dela (opcional)
   document.addEventListener('click', function (e) {
@@ -322,3 +314,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
+       

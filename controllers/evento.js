@@ -41,6 +41,9 @@ exports.buscarPorId = async (req, res) => {
 
 exports.criar = async (req, res) => {
   try {
+    req._eventoCriarChamadas = (req._eventoCriarChamadas || 0) + 1;
+    console.log(`[EVENTO][CRIAR] chamada #${req._eventoCriarChamadas} para userId=${req.session.userId}`);
+
     const {
       titulo_evento,
       descricao_evento,

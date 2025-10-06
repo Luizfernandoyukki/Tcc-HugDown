@@ -40,6 +40,9 @@ exports.buscarPorId = async (req, res) => {
 // Criar nova seção
 exports.criar = async (req, res) => {
   try {
+    req._secaoCriarChamadas = (req._secaoCriarChamadas || 0) + 1;
+    console.log(`[SECAO][CRIAR] chamada #${req._secaoCriarChamadas}`);
+
     const { nome_secao, descricao_secao, icone_secao, ordem_exibicao, ativo } = req.body;
     // Validação do campo obrigatório
     if (!nome_secao) {

@@ -58,32 +58,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  form.addEventListener('submit', function(e) {
-    const nome = nomeInput.value.trim().toLowerCase();
-    const existe = window.tagsExistentes.some(tag => tag.nome_tag.toLowerCase() === nome);
-    const proibidoNome = contemPalavraProibida(nome);
-    const proibidoDesc = contemPalavraProibida(descInput.value);
+  if (form) {
+    if (window._tagSubmitHandler) {
+      form.removeEventListener('submit', window._tagSubmitHandler);
+    }
+    window._tagSubmitHandler = function(e) {
+      const nome = nomeInput.value.trim().toLowerCase();
+      const existe = window.tagsExistentes.some(tag => tag.nome_tag.toLowerCase() === nome);
+      const proibidoNome = contemPalavraProibida(nome);
+      const proibidoDesc = contemPalavraProibida(descInput.value);
 
-    // Filtro de palavrões global (blokdepalavroes.js)
-    if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
-      window.verificarConteudoOfensivo(nomeInput);
-      window.verificarConteudoOfensivo(descInput);
-      if ((nomeInput.value && nomeInput.value.includes('***')) || (descInput.value && descInput.value.includes('***'))) {
-        e.preventDefault();
-        alert('Remova palavras ofensivas dos campos antes de enviar.');
-        return;
+      // Filtro de palavrões global (blokdepalavroes.js)
+      if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
+        window.verificarConteudoOfensivo(nomeInput);
+        window.verificarConteudoOfensivo(descInput);
+        if ((nomeInput.value && nomeInput.value.includes('***')) || (descInput.value && descInput.value.includes('***'))) {
+          e.preventDefault();
+          alert('Remova palavras ofensivas dos campos antes de enviar.');
+          return;
+        }
       }
-    }
 
-    if (existe || proibidoNome) {
-      nomeError.classList.remove('d-none');
-      e.preventDefault();
-    }
-    if (proibidoDesc) {
-      descError.classList.remove('d-none');
-      e.preventDefault();
-    }
-  });
+      if (existe || proibidoNome) {
+        nomeError.classList.remove('d-none');
+        e.preventDefault();
+      }
+      if (proibidoDesc) {
+        descError.classList.remove('d-none');
+        e.preventDefault();
+      }
+    };
+    form.addEventListener('submit', window._tagSubmitHandler);
+  }
 
   // Função para deletar tag
   function deletarTag(nomeTag, liElement) {

@@ -142,7 +142,6 @@ app.use(async (req, res, next) => {
 
 // Rotas
 app.use('/', indexRouter);
-app.use('/documentos-verificacao', require('./routes/documentosVerificacao'));
 app.use('/webpush', require('./routes/webpush'));
 app.use(require('./routes/REPORTSPARAADM.JS'));
 app.use('/postagens', require('./routes/postagens'));

@@ -23,6 +23,9 @@ exports.buscarPorId = async (req, res) => {
 
 exports.criar = async (req, res) => {
   try {
+    req._curtidaCriarChamadas = (req._curtidaCriarChamadas || 0) + 1;
+    console.log(`[CURTIDA][CRIAR] chamada #${req._curtidaCriarChamadas} para userId=${req.session.userId}`);
+
     const novaCurtida = await Curtida.create(req.body);
     res.status(201).json(novaCurtida);
   } catch (err) {

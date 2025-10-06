@@ -175,35 +175,42 @@ function logOfensasDetectadas(texto, ofensas) {
   }
 }
 
-// Inicialização
-document.addEventListener('DOMContentLoaded', function() {
-  gerarPalavrasOfensivasAssincrono(function() {
-    bloquearPalavrasOfensivas();
-  });
+// Inicialização para frontend (navegador)
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  // Permite desativar o filtro globalmente
+  if (window.bloquearPalavroes === false) {
+    // Não ativa o bloqueio de palavrões nesta página
+    return;
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    gerarPalavrasOfensivasAssincrono(function() {
+      bloquearPalavrasOfensivas();
+    });
 
-  // Adiciona também para elementos dinâmicos
-  const observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-      mutation.addedNodes.forEach(function(node) {
-        if (node.nodeType === 1) {
-          const campos = node.querySelectorAll ? node.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]') : [];
-          campos.forEach(campo => {
-            campo.addEventListener('input', function() {
-              if (bloqueioAtivo) verificarConteudoOfensivo(this);
+    // Adiciona também para elementos dinâmicos
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        mutation.addedNodes.forEach(function(node) {
+          if (node.nodeType === 1) {
+            const campos = node.querySelectorAll ? node.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]') : [];
+            campos.forEach(campo => {
+              campo.addEventListener('input', function() {
+                if (bloqueioAtivo) verificarConteudoOfensivo(this);
+              });
             });
-          });
-        }
+          }
+        });
       });
     });
-  });
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   });
-});
+}
 
-// Exporta para uso em outros módulos (se necessário)
+// Exporta para uso em outros módulos (Node.js)
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     palavrasOfensivas,

@@ -86,7 +86,7 @@ router.use('/amizades', require('./amizades'));
 router.use('/comentarios', require('./comentarios'));
 router.use('/compartilhamentos', require('./compartilhamentos'));
 router.use('/curtidas', require('./curtidas'));
-router.use('/documentos-verificacao', require('./documentosVerificacao'));
+router.use('/documentos-verificacao', require('./documentosVerificacao')); 
 router.use('/eventos', require('./eventos'));
 router.use('/idiomas', require('./idiomas'));
 router.use('/membros-grupo', require('./membrosGrupo'));
