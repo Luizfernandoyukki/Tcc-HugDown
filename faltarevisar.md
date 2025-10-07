@@ -1,0 +1,5 @@
+-edit do user
+-pedidos de amizade
+-arrumar os post de videio no index de user
+-ver se o buscar user funciona e se os pedidos de amizades funcionam 
+-vero esqeuci minhasenha 
