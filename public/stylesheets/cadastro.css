@@ -81,9 +81,20 @@ h2, h5 {
 
 /* Corrige alinhamento do ícone de mostrar/ocultar senha */
 .toggle-password {
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  right: 12px;
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  transform: translateY(-50%);
   cursor: pointer;
   z-index: 3;
+  padding: 0;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+/* Garante que o campo de senha tenha padding à direita suficiente */
+input[type="password"].form-control,
+input[type="text"].form-control {
+  padding-right: 40px;
 }

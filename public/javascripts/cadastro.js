@@ -130,6 +130,11 @@ document.addEventListener('DOMContentLoaded', function() {
     showStep(currentStep);
   });
 
+  // Aplica máscaras nos campos
+  if (window.aplicarMascarasCadastro) {
+    window.aplicarMascarasCadastro();
+  }
+
   // Enviar formulário
   if (form) {
     if (window._cadastroSubmitHandler) {
@@ -203,6 +208,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 document.querySelector('input[name="fuso_horario"]').value =
   Intl.DateTimeFormat().resolvedOptions().timeZone;
+    // Remove máscaras antes de enviar
+    if (window.removerMascarasCadastro) {
+      window.removerMascarasCadastro();
+    }
     // Remover máscara do telefone e CEP antes de enviar
     const telefone = telefoneInput.value.replace(/\D/g, ''); // só números
     telefoneInput.value = telefone;
