@@ -162,8 +162,11 @@ block content
                   button.btn.btn-outline-secondary(type="button", id="btn-voltar-5") Voltar
                   button.btn.btn-success(type="submit") Finalizar Cadastro
 
+              input(type="hidden", name="fuso_horario", value="")
+
             .mt-3
               div#cadastro-feedback
+              div.alert.alert-danger.d-none(id="errorAlert")
 
 block scripts
   script(src="/public/util/mascaras.js")
