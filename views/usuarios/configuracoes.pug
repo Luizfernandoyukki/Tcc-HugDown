@@ -40,15 +40,32 @@ block content
             form(method="POST", action="/usuarios/solicitar-profissional", enctype="multipart/form-data")
               .mb-3
                 label(for="tipo_documento") Tipo de documento
-                input.form-control(type="text", name="tipo_documento", required, maxlength="50", value=usuario?.profissionalSaude?.tipo_registro || '')
+                input.form-control(
+                  type="text",
+                  name="tipo_documento",
+                  required,
+                  maxlength="50",
+                  value=(usuario && usuario.profissionalSaude && usuario.profissionalSaude.tipo_registro ? usuario.profissionalSaude.tipo_registro : '')
+                )
                 small.text-muted Ex: CRM, COREN, CRF, CREFITO, CRP, OUTRO
               .mb-3
                 label(for="numero_documento") Número do documento
-                input.form-control(type="text", name="numero_documento", required, maxlength="50", value=usuario?.profissionalSaude?.numero_registro || '')
+                input.form-control(
+                  type="text",
+                  name="numero_documento",
+                  required,
+                  maxlength="50",
+                  value=(usuario && usuario.profissionalSaude && usuario.profissionalSaude.numero_registro ? usuario.profissionalSaude.numero_registro : '')
+                )
                 small.text-muted Máximo 50 caracteres
               .mb-3
                 label(for="instituicao") Instituição
-                input.form-control(type="text", name="instituicao", maxlength="200", value=usuario?.profissionalSaude?.instituicao || '')
+                input.form-control(
+                  type="text",
+                  name="instituicao",
+                  maxlength="200",
+                  value=(usuario && usuario.profissionalSaude && usuario.profissionalSaude.instituicao ? usuario.profissionalSaude.instituicao : '')
+                )
                 small.text-muted Máximo 200 caracteres
               .mb-3
                 label(for="documento") Documento PDF
@@ -56,7 +73,7 @@ block content
                 small.text-muted Apenas arquivos PDF
               .mb-3
                 label(for="observacoes") Observações
-                textarea.form-control(name="observacoes", maxlength="200")= usuario?.profissionalSaude?.especialidade || ''
+                textarea.form-control(name="observacoes", maxlength="200")= usuario && usuario.profissionalSaude && usuario.profissionalSaude.especialidade ? usuario.profissionalSaude.especialidade : ''
                 small.text-muted Máximo 200 caracteres
               button.btn.btn-success(type="submit") Enviar Solicitação
             if infoProfissional

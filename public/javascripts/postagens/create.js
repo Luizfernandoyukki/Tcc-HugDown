@@ -23,6 +23,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Filtro de tags por pesquisa
+  const tagSearch = document.getElementById('tag-search');
+  const tagList = document.querySelectorAll('.tag-checkbox-list .form-check');
+  if (tagSearch && tagList.length) {
+    tagSearch.addEventListener('input', function() {
+      const termo = tagSearch.value.trim().toLowerCase();
+      tagList.forEach(item => {
+        const label = item.querySelector('label');
+        if (!label) return;
+        const nome = label.textContent.trim().toLowerCase();
+        item.style.display = nome.includes(termo) ? '' : 'none';
+      });
+    });
+  }
+
   // Remova listeners antigos antes de adicionar
   if (form) {
     if (window._postagemSubmitHandler) {
@@ -31,14 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
     window._postagemSubmitHandler = async function(e) {
       e.preventDefault();
       const formData = new FormData(form);
-
-      // Adiciona múltiplas tags como array
-      const tagsSelect = document.getElementById('tags');
-      if (tagsSelect) {
-        const selectedTags = Array.from(tagsSelect.selectedOptions).map(opt => opt.value);
-        formData.delete('tags');
-        selectedTags.forEach(tag => formData.append('tags[]', tag));
-      }
 
       try {
         const response = await fetch('/postagens', {

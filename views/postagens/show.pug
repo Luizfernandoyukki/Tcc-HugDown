@@ -15,7 +15,8 @@ block content
             .card.shadow-sm.h-100.post-card(style="cursor:pointer;" data-id=post.id_postagem)
               .card-body
                 h5.card-title= post.titulo || 'Sem título'
-                p.card-text.text-truncate= post.conteudo
+                if post.resumo
+                  p.card-text.text-truncate.pre-content(style="white-space:pre-line")= post.resumo
                 small.text-muted= post.data_criacao ? post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao : ''
                 if post.url_midia
                   img.img-fluid.mb-2(src=post.url_midia, alt="Imagem da postagem")
@@ -33,7 +34,7 @@ block content
           h4.modal-title#modalTitulo
           button.btn-close(type="button", data-bs-dismiss="modal", aria-label="Fechar")
         .modal-body
-          p#modalConteudo
+          p#modalConteudo.pre-content(style="white-space:pre-line")
           ul.list-group
             li.list-group-item
               b Categoria: 
