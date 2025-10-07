@@ -23,6 +23,11 @@ block content
           span.d-block.fs-4 Nova Tag
           small.d-block.text-primary-50
             | Crie uma nova tag para organizar suas postagens. Apenas você poderá editar ou visualizar as tags que criar.
+    if msg
+      .alert.alert-success.mt-3 #{msg}
 
 block scripts
+  script.
+    window.bloquearPalavroes = true;
   script(src="/javascripts/postagens/index.js")
+  script(src="/blokdepalavroes.js")

@@ -29,10 +29,14 @@ block content
 
       .mb-3
         label(for="tags") Tags
-        select.form-select(id="tags", name="tags" multiple)
-          //- Aqui você deve popular as tags dinamicamente no backend
+        // Barra de pesquisa para filtrar tags
+        input.form-control(type="text", id="tag-search", placeholder="Pesquisar tags...")
+        // Lista de tags com checkbox
+        .tag-checkbox-list.mt-2
           each tag in tags
-            option(value=tag.id_tag)= tag.nome_tag
+            .form-check.mb-1
+              input.form-check-input(type="checkbox", name="tags[]" id="tag-#{tag.id_tag}" value=tag.id_tag)
+              label.form-check-label(for="tag-"+tag.id_tag)= tag.nome_tag
 
       .mb-3
         label(for="tipo_postagem") Tipo de Postagem *
@@ -58,5 +62,5 @@ block content
 
   script.
     window.bloquearPalavroes = false;
-  script(src="/blokdepalavroes.js")
   script(src="/javascripts/postagens/create.js")
+  script(src="/blokdepalavroes.js")

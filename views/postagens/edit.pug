@@ -6,6 +6,8 @@ block styles
 block content
   .container
     .edit-card
+      if msg
+        .alert.alert-success.mt-3 #{msg}
       h2 Editar Postagem
       form#form-edit(method="POST" action=`/postagens/${post.id_postagem}?_method=PUT`)
         .mb-3
@@ -17,6 +19,8 @@ block content
         .mb-3
           label(for="conteudo") Conteúdo
           textarea.form-control(id="conteudo", name="conteudo")= post.conteudo
+        input(type="hidden", name="latitude", id="latitude", value=post.latitude)
+        input(type="hidden", name="longitude", id="longitude", value=post.longitude)
         button.btn.btn-success.mt-3(type="submit") 
           i.fas.fa-save.me-2
           | Salvar Alterações

@@ -90,3 +90,7 @@
   border: none;
   box-shadow: 0 8px 32px rgba(90, 241, 123, 0.2) !important;
 }
+
+.pre-content {
+  white-space: pre-line;
+}

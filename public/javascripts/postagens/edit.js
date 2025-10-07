@@ -2,16 +2,17 @@ document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('form-edit');
   if (!form) return;
 
-  form.addEventListener('submit', async function(e) {
+  // Remova listeners antigos antes de adicionar
+  if (window._editPostHandler) {
+    form.removeEventListener('submit', window._editPostHandler);
+  }
+  window._editPostHandler = async function(e) {
     e.preventDefault();
 
     // Pega o id da postagem da URL
     const match = window.location.pathname.match(/\/postagens\/(\d+)\/edit/);
     const id = match ? match[1] : null;
-    if (!id) {
-      alert('ID da postagem não encontrado!');
-      return;
-    }
+    if (!id) return;
 
     // Monta os dados do formulário
     const formData = new FormData(form);
@@ -35,8 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
         body: JSON.stringify(data)
       });
       if (response.ok) {
-        alert('Postagem atualizada com sucesso!');
-        window.location.href = '/postagens/show'; // Redireciona para index de postagens
+        // Redireciona sempre para o show de postagens
+        window.location.href = '/postagens/show';
       } else {
         let errorMsg = 'Erro ao atualizar postagem';
         try {
@@ -50,5 +51,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (err) {
       alert('Erro de conexão: ' + err.message);
     }
-  });
+  };
+  form.addEventListener('submit', window._editPostHandler);
 });

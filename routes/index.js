@@ -219,7 +219,7 @@ router.post('/api/postagens/:id/comentar', asyncHandler(async (req, res) => {
   res.json({ sucesso: true });
 }));
 
-// Alterna curtida (adiciona ou remove)
+// Alterna curtida (adiciona ou remove) - LIMITA a 1 curtida por usuário
 router.post('/api/postagens/:id/curtir-toggle', asyncHandler(async (req, res) => {
   const id_usuario = req.session.userId;
   if (!id_usuario) return res.status(401).json({ error: 'Precisa estar logado' });

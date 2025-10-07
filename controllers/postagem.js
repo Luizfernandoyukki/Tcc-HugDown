@@ -140,14 +140,18 @@ exports.atualizar = async (req, res) => {
     const postagem = await Postagem.findByPk(req.params.id);
     if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
 
+    // Corrige latitude/longitude: se vier vazio, salva como null
+    const latitude = req.body.latitude === '' ? null : req.body.latitude;
+    const longitude = req.body.longitude === '' ? null : req.body.longitude;
+
     await postagem.update({
       titulo: req.body.titulo,
       resumo: req.body.resumo,
       conteudo: req.body.conteudo,
       tipo_postagem: req.body.tipo_postagem,
       artigo_cientifico: req.body.artigo_cientifico === 'Sim' || req.body.artigo_cientifico === 'true',
-      latitude: req.body.latitude,
-      longitude: req.body.longitude,
+      latitude,
+      longitude,
       id_categoria: req.body.id_categoria
     });
 

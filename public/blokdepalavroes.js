@@ -1,64 +1,103 @@
 // Lista extensiva de palavras ofensivas em português
 const palavrasBase = [
-  // Palavras ofensivas básicas
-  'idiota', 'burro', 'otário', 'babaca', 'imbecil', 'estúpido', 'cretino', 
-  'tonto', 'besta', 'asno', 'palhaço', 'panaca', 'trouxa', 'mané', 'tapado', 
-  'nojento', 'ridículo', 'moleque', 'vagabundo', 'canalha', 'pateta', 'animal', 
-  'ignorante', 'jumento', 'burrice', 'imbecilidade', 'estupidez', 'cretinice',
-  
-  // Ofensas mais graves
-  'filho da puta', 'fdp', 'arrombado', 'desgraçado', 'maldito', 'demonio', 
-  'diabo', 'corno', 'cornudo', 'puta', 'prostituta', 'vadia', 'piranha', 
-  'vagabunda', 'cachorra', 'galinha', 'biscate', 'meretriz', 'desprezível',
-  
-  // Termos pejorativos
-  'lixo', 'escória', 'lixoso', 'nojento', 'repugnante', 'asqueroso', 
-  'nojento', 'fedorento', 'porco', 'sujo', 'imundo', 'degenerado', 
-  'pervertido', 'doente', 'louco', 'doido', 'maluco', 'retardado',
-  
-  // Ofensas raciais e discriminatórias
-  'preto burro', 'negro sujo', 'macaco', 'crioulo', 'judeu avarento', 
-  'árabe sujo', 'japa', 'china', 'baiano', 'paraíba', 'nordestino burro',
-  'gay', 'veado', 'bicha', 'sapatão', 'sapatão', 'traveco', 'transgenero',
-  
-  // Palavras de baixo calão
+  // ========== PALAVRÕES E OFENSAS GRAVES ==========
   'caralho', 'porra', 'merda', 'bosta', 'cocô', 'cagar', 'foder', 'fodido',
-  'cu', 'buceta', 'xoxota', 'pau', 'rola', 'pica', 'piroca', 'pinto',
-  'punheta', 'masturbar', 'orgia', 'sexo', 'anal', 'oral', 'vaginal',
+  'foda', 'cu', 'buceta', 'xoxota', 'pau', 'rola', 'pica', 'piroca', 'pinto',
+  'punheta', 'masturbar', 'orgia', 'anal', 'oral', 'vaginal', 'cuzão', 
+  'cusão', 'cusinho', 'bucetão', 'xota', 'piru', 'gozar', 'gozada',
   
-  // Insultos relacionados à aparência
-  'feio', 'horrível', 'monstro', 'deformado', 'gordo', 'obeso', 'baleia',
-  'magrelo', 'ossudo', 'anão', 'baixinho', 'alto demais', 'careca', 
-  'calvo', 'cabelo ruim', 'dentuço', 'orelhudo', 'narigudo',
+  // ========== OFENSAS PESSOAIS GRAVES ==========
+  'filho da puta', 'fdp', 'arrombado', 'desgraçado', 'vadia', 'piranha', 
+  'puta', 'prostituta', 'vagabunda', 'cachorra', 'biscate', 'meretriz',
+  'corna', 'corno', 'cornudo', 'filho de uma égua',
   
-  // Ofensas à inteligência e capacidade
-  'burro pra caralho', 'analfabeto', 'ignorante', 'limitado', 'incapaz',
-  'incompetente', 'impotente', 'fracassado', 'perdedor', 'inútil', 
-  'imprestável', 'medíocre', 'péssimo', 'horrível',
+  // ========== TERMOS PEJORATIVOS GRAVES ==========
+  'escória', 'lixoso', 'asqueroso', 'degenerado', 'pervertido', 'tarado',
+  'depravado', 'desprezível', 'abjeto', 'repulsivo', 'nojento', 'repugnante',
   
-  // Termos violentos e agressivos
-  'matar', 'morrer', 'assassinar', 'esfaquear', 'espancar', 'bater', 
-  'agredir', 'estuprador', 'abusador', 'pedófilo', 'sequestrador',
-  'bandido', 'marginal', 'criminoso', 'ladrão', 'assaltante',
+  // ========== OFENSAS DISCRIMINATÓRIAS GRAVES ==========
+  'veado', 'bicha', 'sapatão', 'traveco', 'travesti', 'quenga', 'mulata',
   
-  // Gírias ofensivas regionais
-  'otário', 'tanso', 'xarope', 'bocó', 'tapado', 'lesado', 'grosso',
-  'grosseria', 'mal-educado', 'malcriado', 'sem-vergonha', 'safado',
-  
-  // Ofensas em inglês (comuns na internet)
+  // ========== PALAVRÕES EM INGLÊS ==========
   'fuck', 'shit', 'asshole', 'bitch', 'bastard', 'motherfucker', 'dick',
-  'pussy', 'cunt', 'whore', 'slut', 'retard', 'nigger', 'fag', 'faggot',
+  'pussy', 'cunt', 'whore', 'slut', 'fag', 'faggot', 'cock', 'wanker', 'twat',
   
-  // Palavras ofensivas em espanhol
-  'pendejo', 'cabrón', 'puta', 'mierda', 'estúpido', 'idiota', 'gilipollas',
+  // ========== PALAVRÕES EM ESPANHOL ==========
+  'puta', 'mierda', 'coño', 'carajo', 'joder', 'maricón', 'puto', 'zorra',
+  'verga', 'picha', 'culero',
   
-  // Abreviações e termos de internet
-  'vtmnc', 'vtnc', 'pqp', 'fdps', 'cpg', 'vsf', 'vai se fuder', 'vai tomar no cu',
+  // ========== ABREVIAÇÕES OFENSIVAS ==========
+  'vtmnc', 'vtnc', 'pqp', 'fdps', 'cpg', 'vsf', 'vsfd', 'fdc', 'tnc',
+  'vai se fuder', 'vai tomar no cu', 'vai se foder', 'vai tomar no seu cu',
+  'vai pra puta que pariu',
   
-  // Ofensas religiosas
-  'satânico', 'demoníaco', 'herege', 'ateu do caralho', 'deus do caralho',
-  'jesus do caralho', 'bíblia do caralho'
+  // ========== OFENSAS RELIGIOSAS GRAVES ==========
+  'satânico', 'demoníaco', 'herege', 'deus do caralho', 'jesus do caralho',
+  'bíblia do caralho', 'allah do caralho',
+  
+  // ========== VARIANTES DISFARÇADAS ==========
+  'c*ralho', 'p*rra', 'm*rda', 'b*sta', 'c*', 'b*ceta', 'p*u', 'r*la',
+  'p*ca', 'p*nto', 'p*nheta', 'f*der', 'f*dido', 'arr*bado', 'desgr*çado',
+  
+  // ========== OFENSAS VIOLENTAS ==========
+  'estuprador', 'abusador', 'pedófilo', 'estuprar', 'violar', 'abusar', 'molestar'
 ];
+
+// Mapa de substituições comuns para disfarçar palavrões
+const substituicoes = [
+  ['a', ['@', '4']],
+  ['e', ['3']],
+  ['i', ['1', '!']],
+  ['o', ['0']],
+  ['u', ['v']],
+  ['s', ['$', '5']],
+  ['t', ['7']],
+  ['p', ['ph']],
+  // Adicione mais se quiser
+];
+
+// Função para gerar variações com substituições
+function gerarVariaçõesComSimbolos(palavra) {
+  if (!palavra || palavra.length < 4) return [];
+  let variacoes = new Set();
+  variacoes.add(palavra);
+
+  // Gera variações trocando cada letra por símbolo
+  function gerarRecursivo(str, idx) {
+    if (idx >= str.length) {
+      variacoes.add(str);
+      return;
+    }
+    let letra = str[idx].toLowerCase();
+    let subs = substituicoes.find(([l]) => l === letra);
+    if (subs) {
+      for (const s of subs[1]) {
+        gerarRecursivo(str.slice(0, idx) + s + str.slice(idx + 1), idx + 1);
+      }
+    }
+    gerarRecursivo(str, idx + 1);
+  }
+  gerarRecursivo(palavra, 0);
+
+  // Adiciona variações com asteriscos, início/fim, etc
+  variacoes.add(palavra.split('').join('*'));
+  variacoes.add('*' + palavra);
+  variacoes.add(palavra + '*');
+  variacoes.add('*' + palavra + '*');
+
+  // Adiciona variações com símbolos no final (ex: put$, put@)
+  if (palavra.length > 3) {
+    variacoes.add(palavra.slice(0, -1) + '$');
+    variacoes.add(palavra.slice(0, -1) + '@');
+    variacoes.add(palavra.slice(0, -1) + '!');
+    variacoes.add(palavra.slice(0, -1) + '1');
+    variacoes.add(palavra.slice(0, -1) + '3');
+    variacoes.add(palavra.slice(0, -1) + '4');
+    variacoes.add(palavra.slice(0, -1) + '0');
+  }
+
+  return Array.from(variacoes);
+}
 
 // Gera variações simples: original, com asteriscos entre letras, com asteriscos no início/fim
 function gerarVariaçõesSimples(palavra) {
@@ -83,7 +122,7 @@ function criarExpressoesOfensivas() {
   let todasPalavras = [];
   palavrasBase.forEach(palavra => {
     if (!palavra || palavra.length < 4) return;
-    todasPalavras = todasPalavras.concat(gerarVariaçõesSimples(palavra));
+    todasPalavras = todasPalavras.concat(gerarVariaçõesComSimbolos(palavra));
   });
   // Remove duplicatas e ordena por tamanho
   return [...new Set(todasPalavras)].sort((a, b) => b.length - a.length);
@@ -100,6 +139,22 @@ function gerarPalavrasOfensivasAssincrono(callback) {
     bloqueioAtivo = true;
     if (typeof callback === 'function') callback();
   }, 0);
+}
+
+// --- ADICIONE ESTE BLOCO PARA NODE.JS ---
+if (typeof module !== 'undefined' && module.exports) {
+  // Gera a lista imediatamente para uso no backend
+  palavrasOfensivas = criarExpressoesOfensivas();
+  bloqueioAtivo = true;
+  module.exports = {
+    palavrasOfensivas,
+    bloquearPalavrasOfensivas,
+    verificarConteudoOfensivo,
+    gerarPalavrasOfensivasAssincrono,
+    criarExpressoesOfensivas
+  };
+  // Não execute o código do navegador!
+  return;
 }
 
 // Sistema de detecção melhorado
@@ -187,17 +242,39 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       bloquearPalavrasOfensivas();
     });
 
-    // Adiciona também para elementos dinâmicos
+    // Adiciona também para elementos dinâmicos (inclusive campos de comentários)
     const observer = new MutationObserver(function(mutations) {
       mutations.forEach(function(mutation) {
         mutation.addedNodes.forEach(function(node) {
           if (node.nodeType === 1) {
-            const campos = node.querySelectorAll ? node.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]') : [];
+            // Aplica filtro em todos os inputs/textareas dentro do nó adicionado
+            const campos = node.querySelectorAll
+              ? node.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]')
+              : [];
             campos.forEach(campo => {
               campo.addEventListener('input', function() {
                 if (bloqueioAtivo) verificarConteudoOfensivo(this);
               });
+              campo.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                  if (bloqueioAtivo) verificarConteudoOfensivo(this);
+                }, 10);
+              });
             });
+            // Se o próprio nó for um campo de texto, aplica também
+            if (
+              node.matches &&
+              (node.matches('input[type="text"]') || node.matches('textarea') || node.matches('[contenteditable="true"]'))
+            ) {
+              node.addEventListener('input', function() {
+                if (bloqueioAtivo) verificarConteudoOfensivo(this);
+              });
+              node.addEventListener('paste', function(e) {
+                setTimeout(() => {
+                  if (bloqueioAtivo) verificarConteudoOfensivo(this);
+                }, 10);
+              });
+            }
           }
         });
       });
