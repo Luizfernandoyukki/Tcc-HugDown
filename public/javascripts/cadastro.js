@@ -221,6 +221,11 @@ document.querySelector('input[name="fuso_horario"]').value =
 
     // Enviar formulário
     try {
+      // Desabilita campos dos steps ocultos antes de enviar
+      document.querySelectorAll('.step-section:not(.active) input, .step-section:not(.active) select, .step-section:not(.active) textarea').forEach(el => {
+        el.disabled = true;
+      });
+
       const formData = new FormData(form);
       const response = await fetch('/usuarios', { // <-- Corrigido para /usuarios
         method: 'POST',
@@ -241,6 +246,11 @@ document.querySelector('input[name="fuso_horario"]').value =
     } catch (err) {
       errorAlert.textContent = 'Erro de conexão ou envio: ' + err.message;
       errorAlert.classList.remove('d-none');
+    } finally {
+      // Reabilita todos os campos após submit (para navegação entre steps)
+      document.querySelectorAll('.step-section input, .step-section select, .step-section textarea').forEach(el => {
+        el.disabled = false;
+      });
     }
     };
     form.addEventListener('submit', window._cadastroSubmitHandler);

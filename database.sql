@@ -90,20 +90,20 @@ CREATE TABLE categorias (
     ativo BOOLEAN DEFAULT TRUE,
     INDEX idx_ativo (ativo)
 );
-
-CREATE TABLE secoes (
-    id_secao INT AUTO_INCREMENT PRIMARY KEY,
-    nome_secao VARCHAR(100) NOT NULL,
-    descricao_secao TEXT,
-    icone_secao VARCHAR(50),
-    ordem_exibicao INT DEFAULT 0,
+CREATE TABLE grupos (
+    id_grupo INT AUTO_INCREMENT PRIMARY KEY,
+    id_administrador INT NOT NULL,
+    nome_grupo VARCHAR(100) NOT NULL,
+    descricao_grupo TEXT,
+    foto_grupo VARCHAR(500),
+    tipo_privacidade ENUM('public', 'private', 'secret') DEFAULT 'public',
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ativo BOOLEAN DEFAULT TRUE,
-    id_grupo INT NULL,
-    FOREIGN KEY (id_grupo) REFERENCES grupos(id_grupo) ON DELETE CASCADE,
-    INDEX idx_ordem (ordem_exibicao),
+    FOREIGN KEY (id_administrador) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    INDEX idx_administrador (id_administrador),
+    INDEX idx_tipo_privacidade (tipo_privacidade),
     INDEX idx_ativo (ativo)
 );
-
 CREATE TABLE tags (
     id_tag INT AUTO_INCREMENT PRIMARY KEY,
     nome_tag VARCHAR(100) UNIQUE NOT NULL,
@@ -113,7 +113,6 @@ CREATE TABLE tags (
     INDEX idx_nome_tag (nome_tag),
     INDEX idx_uso_contador (uso_contador)
 );
-
 CREATE TABLE postagens (
     id_postagem INT AUTO_INCREMENT PRIMARY KEY,
     id_autor INT NOT NULL,
@@ -143,6 +142,23 @@ CREATE TABLE postagens (
     INDEX idx_data_criacao (data_criacao),
     INDEX idx_ativo (ativo)
 );
+
+CREATE TABLE secoes (
+    id_secao INT AUTO_INCREMENT PRIMARY KEY,
+    nome_secao VARCHAR(100) NOT NULL,
+    descricao_secao TEXT,
+    icone_secao VARCHAR(50),
+    ordem_exibicao INT DEFAULT 0,
+    ativo BOOLEAN DEFAULT TRUE,
+    id_grupo INT NULL,
+    FOREIGN KEY (id_grupo) REFERENCES grupos(id_grupo) ON DELETE CASCADE,
+    INDEX idx_ordem (ordem_exibicao),
+    INDEX idx_ativo (ativo)
+);
+
+
+
+
 CREATE TABLE postagens_tags (
     id_postagem INT,
     id_tag INT,
@@ -271,20 +287,6 @@ CREATE TABLE participantes_evento (
     INDEX idx_status (status_participacao)
 );
 
-CREATE TABLE grupos (
-    id_grupo INT AUTO_INCREMENT PRIMARY KEY,
-    id_administrador INT NOT NULL,
-    nome_grupo VARCHAR(100) NOT NULL,
-    descricao_grupo TEXT,
-    foto_grupo VARCHAR(500),
-    tipo_privacidade ENUM('public', 'private', 'secret') DEFAULT 'public',
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ativo BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (id_administrador) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
-    INDEX idx_administrador (id_administrador),
-    INDEX idx_tipo_privacidade (tipo_privacidade),
-    INDEX idx_ativo (ativo)
-);
 
 CREATE TABLE membros_grupo (
     id_membro INT AUTO_INCREMENT PRIMARY KEY,
