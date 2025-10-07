@@ -1,7 +1,5 @@
 if (typeof window !== 'undefined' && window._blokdepalavroesLoaded) {
-  // Já carregado, não executa novamente
-  // Não faça nada, apenas não execute o resto do arquivo
-  // ...fim do bloco de proteção...
+ 
 } else {
   if (typeof window !== 'undefined') {
     window._blokdepalavroesLoaded = true;
@@ -67,74 +65,27 @@ const substituicoes = [
   // Adicione mais se quiser
 ];
 
-// Função para gerar variações com substituições
-function gerarVariaçõesComSimbolos(palavra) {
-  if (!palavra || palavra.length < 4) return [];
-  let variacoes = new Set();
-  variacoes.add(palavra);
-
-  // Gera variações trocando cada letra por símbolo
-  function gerarRecursivo(str, idx) {
-    if (idx >= str.length) {
-      variacoes.add(str);
-      return;
-    }
-    let letra = str[idx].toLowerCase();
-    let subs = substituicoes.find(([l]) => l === letra);
-    if (subs) {
-      for (const s of subs[1]) {
-        gerarRecursivo(str.slice(0, idx) + s + str.slice(idx + 1), idx + 1);
-      }
-    }
-    gerarRecursivo(str, idx + 1);
-  }
-  gerarRecursivo(palavra, 0);
-
-  // Adiciona variações com asteriscos, início/fim, etc
-  variacoes.add(palavra.split('').join('*'));
-  variacoes.add('*' + palavra);
-  variacoes.add(palavra + '*');
-  variacoes.add('*' + palavra + '*');
-
-  // Adiciona variações com símbolos no final (ex: put$, put@)
-  if (palavra.length > 3) {
-    variacoes.add(palavra.slice(0, -1) + '$');
-    variacoes.add(palavra.slice(0, -1) + '@');
-    variacoes.add(palavra.slice(0, -1) + '!');
-    variacoes.add(palavra.slice(0, -1) + '1');
-    variacoes.add(palavra.slice(0, -1) + '3');
-    variacoes.add(palavra.slice(0, -1) + '4');
-    variacoes.add(palavra.slice(0, -1) + '0');
-  }
-
-  return Array.from(variacoes);
-}
-
-// Gera variações simples: original, com asteriscos entre letras, com asteriscos no início/fim
-function gerarVariaçõesSimples(palavra) {
+// Função para gerar variações simples e limitar quantidade
+function gerarVariaçõesSimplesLimitada(palavra) {
   if (!palavra || palavra.length < 4) return [];
   const semAcento = palavra.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const entreAsteriscos = palavra.split('').join('*');
   const inicioAsterisco = '*' + palavra;
   const fimAsterisco = palavra + '*';
-  const ambosAsterisco = '*' + palavra + '*';
   return [
     palavra,
     semAcento,
-    entreAsteriscos,
     inicioAsterisco,
-    fimAsterisco,
-    ambosAsterisco
+    fimAsterisco
   ];
 }
 
-// Sistema de detecção otimizado
+// Sistema de detecção otimizado (limitado)
 function criarExpressoesOfensivas() {
-  console.log('[blokdepalavroes.js] Gerando expressões ofensivas...');
+  console.log('[blokdepalavroes.js] Gerando expressões ofensivas (limitado)...');
   let todasPalavras = [];
   palavrasBase.forEach(palavra => {
     if (!palavra || palavra.length < 4) return;
-    todasPalavras = todasPalavras.concat(gerarVariaçõesComSimbolos(palavra));
+    todasPalavras = todasPalavras.concat(gerarVariaçõesSimplesLimitada(palavra));
   });
   // Remove duplicatas e ordena por tamanho
   return [...new Set(todasPalavras)].sort((a, b) => b.length - a.length);

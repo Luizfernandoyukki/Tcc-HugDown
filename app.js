@@ -17,6 +17,14 @@ const notificacaoService = require('./controllers/notificacaoService');
 
 const app = express();
 
+// Log global para promessas não tratadas e exceções
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[GLOBAL ERROR HANDLER][unhandledRejection]', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[GLOBAL ERROR HANDLER][uncaughtException]', err);
+});
+
 // Testa conexão com o banco na inicialização
 sequelize.authenticate()
   .then(() => console.log('✅ Conexão com banco estabelecida com sucesso!'))
@@ -66,14 +74,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/perfis', express.static(path.join(__dirname, 'perfis')));
-app.use('/post', express.static(path.join(__dirname, 'post')));
-app.use('/images', express.static(path.join(__dirname, 'public/images')));
-app.use('/stylesheets', express.static(path.join(__dirname, 'public/stylesheets')));
-// Adicione esta linha para servir a pasta docs como estática
-app.use('/docs', express.static(path.join(__dirname, 'docs')));
-// Adicione esta linha para servir a pasta grupos como estática
-app.use('/grupos', express.static(path.join(__dirname, 'grupos')));
+// Remova estas linhas:
+// app.use('/perfis', express.static(path.join(__dirname, 'perfis')));
+// app.use('/post', express.static(path.join(__dirname, 'post')));
+// app.use('/images', express.static(path.join(__dirname, 'public/images')));
+// app.use('/docs', express.static(path.join(__dirname, 'docs')));
+// app.use('/grupos', express.static(path.join(__dirname, 'grupos')));
 
 // Configuração de sessão
 app.use(session({
@@ -155,13 +161,36 @@ app.use((req, res, next) => {
 
 // Error handler
 app.use((err, req, res, next) => {
+  // Log detalhado de erro global
+  try {
+    console.error('[GLOBAL ERROR HANDLER]');
+    console.error('URL:', req.originalUrl);
+    console.error('Método:', req.method);
+    console.error('Headers:', req.headers);
+    console.error('Body:', req.body);
+    console.error('Error:', err);
+    if (err && err.stack) {
+      console.error('Stack:', err.stack);
+    }
+  } catch (logErr) {
+    // Se der erro no log, mostra mesmo assim
+    console.error('[GLOBAL ERROR HANDLER][LOG ERROR]', logErr);
+  }
   if (res.headersSent) {
     return next(err);
   }
+  // Garante que sempre renderiza a página de erro com detalhes
   res.status(err.status || 500);
   res.render('error', {
-    message: err.message,
-    error: req.app.get('env') === 'development' ? err : {}
+    error: {
+      status: err.status || 500,
+      message: err.message || 'Erro interno do servidor',
+      stack: err.stack || '',
+      type: err.name || '',
+      ...err // inclui outros campos customizados
+    },
+    title: 'Erro',
+    user: req.user
   });
 });
 

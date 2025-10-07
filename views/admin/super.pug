@@ -30,6 +30,11 @@ block content
       | Gerenciamento de Usuários
     .search-box
       input.form-control#userSearch(type="text", placeholder="Buscar usuários...", oninput="filtrarUsuarios()")
+    // Botão de criar categoria (apenas admin)
+    if usuario && usuario.nivel_admin && usuario.nivel_admin !== 'user'
+      a.btn.btn-success.mb-3(href="/categorias/create")
+        i.fas.fa-folder-plus.me-2
+        | Criar Nova Categoria
     h4.mt-4 Usuários do sistema
     .table-scroll(style="max-height:260px; overflow:auto;")
       table.table.table-striped
@@ -38,6 +43,7 @@ block content
             th ID
             th Nome
             th Email
+            th Advertências
             th Ações
         tbody(id="usuariosTable")
           each usuario in usuarios
@@ -45,10 +51,16 @@ block content
               td= usuario.id_usuario
               td= usuario.nome_usuario || ''
               td= usuario.email || ''
-              td= usuario.id_usuario || ''
+              td
+                span.badge.bg-warning= usuario.advertenciasCount || 0
+              td
                 .btn-group
-                  form.d-inline(action=`/admin/super/usuarios/${usuario.id_usuario}/excluir`, method="POST", class="confirm-form", data-confirm="Excluir usuário?")
-                    button.btn.btn-danger.btn-sm.mr-1(type="submit") Excluir
+                  // Botão banir/desbanir
+                  if usuario.bloqueado
+                    button.btn.btn-danger.btn-sm(type="button", data-desbanir-id=usuario.id_usuario) Desbanir
+                  else
+                    button.btn.btn-dark.btn-sm(type="button", data-bloquear-id=usuario.id_usuario) Banir
+                  // Botão advertir
                   button.btn.btn-warning.btn-sm(type="button", data-advertir-id=usuario.id_usuario, data-advertir-nome=usuario.nome_usuario) Advertir
 
     // Seção de Postagens
@@ -134,11 +146,28 @@ block content
             button(type="button", class="close btn-close-modal", data-target="modalAdvertir") &times;
           div.modal-body
             p#modalAdvertirNome
-            textarea.form-control#modalAdvertirMsg(rows="3") Você foi intimado que, caso continue cometendo infrações, sua conta será banida.
+            select.form-select#modalAdvertirMotivo
+              option(value="Spam") Spam
+              option(value="Conteúdo impróprio") Conteúdo impróprio
+              option(value="Assédio") Assédio
+              option(value="Outro") Outro
+            textarea.form-control#modalAdvertirMsg(rows="3" placeholder="Detalhes (opcional)")
           div.modal-footer
             button.btn.btn-secondary(type="button", class="btn-cancel-advertir", data-target="modalAdvertir") Cancelar
-            // removido onclick inline; usa id para JS
             button.btn.btn-warning(type="button", id="btn-enviar-advertencia") Enviar Advertência
+    // Modal banir/desbanir usuário
+    div#modalBanir.modal(style="display:none;")
+      div.modal-dialog
+        div.modal-content
+          div.modal-header
+            h5.modal-title#modalBanirTitulo Banir/Desbanir Usuário
+            button(type="button", class="close btn-close-modal", data-target="modalBanir") &times;
+          div.modal-body
+            p#modalBanirNome
+            textarea.form-control#modalBanirMotivo(rows="3" placeholder="Motivo do banimento/desbanimento")
+          div.modal-footer
+            button.btn.btn-secondary(type="button", class="btn-cancel-banir", data-target="modalBanir") Cancelar
+            button.btn.btn-dark(type="button", id="btn-enviar-banir") Confirmar
 
     // Seção de Verificações
     h2.mt-5
@@ -421,22 +450,52 @@ block content
     function abrirModalAdvertir(id, nome) {
       usuarioAdvertirId = id;
       document.getElementById('modalAdvertirNome').innerText = `Advertir usuário: ${nome}`;
-      document.getElementById('modalAdvertirMsg').value = 'Você foi intimado que, caso continue cometendo infrações, sua conta será banida.';
+      document.getElementById('modalAdvertirMotivo').value = '';
+      document.getElementById('modalAdvertirMsg').value = '';
       document.getElementById('modalAdvertir').style.display = 'block';
     }
     function fecharModalAdvertir() {
       document.getElementById('modalAdvertir').style.display = 'none';
       usuarioAdvertirId = null;
     }
-    function enviarAdvertencia() {
-      const msg = document.getElementById('modalAdvertirMsg').value;
+    document.getElementById('btn-enviar-advertencia').onclick = function() {
+      const motivo = document.getElementById('modalAdvertirMotivo').value;
+      const detalhes = document.getElementById('modalAdvertirMsg').value;
       fetch(`/admin/super/usuarios/${usuarioAdvertirId}/advertir`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mensagem: msg })
+        body: JSON.stringify({ motivo, detalhes })
       }).then(() => {
         alert('Advertência enviada!');
         fecharModalAdvertir();
+        location.reload();
+      });
+    };
+    // Modal banir/desbanir
+    let usuarioBanirId = null;
+    let isDesbanir = false;
+    function abrirModalBanir(id, desbanir) {
+      usuarioBanirId = id;
+      isDesbanir = desbanir;
+      document.getElementById('modalBanirTitulo').innerText = desbanir ? 'Desbanir Usuário' : 'Banir Usuário';
+      document.getElementById('modalBanirNome').innerText = `Usuário ID: ${id}`;
+      document.getElementById('modalBanirMotivo').value = '';
+      document.getElementById('modalBanir').style.display = 'block';
+    }
+    function fecharModalBanir() {
+      document.getElementById('modalBanir').style.display = 'none';
+      usuarioBanirId = null;
+    }
+    document.getElementById('btn-enviar-banir').onclick = function() {
+      const motivo = document.getElementById('modalBanirMotivo').value;
+      fetch(`/admin/super/usuarios/${usuarioBanirId}/${isDesbanir ? 'desbanir' : 'banir'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ motivo })
+      }).then(() => {
+        alert(isDesbanir ? 'Usuário desbanido!' : 'Usuário banido!');
+        fecharModalBanir();
+        location.reload();
       });
     }
 

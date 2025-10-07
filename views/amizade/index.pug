@@ -5,6 +5,9 @@ block styles
 
 block content
   .container.mt-4
+    a.btn.btn-outline-secondary.mb-3.d-flex.align-items-center.justify-content-start(style="max-width:120px;" href="javascript:history.back()")
+      i.fas.fa-arrow-left.me-2
+      | Voltar
     .search-header.mb-4
       h3.text-success
         i.fas.fa-users.me-2
@@ -12,7 +15,6 @@ block content
       .search-box
         input.form-control.search-input(type="text", id="search-usuario", placeholder="Pesquisar por nome de usuário...")
         i.fas.fa-search.search-icon
-    
     .users-grid
       if usuarios && usuarios.length
         each usuario in usuarios
@@ -34,7 +36,7 @@ block content
                   p.user-bio= usuario.biografia.substring(0, 100) + (usuario.biografia.length > 100 ? '...' : '')
               
               .user-actions
-                - const amizade = usuario.amizade // Precisamos adicionar isso no backend
+                - const amizade = usuario.amizade
                 if amizade
                   case amizade.status_amizade
                     when 'accepted'
@@ -57,16 +59,15 @@ block content
                     when 'rejected'
                       button.btn.btn-outline-secondary.btn-sm.disabled Recusado
                 else
-                  form(action="/amizades/solicitar", method="POST")
+                  form.amizade-form(action="/amizades/solicitar", method="POST")
                     input(type="hidden", name="id_destinatario", value=usuario.id_usuario)
                     button.btn.btn-primary.btn-sm(type="submit")
                       i.fas.fa-user-plus.me-2
                       | Adicionar Amigo
       else
-        .empty-state
+        .empty-state#empty-state
           i.fas.fa-users.fa-3x.mb-3
           p.text-muted Nenhum usuário encontrado.
-
 block scripts
   script.
     window.usuarios = !{JSON.stringify(usuarios)};
@@ -77,13 +78,34 @@ block scripts
       if (!input) return;
       input.addEventListener('input', function() {
         const termo = input.value.trim().toLowerCase();
+        let algum = false;
         document.querySelectorAll('.user-card').forEach(card => {
           const nome = card.querySelector('.user-name')?.textContent.trim().toLowerCase() || '';
-          card.style.display = nome.includes(termo) ? '' : 'none';
+          const show = nome.includes(termo);
+          card.style.display = show ? '' : 'none';
+          if (show) algum = true;
         });
+        document.getElementById('empty-state').style.display = algum ? 'none' : '';
       });
-    });
-          tr.style.display = nome.includes(termo) ? '' : 'none';
+      // Envio de amizade via AJAX para não redirecionar
+      document.querySelectorAll('form.amizade-form').forEach(form => {
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const btn = form.querySelector('button[type="submit"]');
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-clock me-2"></i>Solicitação Enviada';
+          try {
+            const res = await fetch(form.action, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams(new FormData(form))
+            });
+            // Não redireciona, apenas atualiza botão
+          } catch (err) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Adicionar Amigo';
+            alert('Erro ao enviar solicitação.');
+          }
         });
       });
     });

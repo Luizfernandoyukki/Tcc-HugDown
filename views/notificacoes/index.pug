@@ -14,18 +14,25 @@ block content
         i.fas.fa-inbox.d-block.mb-3.fa-2x
         | Nenhuma notificação encontrada.
     else
-      ul.list-group
+      .mb-3
+        label.form-label(for="filtroTipoNotificacao") Filtrar por tipo:
+        select.form-select#filtroTipoNotificacao
+          option(value="") Todas
+          option(value="friendship") Pedidos de amizade
+          option(value="advertencia") Advertências
+          option(value="like") Curtidas
+          option(value="comment") Comentários
+          option(value="event") Eventos
+          option(value="system") Sistema
+      ul.list-group#lista-notificacoes
         each n in notificacoes
-          li.list-group-item.d-flex.flex-wrap(
-            class=n.lida ? '' : 'list-group-item-warning'
-          )
+          li.list-group-item.d-flex.flex-wrap(data-tipo=n.tipo_notificacao class=n.lida ? '' : 'list-group-item-warning')
             .notification-content
               strong= n.titulo
               span.text-muted= n.mensagem
               small.text-muted
                 i.far.fa-clock.me-1
                 = new Date(n.data_criacao).toLocaleString('pt-BR')
-            
             .notification-actions
               if n.tipo_notificacao === 'friendship' && !n.lida && n.id_amizade
                 form.d-inline-block.me-2(action=`/amizades/${n.id_amizade}/aceitar`, method="POST")
@@ -36,7 +43,6 @@ block content
                   button.btn.btn-sm.btn-danger(type="submit")
                     i.fas.fa-times.me-1
                     | Recusar
-              
               else if n.tipo_notificacao === 'group_invite' && !n.lida && n.id_grupo
                 form.d-inline-block.me-2(action=`/grupos/${n.id_grupo}/aceitar-convite`, method="POST")
                   button.btn.btn-sm.btn-success(type="submit")
@@ -46,9 +52,19 @@ block content
                   button.btn.btn-sm.btn-danger(type="submit")
                     i.fas.fa-times.me-1
                     | Recusar
-              
               else if !n.lida
                 form.d-inline-block(action=`/notificacoes/${n.id_notificacao}/ler` method="POST")
                   button.btn.btn-sm.btn-outline-success(type="submit")
                     i.fas.fa-check.me-1
                     | Marcar como lida
+    script.
+      document.getElementById('filtroTipoNotificacao').addEventListener('change', function() {
+        const tipo = this.value;
+        document.querySelectorAll('#lista-notificacoes li').forEach(li => {
+          if (!tipo || li.getAttribute('data-tipo') === tipo) {
+            li.style.display = '';
+          } else {
+            li.style.display = 'none';
+          }
+        });
+      });

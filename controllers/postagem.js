@@ -75,60 +75,23 @@ exports.buscarPorId = async (req, resOrOptions) => {
 // Criar nova postagem
 exports.criar = async (req, res) => {
   try {
-    req._postagemCriarChamadas = (req._postagemCriarChamadas || 0) + 1;
-    console.log(`[POSTAGEM][CRIAR] chamada #${req._postagemCriarChamadas} para userId=${req.session.userId}`);
-    console.log('[LOG] postagemController.criar chamado. Body:', req.body, 'File:', req.file);
-    // Verifica se o usuário está logado
-    if (!req.session || !req.session.userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado. Faça login para criar postagens.' });
-    }
-    // Monta dados da postagem
-    const dados = {
-      id_autor: req.session.userId,
-      id_categoria: req.body.id_categoria,
-      tipo_postagem: req.body.tipo_postagem,
-      conteudo: req.body.conteudo,
-      titulo: req.body.titulo,
-      resumo: req.body.resumo,
-      artigo_cientifico: req.body.artigo_cientifico === 'true',
-      // Salva url_midia e tipo_midia se houver arquivo
-      url_midia: (req.body.tipo_postagem === 'photo' || req.body.tipo_postagem === 'video') && req.file
-        ? '/post/' + req.file.filename
-        : null,
-      tipo_midia: req.file ? req.file.mimetype : null,
-      latitude: req.body.latitude || null,
-      longitude: req.body.longitude || null
-    };
-
-    // Cria a postagem
-    const novaPostagem = await Postagem.create(dados);
-
-    // Relaciona tags (N para N) - use 'tags' e não 'tag'
-    if (req.body.tags || req.body['tags[]']) {
-      let tagsArray = req.body.tags || req.body['tags[]'];
-      if (!Array.isArray(tagsArray)) tagsArray = [tagsArray];
-      await novaPostagem.setTags(tagsArray);
+    // Garante que id_autor seja do usuário logado
+    const id_autor = req.session?.userId || (res.locals.usuario && res.locals.usuario.id_usuario);
+    if (!id_autor) {
+      return res.status(401).json({ error: 'Usuário não autenticado.' });
     }
 
-    // Notificar amigos (busque todos amigos do autor e envie notificação)
-    if (typeof buscarAmigosDoUsuario === 'function') {
-      const amigos = await buscarAmigosDoUsuario(req.session.userId);
-      for (const amigo of amigos) {
-        await criarNotificacao({
-          id_usuario: amigo.id_usuario,
-          tipo_notificacao: 'post',
-          titulo: 'Novo post de um amigo',
-          mensagem: 'Seu amigo postou algo novo.'
-        });
-      }
-    } else {
-      console.warn('[WARN] Função buscarAmigosDoUsuario não está definida. Nenhuma notificação enviada.');
+    // Corrige caminho da imagem se houver arquivo
+    if (req.file && req.file.filename) {
+      req.body.url_midia = '/images/post/' + req.file.filename;
     }
 
+    // Garante id_autor no body
+    req.body.id_autor = id_autor;
+
+    const novaPostagem = await Postagem.create(req.body);
     res.status(201).json(novaPostagem);
   } catch (err) {
-    console.error('[ERRO] Erro ao criar postagem:', err);
-    // Log detalhado para debug
     res.status(500).json({ error: 'Erro ao criar postagem: ' + err.message });
   }
 };
@@ -206,6 +169,53 @@ exports.listarPorCategoria = async (req, options = {}) => {
   return posts;
 };
 
+// Listar postagens por categoria e tag
+exports.listarPorCategoriaETag = async (req, options = {}) => {
+  const id_categoria = options.id_categoria || (req.query && req.query.categoria);
+  const id_tag = options.id_tag || (req.query && req.query.tag);
+  if (!id_categoria || !id_tag) return [];
+  const posts = await Postagem.findAll({
+    where: { id_categoria },
+    include: [
+      { model: Usuario, as: 'autor' },
+      { model: Categoria, as: 'categoria' },
+      {
+        model: Tag,
+        as: 'tags',
+        where: { id_tag }
+      }
+    ]
+  });
+  if (options.raw) return posts;
+  if (options.json) return options.json(posts);
+  return posts;
+};
+
+// Listar postagens por tag
+exports.listarPorTag = async (req, options = {}) => {
+  const id_tag = options.id_tag || (req.query && req.query.tag);
+  if (!id_tag) return [];
+  const posts = await Postagem.findAll({
+    include: [
+      { model: Usuario, as: 'autor' },
+      { model: Categoria, as: 'categoria' },
+      {
+        model: Tag,
+        as: 'tags',
+        where: { id_tag }
+      }
+    ]
+  });
+  if (options.raw) return posts;
+  if (options.json) return options.json(posts);
+  return posts;
+};
+
+// Buscar postagem por título e autor
+exports.buscarPorTituloAutor = async (titulo, id_autor) => {
+  const { Postagem } = require('../models');
+  return await Postagem.findOne({ where: { titulo, id_autor } });
+};
 // Listar postagens por categoria e tag
 exports.listarPorCategoriaETag = async (req, options = {}) => {
   const id_categoria = options.id_categoria || (req.query && req.query.categoria);

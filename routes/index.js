@@ -99,6 +99,9 @@ router.use('/categorias-traducao', require('./categoriasTraducao'));
 router.use('/tags-traducao', require('./tagsTraducao'));
 router.use('/esqueciminhasenha', require('./esqueciminhasenha'));
 router.use('/feed', require('./feed'));
+router.use('/advertencias', require('./advertencias'));
+router.use('/report-usuario', require('./reportUsuario'));
+router.use('/report-amigo', require('./reportAmigo'));
 
 // Função utilitária para converter lat/lng em endereço
 async function getLocationFromLatLng(lat, lng) {

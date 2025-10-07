@@ -19,16 +19,24 @@ function contemPalavraProibida(texto) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Preencher lista de tags existentes
+  // Preencher lista de tags existentes (apenas do usuário)
   const tagsUl = document.getElementById('tags-existentes');
   if (tagsUl && window.tagsExistentes.length) {
     tagsUl.innerHTML = '';
-    window.tagsExistentes.forEach(tag => {
-      const li = document.createElement('li');
-      li.className = 'list-group-item';
-      li.textContent = tag.nome_tag;
-      tagsUl.appendChild(li);
-    });
+    window.tagsExistentes
+      .filter(tag => tag.id_usuario === window.usuario.id_usuario) // só minhas tags
+      .forEach(tag => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = tag.nome_tag;
+        // Adiciona botão de deletar só para o dono
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-danger btn-sm ms-2 delete-tag-btn';
+        btn.textContent = 'Excluir';
+        btn.onclick = () => deletarTag(tag.nome_tag, li);
+        li.appendChild(btn);
+        tagsUl.appendChild(li);
+      });
   }
 
   // Validação de nome único e palavras proibidas

@@ -9,26 +9,61 @@ block content
     .container
       .row.align-items-center
         .col-md-8
+          .d-flex.align-items-center.gap-2.mb-3
+            a.btn.btn-outline-secondary.d-flex.align-items-center.justify-content-start(
+              style="max-width:120px;" href="/grupos/show")
+              i.fas.fa-arrow-left.me-2
+              | Voltar
+            if usuario && grupo.membrosFormatados && grupo.membrosFormatados.find(m => m.id === usuario.id_usuario)
+              a.btn.btn-warning.d-flex.align-items-center.justify-content-start(
+                style="max-width:160px;" data-bs-toggle="modal" data-bs-target="#modalConfigGrupo")
+                span.fs-4.me-2(style="line-height:1;") ⚙️
+                | Configurações
+        .col-md-4.text-end
+          // Remova o botão de configurações duplicado daqui
+      .row.align-items-center
+        .col-md-8
           .d-flex.align-items-center.gap-4
             if grupo.foto_grupo
               img.grupo-avatar(src=grupo.foto_grupo, alt=grupo.nome_grupo)
             else
               img.grupo-avatar(src="/images/default-group.png", alt="Grupo padrão")
-            
             .grupo-info
               h2.mb-2= grupo.nome_grupo
               p.text-muted.mb-0= grupo.descricao_grupo
               .badge.bg-primary.mt-2
                 i.fas.fa-lock.me-2
                 = grupo.tipo_privacidade
-
         .col-md-4.text-end
-          if usuario && grupo.membrosFormatados
-            - const meuPapel = grupo.membrosFormatados.find(m => m.id === usuario.id_usuario)
+          // Remova o botão de configurações duplicado daqui
+  // Modal de configurações do grupo (fora do bloco de scripts!)
+  if usuario && grupo.membrosFormatados && grupo.membrosFormatados.find(m => m.id === usuario.id_usuario)
+    - const meuPapel = grupo.membrosFormatados.find(m => m.id === usuario.id_usuario)
+    .modal.fade#modalConfigGrupo(tabindex="-1", aria-labelledby="modalConfigGrupoLabel", aria-hidden="true")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h5.modal-title#modalConfigGrupoLabel Configurações do Grupo
+            button.btn-close(type="button", data-bs-dismiss="modal", aria-label="Fechar")
+          .modal-body
             if meuPapel && meuPapel.isAdmin
-              a.btn.btn-outline-primary(href=`/grupos/${grupo.id_grupo}/configuracoes`)
-                i.fas.fa-cog.me-2
-                | Configurações
+              .mb-3
+                label.text-muted Gerar link de convite:
+                input.form-control(type="text", readonly, value=`${window.location.origin}/grupos/${grupo.id_grupo}/participar`)
+                small.text-muted Copie e envie para quem quiser adicionar. Qualquer pessoa que acessar esse link se tornará membro, mesmo em grupo privado.
+            .mb-3
+              form(action=`/admin/super/grupos/reportar`, method="POST")
+                input(type="hidden", name="id_grupo", value=grupo.id_grupo)
+                button.btn.btn-danger.w-100(type="submit") Denunciar Grupo
+            .mb-3
+              form(action=`/grupos/${grupo.id_grupo}/sair`, method="POST")
+                button.btn.btn-outline-warning.w-100(type="submit") Sair do Grupo
+            if meuPapel && meuPapel.isAdmin
+              hr
+              form(action=`/grupos/${grupo.id_grupo}/excluir`, method="GET")
+                button.btn.btn-outline-danger.w-100(type="submit") Excluir Grupo
+          .modal-footer
+            button.btn.btn-secondary(type="button", data-bs-dismiss="modal") Fechar
 
   .container.mt-4
     .row
@@ -65,12 +100,7 @@ block content
                         source(src=post.url_midia)
 
                 .post-actions.mt-3
-                  button.btn.btn-sm.btn-light.me-2
-                    i.far.fa-heart.me-1
-                    | Curtir
-                  button.btn.btn-sm.btn-light
-                    i.far.fa-comment.me-1
-                    | Comentar
+                  // Removido: botões de curtir e comentar
         else
           .alert.alert-info.text-center
             i.fas.fa-info-circle.me-2
@@ -80,9 +110,11 @@ block content
       .col-lg-4
         .card.sticky-top.members-card(style="top: 1rem;")
           .card-header.bg-transparent
-            h5.mb-0 
-              i.fas.fa-users.me-2
-              | Membros do Grupo
+            .d-flex.align-items-center.justify-content-between
+              h5.mb-0 
+                i.fas.fa-users.me-2
+                | Membros do Grupo
+              // Remova o botão de configurações da sidebar
           .card-body.p-0
             .list-group.list-group-flush
               each membro in grupo.membrosFormatados
@@ -98,5 +130,33 @@ block content
                         else
                           | Membro desde #{new Date(membro.dataEntrada).toLocaleDateString('pt-BR')}
 
+
 block scripts
+  // Remova o script que insere o botão de configurações dinamicamente
+  script(src="/javascripts/grupos/index.js")
+block scripts
+  script.
+    // Define o objeto do usuário logado no JS
+    window.usuarioLogadoObj = !{JSON.stringify(usuario || null)};
+    window.grupoMembrosFormatados = !{JSON.stringify(grupo && grupo.membrosFormatados ? grupo.membrosFormatados : [])};
+    // Renderiza o botão de configurações ao lado do nome do grupo se o usuário for membro
+    (function() {
+      const usuario = window.usuarioLogadoObj;
+      const membros = window.grupoMembrosFormatados;
+      if (!usuario || !usuario.id_usuario || !Array.isArray(membros)) return;
+      const ehMembro = membros.some(m => m.id === usuario.id_usuario);
+      if (!ehMembro) return;
+      const placeholder = document.getElementById('btn-config-grupo-placeholder');
+      if (!placeholder) return;
+      // Cria o botão
+      const btn = document.createElement('a');
+      btn.className = 'btn btn-outline-secondary ms-2 d-inline-flex align-items-center justify-content-center';
+      btn.style.position = 'relative';
+      btn.style.zIndex = 2;
+      btn.style.verticalAlign = 'middle';
+      btn.setAttribute('data-bs-toggle', 'modal');
+      btn.setAttribute('data-bs-target', '#modalConfigGrupo');
+      btn.innerHTML = '<span class="fs-4 me-2" style="line-height:1;">⚙️</span>Configurações';
+      placeholder.appendChild(btn);
+    })();
   script(src="/javascripts/grupos/index.js")

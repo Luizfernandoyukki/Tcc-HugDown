@@ -1,6 +1,9 @@
 extends layout
 
 block content
+  a.btn.btn-outline-secondary.mb-3.d-flex.align-items-center.justify-content-start(style="max-width:120px;" href="/")
+    i.fas.fa-arrow-left.me-2
+    | Voltar
   link(rel="stylesheet", href="/stylesheets/feed.css")
   script(src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")
 
@@ -97,7 +100,7 @@ block content
                     span.curtidas-count(style="margin-left:4px;")= post.curtidas || 0
                   .visualizacoes-indicador.d-flex.align-items-center
                     i.fa.fa-wifi(style="color:#007bff;font-size:1.2rem;")
-                    span(style="margin-left:4px;")= post.visualizacoes || 0
+                    span.visualizacoes-count(style="margin-left:4px;")= post.visualizacoes || 0
 
       .comentarios-aba#comentarios-aba
         .comentarios-list-aba(style="padding: 0.5rem 0;")

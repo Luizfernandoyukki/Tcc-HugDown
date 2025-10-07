@@ -28,18 +28,22 @@ exports.buscarPorId = async (req, res) => {
 // Criar novo grupo
 exports.criar = async (req, res) => {
   try {
+    // Se houver foto do grupo, espera caminho relativo vindo do front
+    let foto_grupo = null;
+    if (req.body.foto_grupo) {
+      foto_grupo = '/images/grupos/' + req.body.foto_grupo;
+    }
     const novoGrupo = await Grupo.create({
       nome_grupo: req.body.nome_grupo,
-      descricao_grupo: req.body.descricao_grupo,
-      foto_grupo: req.body.foto_grupo, // ajustar se for upload real
+      descricao_grupo: req.body.descricao_grupo || null,
+      foto_grupo,
       tipo_privacidade: req.body.tipo_privacidade,
-      id_administrador: req.user.id_usuario,
-      max_participantes: req.body.max_participantes || null,
-      id_categoria: req.body.id_categoria || null
+      id_administrador: req.body.id_administrador,
+      ativo: true
     });
-    return res.redirect('/grupos');
+    res.status(201).json(novoGrupo);
   } catch (err) {
-    res.status(500).send('Erro ao criar grupo: ' + err.message);
+    res.status(500).json({ error: 'Erro ao criar grupo: ' + err.message });
   }
 };
 

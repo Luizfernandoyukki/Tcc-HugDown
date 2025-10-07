@@ -159,4 +159,8 @@ block scripts
   script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js")
   script.
     window.bloquearPalavroes = true;
- 
+    if (window.usuarioLogado) {
+      if (window.Notification && Notification.permission !== 'granted') {
+        Notification.requestPermission();
+      }
+    }

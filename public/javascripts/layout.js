@@ -34,6 +34,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.bloquearPalavrasOfensivas && typeof window.bloquearPalavrasOfensivas === 'function') {
       window.bloquearPalavrasOfensivas();
     }
+    fetch('/api/notificacoes/nao-lidas/count')
+    .then(res => res.json())
+    .then(data => {
+      const indicator = document.querySelector('.notification-indicator');
+      if (indicator && data.count > 0) {
+        indicator.textContent = data.count;
+        indicator.style.display = 'block';
+      } else if (indicator) {
+        indicator.style.display = 'none';
+      }
+    });
 });
 
 // Sistema de pesquisa na página
@@ -69,7 +80,6 @@ function searchInContent(term) {
     const main = document.querySelector('.site-main');
     if (!main) return;
 
-    // walker é declarado aqui (dentro da função) para evitar ReferenceError externo
     const walker = document.createTreeWalker(
         main,
         NodeFilter.SHOW_TEXT,

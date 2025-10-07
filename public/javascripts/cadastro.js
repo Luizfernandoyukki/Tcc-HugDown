@@ -146,13 +146,23 @@ document.addEventListener('DOMContentLoaded', function() {
       errorAlert.classList.add('d-none');
       errorAlert.innerHTML = '';
 
-      // Filtro de palavrões (usa blokdepalavroes.js)
+      // Filtro de palavrões (usa blokdepalavroes.js) com debounce
+      let debounceTimeout;
       const camposTexto = form.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
+      camposTexto.forEach(campo => {
+        campo.addEventListener('input', function() {
+          clearTimeout(debounceTimeout);
+          debounceTimeout = setTimeout(() => {
+            if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
+              window.verificarConteudoOfensivo(campo);
+            }
+          }, 200); // 200ms debounce
+        });
+      });
       let encontrouOfensiva = false;
       camposTexto.forEach(campo => {
         if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
           window.verificarConteudoOfensivo(campo);
-          // Se o campo foi modificado, considera que havia palavrão
           if ((campo.value && campo.value.includes('***')) || (campo.textContent && campo.textContent.includes('***'))) {
             encontrouOfensiva = true;
           }
@@ -228,19 +238,51 @@ document.querySelector('input[name="fuso_horario"]').value =
       return;
     }
 
+    // HABILITA TODOS OS CAMPOS ANTES DE ENVIAR
+    document.querySelectorAll('.step-section input, .step-section select, .step-section textarea').forEach(el => {
+      el.disabled = false;
+    });
+
     // Enviar formulário
     try {
-      // Desabilita campos dos steps ocultos antes de enviar
-      document.querySelectorAll('.step-section:not(.active) input, .step-section:not(.active) select, .step-section:not(.active) textarea').forEach(el => {
-        el.disabled = true;
-      });
-
       const formData = new FormData(form);
-      const response = await fetch('/usuarios', { // <-- Corrigido para /usuarios
+
+      // LOG dos dados enviados
+      const dadosEnviados = {};
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          dadosEnviados[key] = value.name;
+        } else {
+          dadosEnviados[key] = value;
+        }
+      }
+      console.log('[CADASTRO][FRONTEND][DADOS ENVIADOS]', dadosEnviados);
+
+      
+      const response = await fetch('/usuarios', {
         method: 'POST',
         body: formData
       });
-      const data = await response.json();
+
+      let data;
+      let isJson = response.headers.get('content-type')?.includes('application/json');
+      if (isJson) {
+        data = await response.json();
+      } else {
+        // Se não for JSON, tenta extrair mensagem de erro do HTML
+        const html = await response.text();
+        // Tenta extrair mensagem de erro do HTML (simples)
+        const match = html.match(/<div[^>]*id=["']errorAlert["'][^>]*>(.*?)<\/div>/i);
+        if (match && match[1]) {
+          errorAlert.innerHTML = match[1];
+          errorAlert.classList.remove('d-none');
+          return;
+        }
+        // Se não encontrar, mostra erro genérico
+        errorAlert.textContent = 'Erro ao realizar cadastro. Verifique os campos e tente novamente.';
+        errorAlert.classList.remove('d-none');
+        return;
+      }
 
       if (data.success) {
         let message = 'Cadastro realizado com sucesso!';

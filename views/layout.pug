@@ -26,10 +26,11 @@ html
               i.fas.fa-search
           // força layout horizontal e center para itens do nav
           ul.navbar-nav.ms-auto.flex-row.align-items-center.gap-3
-            li.nav-item.notification-wrapper
+            li.nav-item.notification-wrapper.position-relative
               a.nav-link.p-2.acao-restrita(href='/notificacoes', title='Notificações')
-                .notification-indicator
                 img#icon-notificacao.menu-icon(src='/images/notificação.png', alt='Notificações')
+                .notification-indicator.position-absolute.top-0.end-0.bg-danger.rounded-circle(style="width:18px;height:18px;z-index:2;")
+                  // Este elemento será preenchido via JS com o número de notificações não lidas
             li.nav-item
               a.nav-link.p-2.acao-restrita(href='/postagens', title='Nova postagem')
                 img#icon-mais.menu-icon(src='/images/mais.png', alt='Nova postagem')

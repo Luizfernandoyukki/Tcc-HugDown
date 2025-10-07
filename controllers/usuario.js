@@ -38,8 +38,36 @@ exports.buscarPorId = async (req, res) => {
 // Criar novo usuário
 exports.criar = async (req, res) => {
   try {
+    // Log dos dados recebidos (detalhado)
+    console.log('[CADASTRO][REQ.METHOD]', req.method);
+    console.log('[CADASTRO][REQ.HEADERS]', req.headers);
+    console.log('[CADASTRO][REQ.BODY]', req.body);
+    if (req.file) {
+      console.log('[CADASTRO][REQ.FILE]', req.file);
+    }
+    if (req.files) {
+      console.log('[CADASTRO][REQ.FILES]', req.files);
+    }
+    console.log('[CADASTRO][CHECKBOX][profissional_saude]:', req.body.profissional_saude);
+
+    // Log individual de cada campo
+    [
+      'email', 'nome_real', 'sobrenome_real', 'nome_usuario', 'telefone', 'endereco',
+      'cidade', 'estado', 'cep', 'pais', 'genero', 'data_nascimento', 'senha',
+      'idioma_preferido', 'biografia', 'fuso_horario', 'profissional_saude',
+      'tipo_registro', 'numero_registro', 'uf_registro', 'instituicao', 'especialidade'
+    ].forEach(campo => {
+      console.log(`[CADASTRO][CAMPO] ${campo}:`, req.body[campo]);
+    });
+
+    // Se não chegou nenhum dado, loga e retorna erro amigável
+    if (!req.body || Object.keys(req.body).length === 0) {
+      console.error('[CADASTRO][ERRO] Nenhum dado recebido no req.body');
+      return res.status(400).render('cadastro', { error: 'Nenhum dado recebido. Verifique o formulário e tente novamente.' });
+    }
+
     // Extrai os dados do body ou do FormData
-    const {
+    let {
       email,
       nome_real,
       sobrenome_real,
@@ -54,27 +82,35 @@ exports.criar = async (req, res) => {
       data_nascimento,
       senha,
       idioma_preferido,
-      verificado,
-      ativo,
       biografia,
-      fuso_horario // <-- Adicione aqui
+      fuso_horario
     } = req.body;
 
-    // Validação dos campos obrigatórios
+    // Busca do sistema se não vier do formulário
+    if (!idioma_preferido) idioma_preferido = req.headers['accept-language']?.split(',')[0] || 'pt-BR';
+    if (!fuso_horario) fuso_horario = Intl?.DateTimeFormat?.().resolvedOptions?.().timeZone || 'America/Sao_Paulo';
+    if (!pais) pais = 'Brasil';
+
+    // Remove máscara do telefone e cep se vierem mascarados
+    if (telefone) telefone = telefone.replace(/\D/g, '');
+    if (cep) cep = cep.replace(/\D/g, '');
+
+    // Validação dos campos obrigatórios (apenas os do formulário principal)
     if (!email || !nome_real || !sobrenome_real || !nome_usuario || !telefone || !endereco || !cidade || !estado || !cep || !senha || !genero || !data_nascimento || !idioma_preferido || !pais) {
-      return res.status(400).json({ error: 'Preencha todos os campos obrigatórios.' });
+      console.log('[CADASTRO][ERRO] Campos obrigatórios ausentes:', {
+        email, nome_real, sobrenome_real, nome_usuario, telefone, endereco, cidade, estado, cep, senha, genero, data_nascimento, idioma_preferido, pais
+      });
+      return res.render('cadastro', { error: 'Preencha todos os campos obrigatórios.' });
     }
 
     // Criptografa a senha antes de salvar
     const saltRounds = 10;
     const senha_hash = await bcrypt.hash(senha, saltRounds);
 
-    // Foto de perfil (se veio via upload)
+    // Foto de perfil (agora espera caminho relativo vindo do front)
     let foto_perfil = null;
-    if (req.files && req.files.foto_perfil && req.files.foto_perfil[0]) {
-      foto_perfil = '/perfis/' + req.files.foto_perfil[0].filename; // Caminho relativo para servir via express.static
-    } else if (req.body.foto_perfil) {
-      foto_perfil = req.body.foto_perfil;
+    if (req.file) {
+      foto_perfil = '/images/perfis/' + req.file.filename;
     }
 
     const novoUsuario = await Usuario.create({
@@ -96,15 +132,15 @@ exports.criar = async (req, res) => {
       ativo: true,
       foto_perfil,
       biografia,
-      fuso_horario // <-- Salva aqui
+      fuso_horario
     });
 
-    // Se for profissional de saúde, cria documento de verificação (NÃO cria ProfissionalSaude ainda)
-    if (req.body.profissional_saude) {
+    // Documento de verificação (somente se profissional_saude marcado)
+    if (req.body.profissional_saude === '1') {
       const { DocumentoVerificacao } = require('../models');
       let caminho_arquivo = null;
-      if (req.files && req.files.documento_comprobatorio && req.files.documento_comprobatorio[0]) {
-        caminho_arquivo = '/docs/' + req.files.documento_comprobatorio[0].filename;
+      if (req.body.documento_comprobatorio) {
+        caminho_arquivo = '/images/docs/' + req.body.documento_comprobatorio;
       }
       await DocumentoVerificacao.create({
         id_usuario: novoUsuario.id_usuario,
@@ -117,14 +153,18 @@ exports.criar = async (req, res) => {
       });
     }
 
-    res.redirect('/');
+    // Cadastro realizado com sucesso
+    return res.redirect('/login');
   } catch (err) {
     // Tratamento de erro de validação do Sequelize
+    let mensagemErro = 'Erro ao criar usuário';
     if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
-      const mensagens = err.errors ? err.errors.map(e => e.message).join('; ') : err.message;
-      return res.status(400).json({ error: 'Erro de validação: ' + mensagens });
+      mensagemErro = err.errors ? err.errors.map(e => e.message).join('; ') : err.message;
+    } else if (err.message) {
+      mensagemErro = err.message;
     }
-    res.status(500).json({ error: 'Erro ao criar usuário: ' + err.message });
+    console.log('[CADASTRO][ERRO]', mensagemErro);
+    return res.status(500).render('cadastro', { error: mensagemErro });
   }
 };
 
@@ -135,24 +175,12 @@ exports.atualizar = async (req, res) => {
     const usuario = await Usuario.findByPk(id);
     if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
 
-    // Se houver upload de foto_perfil via multer, atualiza o caminho
-    if (req.files && req.files.foto_perfil && req.files.foto_perfil[0]) {
-      // Remove a foto antiga se existir e for um arquivo local em /perfis
-      try {
-        const antiga = usuario.foto_perfil;
-        if (antiga && (antiga.startsWith('/perfis') || antiga.startsWith('perfis'))) {
-          const antigaPath = path.join(__dirname, '..', antiga.replace(/^\//, ''));
-          if (fs.existsSync(antigaPath)) fs.unlinkSync(antigaPath);
-        }
-      } catch (err) {
-        console.warn('[USUARIO][ATUALIZAR] não foi possível remover foto antiga:', err.message);
-      }
-      const nova = '/perfis/' + req.files.foto_perfil[0].filename;
-      req.body.foto_perfil = nova;
+    // Foto de perfil (espera caminho relativo vindo do front)
+    if (req.body.foto_perfil) {
+      req.body.foto_perfil = '/images/perfis/' + req.body.foto_perfil;
     }
 
     await usuario.update(req.body);
-    // retorna objeto atualizado
     res.json(usuario);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao atualizar usuário: ' + err.message });

@@ -10,7 +10,7 @@ block content
         .card.shadow-sm
           .card-body
             h4.mb-4 Editar Perfil
-            form#form-usuario-edit(data-usuario-id=usuario.id_usuario, method="post", enctype="multipart/form-data")
+            form#form-edit(method="POST", action=`/usuarios/${usuario.id_usuario}?_method=PUT`, enctype="multipart/form-data")
               .mb-3
                 label.form-label(for="nome_usuario") Nome de usuário
                 input.form-control(type="text", name="nome_usuario", id="nome_usuario", value=usuario.nome_usuario)
@@ -25,6 +25,10 @@ block content
                 input.form-control(type="file", name="foto_perfil", id="foto_perfil")
                 if usuario.foto_perfil
                   img.mt-2.rounded-circle(src=usuario.foto_perfil, alt="Foto atual", width="80", height="80")
+              if error
+                .alert.alert-danger.mt-3 #{error}
+              if msg
+                .alert.alert-success.mt-3 #{msg}
               button.btn.btn-success(type="submit") Salvar alterações
 
 block scripts

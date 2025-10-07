@@ -5,6 +5,10 @@ block styles
 
 block content
   .container.mt-5
+    a.btn.btn-outline-secondary.mb-3.d-flex.align-items-center.justify-content-start(
+      style="max-width:120px;" href=`/usuarios/index/${usuario && usuario.id_usuario ? usuario.id_usuario : ''}`)
+      i.fas.fa-arrow-left.me-2
+      | Voltar
     h2.mb-4
       i.fas.fa-cog.me-2
       | Configurações da Conta

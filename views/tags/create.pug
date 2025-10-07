@@ -5,6 +5,9 @@ block styles
 
 block content
   .container.mt-5.mb-5
+    a.btn.btn-outline-secondary.mb-3.d-flex.align-items-center.justify-content-start(style="max-width:120px;" href="javascript:history.back()")
+      i.fas.fa-arrow-left.me-2
+      | Voltar
     .row.justify-content-center
       .col-12.col-md-8
         .card.shadow-sm
@@ -16,7 +19,7 @@ block content
                 | Tag criada com sucesso!
                 button.btn-close(type="button", data-bs-dismiss="alert", aria-label="Close")
             p.text-muted.text-center
-              | Crie uma nova tag para organizar suas postagens. O nome deve ser único e não pode conter palavras ofensivas.
+              | Crie uma nova tag para organizar suas postagens. O nome deve ser único e não pode conter palavras ofensivas, e não pode ser deletado, caso denunciaado poderá ocorrer advertência
 
             form#form-tag-create(method="POST", action="/tags")
               .mb-3

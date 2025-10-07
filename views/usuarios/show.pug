@@ -40,6 +40,31 @@ block content
                     button.btn.btn-dark.mt-2(type="button" disabled) Usuário bloqueado
                   else
                     button.btn.btn-primary.mt-2(type="submit") Enviar solicitação de amizade
+              // Botão de denunciar perfil (não atrapalha layout)
+              if !(!locals.usuario || usuario.id_usuario === locals.usuario.id_usuario)
+                button.btn.btn-outline-danger.mt-2.ms-2(type="button", data-bs-toggle="modal", data-bs-target="#modalDenunciarPerfil")
+                  i.fas.fa-flag.me-1
+                  | Denunciar Perfil
+            // Modal de denúncia de perfil
+            .modal.fade#modalDenunciarPerfil(tabindex="-1", aria-labelledby="modalDenunciarPerfilLabel", aria-hidden="true")
+              .modal-dialog
+                .modal-content
+                  .modal-header
+                    h5.modal-title#modalDenunciarPerfilLabel Denunciar Perfil
+                    button.btn-close(type="button", data-bs-dismiss="modal", aria-label="Fechar")
+                  .modal-body
+                    form(action="/admin/super/usuarios/reportar", method="POST")
+                      input(type="hidden", name="id_usuario", value=usuario.id_usuario)
+                      .mb-3
+                        label(for="motivo") Motivo
+                        select.form-select(name="motivo", id="motivo", required)
+                          option(value="spam") Spam
+                          option(value="conteudo_inadequado") Conteúdo inadequado
+                          option(value="outro") Outro
+                      .mb-3
+                        label(for="detalhes") Detalhes
+                        textarea.form-control(name="detalhes", id="detalhes", rows="3")
+                      button.btn.btn-danger(type="submit") Enviar denúncia
             .card.shadow-sm.mb-4
               .card-body
                 h5.text-success.mb-3 Amigos

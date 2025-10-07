@@ -34,9 +34,24 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
-// Importa e registra o novo model
+// Importa e registra os novos models
 const ReportComentario = require('./ReportComentario')(sequelize, Sequelize.DataTypes);
 db.ReportComentario = ReportComentario;
+
+const ReportUsuario = require('./reportUsuario')(sequelize, Sequelize.DataTypes);
+db.ReportUsuario = ReportUsuario;
+
+const Advertencia = require('./advertencia')(sequelize, Sequelize.DataTypes);
+db.Advertencia = Advertencia;
+
+const ReportGrupo = require('./reportGrupo')(sequelize, Sequelize.DataTypes);
+db.ReportGrupo = ReportGrupo;
+
+const ReportEvento = require('./reportEvento')(sequelize, Sequelize.DataTypes);
+db.ReportEvento = ReportEvento;
+
+const ReportAmigo = require('./reportAmigo')(sequelize, Sequelize.DataTypes);
+db.ReportAmigo = ReportAmigo;
 
 // Associações (caso existam nos models)
 Object.keys(db).forEach(modelName => {

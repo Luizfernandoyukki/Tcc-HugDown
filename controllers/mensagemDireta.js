@@ -27,6 +27,10 @@ exports.buscarPorId = async (req, res) => {
 // Criar nova mensagem direta
 exports.criar = async (req, res) => {
   try {
+    // Se houver arquivo de mídia, espera caminho relativo vindo do front
+    if (req.body.url_midia) {
+      req.body.url_midia = '/images/mensagens/' + req.body.url_midia;
+    }
     const novaMensagem = await MensagemDireta.create(req.body);
     await criarNotificacao({
       id_usuario: req.body.id_destinatario,

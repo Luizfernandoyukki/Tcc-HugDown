@@ -12,7 +12,7 @@ block content
           .card-body.p-4
             h2.text-center.mb-4 Cadastro
 
-            form#form-cadastro(method="POST" enctype="multipart/form-data" action="/usuarios")
+            form#formCadastro(method="POST" action="/usuarios")
               .step-section.active#step-1
                 h5.mb-3.text-success Dados Pessoais
                 .mb-3
@@ -41,20 +41,16 @@ block content
                   input.form-control(type="email", id="email", name="email", required, maxlength="255")
                 .mb-3.position-relative
                   label.form-label(for="senha") Senha *
-                  input.form-control(type="password", id="senha", name="senha", required, minlength="6", autocomplete="new-password")
-                  span.toggle-password.position-absolute.top-50.end-0.translate-middle-y.pe-3(
-                    style="cursor:pointer;"
-                    data-target="senha"
-                  )
-                    i.fas.fa-eye
+                  .input-group
+                    input.form-control(type="password", name="senha", id="senha", required, autocomplete="new-password")
+                    span.input-group-text.toggle-password(data-target="senha" style="cursor:pointer;")
+                      i.fas.fa-eye
                 .mb-3.position-relative
-                  label.form-label(for="confirmar_senha") Confirmar Senha *
-                  input.form-control(type="password", id="confirmar_senha", name="confirmar_senha", required, minlength="6", autocomplete="new-password")
-                  span.toggle-password.position-absolute.top-50.end-0.translate-middle-y.pe-3(
-                    style="cursor:pointer;"
-                    data-target="confirmar_senha"
-                  )
-                    i.fas.fa-eye
+                  label.form-label(for="confirma_senha") Repetir Senha *
+                  .input-group
+                    input.form-control(type="password", name="confirma_senha", id="confirma_senha", required, autocomplete="new-password")
+                    span.input-group-text.toggle-password(data-target="confirma_senha" style="cursor:pointer;")
+                      i.fas.fa-eye
                 .mb-3
                   label.form-label(for="nome_usuario") Nome de Usuário *
                   input.form-control(type="text", id="nome_usuario", name="nome_usuario", required, maxlength="50")
@@ -169,5 +165,29 @@ block content
               div.alert.alert-danger.d-none(id="errorAlert")
 
 block scripts
-  script(src="/public/util/mascaras.js")
+  script(src="/util/mascaras.js")
   script(src="/javascripts/cadastro.js")
+
+  script.
+    function toggleSenha(id, el) {
+      const input = document.getElementById(id);
+      if (input.type === 'password') {
+        input.type = 'text';
+        el.querySelector('i').classList.remove('fa-eye');
+        el.querySelector('i').classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        el.querySelector('i').classList.remove('fa-eye-slash');
+        el.querySelector('i').classList.add('fa-eye');
+      }
+    }
+    // Corrige erro de foco/disable
+    document.addEventListener('DOMContentLoaded', function() {
+      ['senha', 'confirma_senha'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+          input.disabled = false;
+          input.focus();
+        }
+      });
+    });

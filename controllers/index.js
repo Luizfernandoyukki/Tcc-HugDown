@@ -23,6 +23,11 @@ const profissionalSaudeController = require('./profissionalSaude');
 const postagemSecaoController = require('./postagemSecao');
 const reportsController = require('./reports');
 const reportComentarioController = require('./reportComentario');
+const reportUsuarioController = require('./reportUsuario');
+const advertenciaController = require('./advertencia');
+const reportGrupoController = require('./reportGrupo');
+const reportEventoController = require('./reportEvento');
+const reportAmigoController = require('./reportAmigo');
 
 module.exports = {
   administradorController,
@@ -50,4 +55,9 @@ module.exports = {
   usuarioController,
   profissionalSaudeController,
   reportComentarioController,
+  reportUsuarioController,
+  advertenciaController,
+  reportGrupoController,
+  reportEventoController,
+  reportAmigoController,
 };

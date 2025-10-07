@@ -5,8 +5,14 @@ block styles
 
 block content
   .container.mt-5
+    a.btn.btn-outline-secondary.mb-3.d-flex.align-items-center.justify-content-start(style="max-width:120px;" href="javascript:history.back()")
+      i.fas.fa-arrow-left.me-2
+      | Voltar
     h2.text-success.text-center.mb-4 Minhas Postagens
     p.text-center.text-muted Bem-vindo, #{usuario ? usuario.nome_usuario : 'visitante'}! Aqui estão suas postagens.
+    // Barra de pesquisa por título
+    .mb-4
+      input.form-control(type="text", id="busca-titulo-post", placeholder="Pesquisar por título ou conteúdo...")
 
     if postagens && postagens.length
       .row.g-4
@@ -19,7 +25,15 @@ block content
                   p.card-text.text-truncate.pre-content(style="white-space:pre-line")= post.resumo
                 small.text-muted= post.data_criacao ? post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao : ''
                 if post.url_midia
-                  img.img-fluid.mb-2(src=post.url_midia, alt="Imagem da postagem")
+                  if post.tipo_postagem === 'photo'
+                    img.img-fluid.mb-2(src=post.url_midia, alt="Imagem da postagem", style="max-width:100%;height:auto;", onerror="this.src='/images/default-post.png'")
+                  else if post.tipo_postagem === 'video'
+                    video.img-fluid.mb-2(controls, style="max-width:100%;height:auto;")
+                      source(src=post.url_midia, type="video/mp4")
+                      | Seu navegador não suporta vídeo.
+                  else
+                    // fallback para outros tipos
+                    img.img-fluid.mb-2(src=post.url_midia, alt="Arquivo da postagem", style="max-width:100%;height:auto;", onerror="this.src='/images/default-post.png'")
     else
       .d-flex.justify-content-center.align-items-center.mt-5(style="min-height:300px;")
         .card.bg-dark.text-white.p-4(style="max-width: 420px; border-radius: 18px; box-shadow: 0 0 16px #000;")
@@ -67,4 +81,25 @@ block content
 block scripts
   script.
     window.postagens = !{postagensJson};
+    // Filtro de pesquisa por título ou conteúdo
+    document.addEventListener('DOMContentLoaded', function() {
+      const input = document.getElementById('busca-titulo-post');
+      if (!input) return;
+      input.addEventListener('input', function() {
+        const termo = input.value.trim().toLowerCase();
+        let algum = false;
+        document.querySelectorAll('.post-card').forEach(card => {
+          const titulo = card.querySelector('.card-title')?.textContent.trim().toLowerCase() || '';
+          const resumo = card.querySelector('.card-text')?.textContent.trim().toLowerCase() || '';
+          const show = titulo.includes(termo) || resumo.includes(termo);
+          card.style.display = show ? '' : 'none';
+          if (show) algum = true;
+        });
+        // Exibe mensagem se nenhum post encontrado
+        const container = document.querySelector('.row.g-4');
+        if (container) container.style.display = algum ? '' : 'none';
+        const emptyCard = document.querySelector('.card.bg-dark');
+        if (emptyCard) emptyCard.style.display = algum ? 'none' : '';
+      });
+    });
   script(src="/javascripts/postagens/show.js")

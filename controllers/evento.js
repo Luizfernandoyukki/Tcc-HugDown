@@ -1,7 +1,24 @@
 const { Evento, Usuario, ParticipanteEvento } = require('../models');
 
+// Função para atualizar status dos eventos
+exports.atualizarStatusEventos = async () => {
+  const agora = new Date();
+  const eventos = await Evento.findAll();
+  for (const evento of eventos) {
+    if (evento.data_fim && new Date(evento.data_fim) < agora) {
+      // Exclui evento expirado
+      await evento.destroy();
+    } else if (new Date(evento.data_inicio) <= agora && (!evento.data_fim || new Date(evento.data_fim) > agora)) {
+      // Evento em andamento (pode atualizar campo status se existir)
+      evento.status = 'em_andamento';
+      await evento.save();
+    }
+  }
+};
+
 exports.listar = async (req, res) => {
   try {
+    await exports.atualizarStatusEventos();
     const eventos = await Evento.findAll({
       include: [
         { model: Usuario, as: 'organizador' },

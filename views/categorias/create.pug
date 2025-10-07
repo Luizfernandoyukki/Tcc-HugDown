@@ -1,0 +1,28 @@
+extends ../layout
+
+block styles
+  link(rel="stylesheet", href="/stylesheets/categorias/create.css")
+
+block content
+  .container.mt-5
+    a.btn.btn-outline-secondary.mb-3(href="javascript:history.back()")
+      i.fas.fa-arrow-left.me-2
+      | Voltar
+    h2.mb-4
+      i.fas.fa-folder-plus.me-2
+      | Criar Nova Categoria
+    form(method="POST", action="/categorias")
+      .mb-3
+        label(for="nome_categoria") Nome da categoria
+        input.form-control(type="text", name="nome_categoria", required, maxlength="100")
+      .mb-3
+        label(for="descricao") Descrição
+        textarea.form-control(name="descricao", maxlength="500")
+      .mb-3
+        label(for="cor_categoria") Cor da categoria
+        input.form-control(type="color", name="cor_categoria", value="#007bff")
+      .mb-3
+        label(for="icone") Ícone (FontAwesome)
+        input.form-control(type="text", name="icone", maxlength="50")
+        small.text-muted Exemplo: fas fa-heart
+      button.btn.btn-primary(type="submit") Criar Categoria

@@ -4,61 +4,50 @@ const controllers = require('../controllers');
 const requireLogin = require('../middlewares/auth');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-const multer = require('multer');
 const path = require('path');
+const multer = require('multer');
+const fs = require('fs');
+
+// Storage para imagem de perfil
+const storagePerfil = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dir = path.join(__dirname, '../public/images/perfis');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + ext);
+  }
+});
+const uploadPerfil = multer({ storage: storagePerfil });
+
+// Storage para documento de verificação
+const storageDoc = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dir = path.join(__dirname, '../public/images/docs');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + ext);
+  }
+});
+const uploadDoc = multer({ storage: storageDoc });
+
 const { Usuario, DocumentoVerificacao } = require('../models');
 const { usuarioController } = controllers;
 const { podeEditarOuVerPerfil } = require('../middlewares/auth');
 
-// Configuração do multer para cadastro de usuário
-const storageCadastro = multer.diskStorage({
-  destination: function (req, file, cb) {
-    if (file.fieldname === 'foto_perfil') {
-      cb(null, path.join(__dirname, '../perfis'));
-    } else if (file.fieldname === 'documento_comprobatorio') {
-      cb(null, path.join(__dirname, '../docs'));
-    } else {
-      cb(new Error('Campo de arquivo não permitido.'));
-    }
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const nome = Date.now() + '-' + Math.round(Math.random() * 1E9) + ext;
-    cb(null, nome);
-  }
-});
-const fileFilter = (req, file, cb) => {
-  if (file.fieldname === 'foto_perfil') {
-    if (/^image\/(jpeg|png|gif|bmp|webp)$/.test(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('A foto de perfil deve ser uma imagem.'));
-    }
-  } else if (file.fieldname === 'documento_comprobatorio') {
-    if (
-      file.mimetype === 'application/pdf' ||
-      file.mimetype === 'image/png' ||
-      file.mimetype === 'image/jpeg'
-    ) {
-      cb(null, true);
-    } else {
-      cb(new Error('O documento comprobatório deve ser PDF, PNG ou JPG.'));
-    }
-  } else {
-    cb(new Error('Campo de arquivo não permitido.'));
-  }
-};
-const uploadCadastro = multer({ storage: storageCadastro, fileFilter: fileFilter });
+router.use(express.urlencoded({ extended: true }));
 
-// Cadastro de usuário
-router.post(
-  '/',
-  uploadCadastro.fields([
-    { name: 'documento_comprobatorio', maxCount: 1 },
-    { name: 'foto_perfil', maxCount: 1 }
-  ]),
-  usuarioController.criar
-);
+// Cadastro de usuário (com upload de foto de perfil)
+router.post('/', uploadPerfil.single('foto_perfil'), usuarioController.criar);
 
 // Login
 router.post('/login', usuarioController.login);
@@ -66,9 +55,8 @@ router.post('/login', usuarioController.login);
 // Listar usuários
 router.get('/', requireLogin, usuarioController.listar);
 
-// Rota para exibir o próprio perfil (index)
+// Exibir o próprio perfil
 router.get('/index/:id', requireLogin, async (req, res) => {
-  // Só permite acessar se for o próprio usuário
   if (Number(req.session.userId) !== Number(req.params.id)) {
     return res.status(403).render('error', { error: 'Acesso negado ao perfil.' });
   }
@@ -81,51 +69,68 @@ router.get('/index/:id', requireLogin, async (req, res) => {
   }
 });
 
-// Rota para redirecionar o usuário logado para seu próprio perfil
+// Redirecionar usuário logado para seu próprio perfil
 router.get('/me', requireLogin, async (req, res) => {
   const id = req.session.userId;
   if (!id) return res.status(401).render('error', { error: 'Usuário não autenticado.' });
   return res.redirect(`/usuarios/index/${id}`);
 });
 
-// Rota para exibir o perfil de qualquer usuário (show)
+// Exibir perfil de qualquer usuário
 router.get('/show/:id', requireLogin, async (req, res) => {
   try {
     const usuario = await usuarioController.buscarPerfilCompleto(req.params.id);
     if (!usuario) {
-      console.warn('[ROUTE] Usuário não encontrado:', req.params.id);
       return res.status(404).render('error', { error: 'Usuário não encontrado' });
     }
-    // Adicione usuarioLogado ao render
     const usuarioLogado = await usuarioController.buscarPerfilCompleto(req.session.userId);
     return res.render('usuarios/show', { usuario, usuarioLogado, isLoggedIn: true });
   } catch (err) {
-    console.error('[ROUTE][ERROR] Erro ao buscar perfil:', err);
     res.status(500).render('error', { error: 'Erro ao buscar perfil: ' + err.message });
   }
 });
 
-// Editar perfil padrão
+// Editar perfil (GET)
 router.get('/edit/:id', requireLogin, podeEditarOuVerPerfil, async (req, res) => {
   try {
-    const { Usuario } = require('../models');
     const usuario = await Usuario.findByPk(req.params.id);
     if (!usuario) return res.status(404).render('error', { error: 'Usuário não encontrado' });
-    // Renderiza a view de edição com o objeto Sequelize (compatível com edit.pug)
     res.render('usuarios/edit', { usuario });
   } catch (err) {
-    console.error('[ROUTE][USUARIOS][EDIT] Erro:', err);
     res.status(500).render('error', { error: 'Erro ao buscar usuário: ' + err.message });
   }
 });
 
-// Atualizar usuário (agora aceita upload de foto_perfil)
-router.put('/:id', requireLogin, uploadCadastro.fields([{ name: 'foto_perfil', maxCount: 1 }]), usuarioController.atualizar);
+// Atualizar usuário (com upload de foto de perfil)
+router.put('/:id', requireLogin, uploadPerfil.single('foto_perfil'), async (req, res) => {
+  try {
+    const usuario = await Usuario.findByPk(req.params.id);
+    if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    // Se veio nova foto, apaga a antiga
+    if (req.file) {
+      if (usuario.foto_perfil && !usuario.foto_perfil.includes('default')) {
+        const fotoPath = path.join(__dirname, '../public', usuario.foto_perfil.replace(/^\/+/, ''));
+        if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+      }
+      usuario.foto_perfil = '/images/perfis/' + req.file.filename;
+    }
+
+    usuario.nome_usuario = req.body.nome_usuario || usuario.nome_usuario;
+    usuario.email = req.body.email || usuario.email;
+    usuario.biografia = req.body.biografia || usuario.biografia;
+
+    await usuario.save();
+    res.json(usuario);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao atualizar usuário: ' + err.message });
+  }
+});
 
 // Remover usuário
 router.delete('/:id', requireLogin, usuarioController.remover);
 
-// Função utilitária para verificar se o usuário existe e redirecionar para o perfil
+// Redirecionar para perfil pelo id
 async function redirecionarParaPerfil(req, res, next) {
   const id = req.params.id;
   try {
@@ -136,17 +141,15 @@ async function redirecionarParaPerfil(req, res, next) {
     return res.status(500).render('error', { error: 'Erro ao localizar perfil: ' + err.message });
   }
 }
-
-// Rota para buscar qualquer usuário pelo id e redirecionar para o perfil correto
 router.get('/find/:id', requireLogin, redirecionarParaPerfil);
 
 // Página de configurações
-router.get('/configuracoes', async (req, res) => {
+router.get('/configuracoes', requireLogin, (req, res) => {
   res.render('usuarios/configuracoes');
 });
 
 // Solicitar exclusão de conta (envia token por e-mail)
-router.post('/excluir-conta', async (req, res) => {
+router.post('/excluir-conta', requireLogin, async (req, res) => {
   const usuario = await Usuario.findByPk(req.session.userId);
   if (!usuario) return res.render('usuarios/configuracoes', { errorExcluir: 'Usuário não encontrado.' });
   const token = crypto.randomBytes(4).toString('hex').slice(0, 6).toUpperCase();
@@ -154,7 +157,6 @@ router.post('/excluir-conta', async (req, res) => {
   req.session.excluirTokenExpires = Date.now() + 15 * 60 * 1000;
   req.session.excluirUserId = usuario.id_usuario;
 
-  // Envia e-mail
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -162,6 +164,7 @@ router.post('/excluir-conta', async (req, res) => {
       pass: process.env.EMAIL_PASS
     }
   });
+
   await transporter.sendMail({
     from: process.env.EMAIL_FROM || '"HugDown" <no-reply@seudominio.com>',
     to: usuario.email,
@@ -173,7 +176,7 @@ router.post('/excluir-conta', async (req, res) => {
 });
 
 // Confirmar exclusão de conta
-router.post('/excluir-conta/confirmar', async (req, res) => {
+router.post('/excluir-conta/confirmar', requireLogin, async (req, res) => {
   const { token } = req.body;
   if (
     !req.session.excluirToken ||
@@ -186,40 +189,45 @@ router.post('/excluir-conta/confirmar', async (req, res) => {
   }
   await Usuario.destroy({ where: { id_usuario: req.session.excluirUserId } });
   req.session.destroy(() => {
-    // Mensagem de despedida
     res.render('usuarios/configuracoes', { msgDespedida: true });
   });
 });
 
-// Solicitar profissional de saúde (envio de documento)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '..', 'docs'));
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const name = Date.now() + '-' + Math.round(Math.random() * 1e9) + ext;
-    cb(null, name);
+// Editar perfil (POST, com upload de foto de perfil)
+router.post('/edit/:id', requireLogin, podeEditarOuVerPerfil, uploadPerfil.single('foto_perfil'), async (req, res) => {
+  try {
+    const usuario = await Usuario.findByPk(req.params.id);
+    if (!usuario) return res.status(404).render('error', { error: 'Usuário não encontrado' });
+    usuario.email = req.body.email;
+    usuario.nome_usuario = req.body.nome_usuario;
+    usuario.biografia = req.body.biografia;
+    if (req.file) {
+      if (usuario.foto_perfil && !usuario.foto_perfil.includes('default')) {
+        const fotoPath = path.join(__dirname, '../public', usuario.foto_perfil.replace(/^\/+/, ''));
+        if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+      }
+      usuario.foto_perfil = '/images/perfis/' + req.file.filename;
+    }
+    await usuario.save();
+    res.redirect(`/usuarios/index/${usuario.id_usuario}`);
+  } catch (err) {
+    res.status(500).render('error', { error: 'Erro ao atualizar usuário: ' + err.message });
   }
 });
-const upload = multer({ storage, fileFilter: (req, file, cb) => {
-  if (file.mimetype === 'application/pdf') cb(null, true);
-  else cb(new Error('Apenas arquivos PDF são aceitos.'));
-}});
 
-router.post('/solicitar-profissional', upload.single('documento'), async (req, res) => {
+// Solicitar profissional de saúde (envio de documento PDF)
+router.post('/solicitar-profissional', requireLogin, uploadDoc.single('documento'), async (req, res) => {
   try {
     const id_usuario = req.session.userId;
     if (!id_usuario) return res.render('usuarios/configuracoes', { errorProfissional: 'Usuário não autenticado.' });
     const { tipo_documento, numero_documento, instituicao, observacoes } = req.body;
     if (!req.file) return res.render('usuarios/configuracoes', { errorProfissional: 'Arquivo PDF obrigatório.' });
-    const caminho_arquivo = '/docs/' + req.file.filename;
     await DocumentoVerificacao.create({
       id_usuario,
       tipo_documento,
       numero_documento,
       instituicao,
-      caminho_arquivo,
+      caminho_arquivo: '/images/docs/' + req.file.filename,
       status: 'pending',
       observacoes
     });
@@ -230,3 +238,4 @@ router.post('/solicitar-profissional', upload.single('documento'), async (req, r
 });
 
 module.exports = router;
+ 

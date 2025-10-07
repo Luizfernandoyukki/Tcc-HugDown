@@ -10,13 +10,30 @@ block content
       p.text-muted Nenhuma conversa encontrada.
     else
       ul.list-group
+        // Barra de pesquisa por nome de usuário
+        input.form-control.mb-3(type="text", id="busca-amigo", placeholder="Pesquisar amigo...")
         each c in conversas
-          li.list-group-item.d-flex.align-items-center.justify-content-between
-            .d-flex.align-items-center
+          li.list-group-item.d-flex.align-items-center.justify-content-between.amigo-item(style="cursor:pointer;" data-id=c.amigo.id_usuario)
+            .d-flex.align-items-center.flex-grow-1
               img.rounded-circle.me-3(src=c.amigo.foto_perfil || '/images/default-avatar.png', alt='Avatar', width='48', height='48')
-              .flex-grow-1
-                strong= c.amigo.nome_usuario
-                if c.ultimaMensagem
-                  br
-                  span.text-muted.small #{c.ultimaMensagem.conteudo.substring(0, 40)}...
-            a.btn.btn-outline-primary.btn-sm(href=`/mensagens-diretas/conversa/${c.amigo.id_usuario}`) Abrir
+              strong= c.amigo.nome_usuario
+              if c.ultimaMensagem
+                br
+                span.text-muted.small #{c.ultimaMensagem.conteudo.substring(0, 40)}...
+            // Removido botão "Abrir" - toda a box é clicável
+  script.
+    // Torna toda a box clicável
+    document.querySelectorAll('.amigo-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const id = item.getAttribute('data-id');
+        window.location.href = `/mensagens-diretas/conversa/${id}`;
+      });
+    });
+    // Barra de pesquisa
+    document.getElementById('busca-amigo').addEventListener('input', function() {
+      const termo = this.value.toLowerCase();
+      document.querySelectorAll('.amigo-item').forEach(item => {
+        const nome = item.querySelector('strong').textContent.toLowerCase();
+        item.style.display = nome.includes(termo) ? '' : 'none';
+      });
+    });

@@ -1,6 +1,9 @@
 extends ../layout
 
 block content
+  a.btn.btn-outline-secondary.mb-3.d-flex.align-items-center.justify-content-start(style="max-width:120px;" href="javascript:history.back()")
+    i.fas.fa-arrow-left.me-2
+    | Voltar
   .container.py-5
     if evento
       - const categoria = (evento.nome_categoria_evento || '').toLowerCase();
@@ -54,6 +57,10 @@ block content
               small.text-muted
                 i.fas.fa-user.me-1
                 | Organizador: #{evento.organizador.nome_usuario}
+            if evento.link_online
+              .mb-3
+                label.text-muted Link do Evento Online:
+                a(href=evento.link_online, target="_blank", rel="noopener noreferrer")= evento.link_online
         hr
         p.mt-3(style="font-size:1.08em; color:#444;")= evento.descricao_evento
 
@@ -67,8 +74,35 @@ block content
         else
           div.alert.alert-warning.mt-4
             | Faça login para participar deste evento.
+
+        // Botão de reportar evento
+        button.btn.btn-outline-danger.mt-3(data-bs-toggle="modal", data-bs-target="#modalReportEvento")
+          i.fas.fa-flag.me-2
+          | Reportar Evento
+
     else
       p.text-danger.text-center.mt-5 Evento não encontrado.
+
+    // Modal de report
+    .modal.fade#modalReportEvento(tabindex="-1", aria-labelledby="modalReportEventoLabel", aria-hidden="true")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h5.modal-title#modalReportEventoLabel Reportar Evento
+            button.btn-close(type="button", data-bs-dismiss="modal", aria-label="Fechar")
+          .modal-body
+            form#formReportEvento(method="POST", action=`/eventos/${evento.id_evento}/report`)
+              input(type="hidden", name="id_evento", value=evento.id_evento)
+              .mb-3
+                label(for="motivo") Motivo
+                select.form-select(name="motivo", id="motivo", required)
+                  option(value="spam") Spam
+                  option(value="conteudo_inadequado") Conteúdo inadequado
+                  option(value="outro") Outro
+              .mb-3
+                label(for="detalhes") Detalhes
+                textarea.form-control(name="detalhes", id="detalhes", rows="3")
+              button.btn.btn-danger(type="submit") Enviar Report
 
 block styles
   style.
@@ -136,11 +170,12 @@ block styles
       text-transform: uppercase;
       line-height: 1;
       letter-spacing: 1px;
-    }
-    .badge.bg-secondary {
-      background: #198754 !important;
-      color: #fff !important;
-      font-weight: 600;
+
+
+
+
+
+    }      color: #fff !important;      background: #198754 !important;    .badge.bg-secondary {    }      font-weight: 600;
       font-size: 1em;
       border-radius: 8px;
       padding: 0.4em 1em;

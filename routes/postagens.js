@@ -4,7 +4,7 @@ const controllers = require('../controllers/index.js');
 const requireLogin = require('../middlewares/auth');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs'); // <-- Adicione isso
+const fs = require('fs');
 const { podeEditarOuVerPostagem } = require('../middlewares/auth');
 const {
   postagemController,
@@ -13,17 +13,15 @@ const {
   secaoController
 } = controllers;
 
-// Garante que a pasta 'post' existe
-const postDir = path.join(__dirname, '../post');
-if (!fs.existsSync(postDir)) {
-  fs.mkdirSync(postDir, { recursive: true });
-}
-
 // Configuração do multer para upload de postagens
 const storagePostagem = multer.diskStorage({
   destination: function (req, file, cb) {
-    console.log('[DEBUG] Salvando arquivo em:', postDir); // <-- Adicione este log
-    cb(null, postDir); // usa a variável já garantida
+    // Corrija para salvar em public/images/post
+    const postDir = path.join(__dirname, '../public/images/post');
+    if (!fs.existsSync(postDir)) {
+      fs.mkdirSync(postDir, { recursive: true });
+    }
+    cb(null, postDir);
   },
   filename: function (req, file, cb) {
     // Garante extensão correta

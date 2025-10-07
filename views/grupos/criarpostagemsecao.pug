@@ -2,6 +2,10 @@ extends ../layout
 
 block content
   .container.mt-5
+    a.btn.btn-outline-secondary.mb-3.d-flex.align-items-center.justify-content-start(style="max-width:120px;" href="javascript:history.back()")
+      i.fas.fa-arrow-left.me-2
+      | Voltar
+
     h2 Nova Postagem no Grupo: #{grupo.nome_grupo}
 
     form(method="POST", action=`/grupos/${grupo.id_grupo}/criarpostagemsecao`, enctype="multipart/form-data")

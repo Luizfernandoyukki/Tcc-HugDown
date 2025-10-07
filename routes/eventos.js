@@ -5,6 +5,7 @@ const { eventoController } = controllers;
 const { ParticipanteEvento } = require('../models');
 const requireLogin = require('../middlewares/auth');
 const https = require('https');
+const reportEventoController = require('../controllers/reportEvento');
 
 // Exibir formulário de criação de evento (GET /eventos/create)
 router.get('/create', requireLogin, async (req, res) => {
@@ -167,5 +168,8 @@ router.post('/', requireLogin, async (req, res, next) => {
     res.status(500).render('error', { error: 'Erro ao criar evento: ' + err.message });
   }
 });
+
+// Adicione esta rota para reportar evento:
+router.post('/:id/report', requireLogin, reportEventoController.criar);
 
 module.exports = router;

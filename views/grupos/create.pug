@@ -29,10 +29,14 @@ block content
         input.form-control(type="number", name="max_participantes", id="max_participantes", min="1")
 
       .mb-3
-        label.form-label(for="id_categoria") Categoria
-        select.form-select(name="id_categoria", id="id_categoria")
-          option(value="") Selecione uma categoria
-          //- each cat in categorias
-          //-   option(value=cat.id_categoria)= cat.nome_categoria
+        label.form-label(for="categoria_grupo") Categoria do Grupo
+        select.form-select(name="categoria_grupo", id="categoria_grupo", required)
+          option(value="") Selecione...
+          option(value="Saúde") Saúde
+          option(value="Família") Família
+          option(value="Esporte") Esporte
+          option(value="Educação") Educação
+          option(value="Lazer") Lazer
+          option(value="Outros") Outros
 
       button.btn.btn-primary.mt-3(type="submit") Criar Grupo

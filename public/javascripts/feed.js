@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fetch(`/api/postagens/${id}/visualizar`, { method: 'POST' })
       .then(res => res.json())
       .then(data => {
-        const visualizacoesSpan = card.querySelector('.visualizacoes span');
+        const visualizacoesSpan = card.querySelector('.visualizacoes-count');
         if (visualizacoesSpan) visualizacoesSpan.textContent = data.visualizacoes;
       });
   });
@@ -314,4 +314,3 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
-       

@@ -5,9 +5,14 @@ block styles
 
 block content
   .container.mt-4
+    a.btn.btn-outline-secondary.mb-3(href="javascript:history.back()")
+      i.fas.fa-arrow-left.me-2
+      | Voltar
     .d-flex.align-items-center.mb-3
       img.rounded-circle.me-2(src=amigo.foto_perfil || '/images/default-avatar.png', alt='Avatar', width='48', height='48')
       h4.mb-0= amigo.nome_usuario
+      button.btn.btn-outline-secondary.btn-sm.ms-2(data-bs-toggle="modal", data-bs-target="#modalConfigChat")
+        i.fas.fa-cog
     .card
       .card-body
         .dm-messages(style='max-height:400px;overflow-y:auto;')
@@ -24,12 +29,81 @@ block content
                       | Você
                     else
                       | #{amigo.nome_usuario}
+                  if m.respondendo_id
+                    span.badge.bg-info.ms-2 Respondendo mensagem #{m.respondendo_id}
+                  if m.emoji
+                    span.fs-3.ms-2= m.emoji
+                  if m.url_midia
+                    img.img-fluid.me-2(src=m.url_midia, alt="Imagem", style="max-width:120px;max-height:120px;")
                   br
                   | #{m.conteudo}
                   br
                   span.text-muted.small #{new Date(m.data_envio).toLocaleString('pt-BR')}
-    form.mt-3(action=`/mensagens-diretas/conversa/${amigo.id_usuario}` method='POST')
+    form.mt-3(action=`/mensagens-diretas/conversa/${amigo.id_usuario}` method='POST' enctype="multipart/form-data")
       .input-group
-        input.form-control(type='text', name='conteudo', placeholder='Digite sua mensagem...' required)
-        button.btn.btn-primary(type='submit') Enviar
+        input.form-control(type='text', name='conteudo', id='mensagem', placeholder='Digite sua mensagem...' required)
+        select.form-select#emoji-picker(name="emoji")
+          option(value="") Emoji
+          option(value="😀") 😀
+          option(value="😂") 😂
+          option(value="😍") 😍
+          option(value="👍") 👍
+          option(value="🙏") 🙏
+          option(value="🎉") 🎉
+          option(value="❤️") ❤️
+          option(value="😢") 😢
+          option(value="🔥") 🔥
+        input.form-control(type="file", id="imagem-chat", name="imagem_chat", accept="image/*")
+        button.btn.btn-primary(type="submit") Enviar
+      input(type="hidden", id="respondendo_id", name="respondendo_id")
+    .modal.fade#modalConfigChat(tabindex="-1", aria-labelledby="modalConfigChatLabel", aria-hidden="true")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h5.modal-title#modalConfigChatLabel Configurações da Conversa
+            button.btn-close(type="button", data-bs-dismiss="modal", aria-label="Fechar")
+          .modal-body
+            button.btn.btn-danger.w-100.mb-2(type="button", id="btn-deletar-amigo") Deletar Amigo
+            button.btn.btn-warning.w-100.mb-2(type="button", id="btn-denunciar-amigo") Denunciar Amigo
+            label.form-label.mt-3 Mudar tema da conversa
+            select.form-select#tema-chat(name="tema_chat")
+              option(value="padrao") Padrão
+              option(value="escuro") Escuro
+              option(value="azul") Azul
+              option(value="verde") Verde
+              option(value="rosa") Rosa
+              option(value="amarelo") Amarelo
+          .modal-footer
+            button.btn.btn-secondary(type="button", data-bs-dismiss="modal") Fechar
     a.btn.btn-link.mt-2(href='/mensagens-diretas') Voltar para conversas
+  script.
+    // Pesquisa de amigos
+    if (document.getElementById('busca-amigo')) {
+      document.getElementById('busca-amigo').addEventListener('input', function() {
+        const termo = this.value.toLowerCase();
+        document.querySelectorAll('.amigo-item').forEach(item => {
+          const nome = item.querySelector('.fw-bold').textContent.toLowerCase();
+          item.style.display = nome.includes(termo) ? '' : 'none';
+        });
+      });
+      document.querySelectorAll('.amigo-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const id = item.getAttribute('data-id');
+          window.location.href = `/mensagens-diretas/conversa/${id}`;
+        });
+      });
+    }
+    // Tema da conversa
+    if (document.getElementById('tema-chat')) {
+      document.getElementById('tema-chat').addEventListener('change', function() {
+        document.body.className = 'tema-' + this.value;
+      });
+    }
+      });
+    }
+    // Tema da conversa
+    if (document.getElementById('tema-chat')) {
+      document.getElementById('tema-chat').addEventListener('change', function() {
+        document.body.className = 'tema-' + this.value;
+      });
+    }
