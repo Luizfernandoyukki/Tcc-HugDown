@@ -248,3 +248,9 @@ exports.listarPorTag = async (req, options = {}) => {
   return posts;
 };
 
+// Buscar postagem por título e autor
+exports.buscarPorTituloAutor = async (titulo, id_autor) => {
+  const { Postagem } = require('../models');
+  return await Postagem.findOne({ where: { titulo, id_autor } });
+};
+

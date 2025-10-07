@@ -130,7 +130,24 @@ router.get('/:id/edit', requireLogin, podeEditarOuVerPostagem, async (req, res) 
 });
 
 // Criação, edição, remoção (POST, PUT, DELETE)
-router.post('/', requireLogin, uploadPostagem.single('arquivo_post'), postagemController.criar);
+router.post('/', requireLogin, uploadPostagem.single('arquivo_post'), async (req, res, next) => {
+  try {
+    // Verifica se já existe postagem igual (exemplo: pelo título e autor)
+    const { titulo } = req.body;
+    const id_autor = res.locals.usuario?.id_usuario;
+    if (titulo && id_autor) {
+      const existe = await controllers.postagemController.buscarPorTituloAutor(titulo, id_autor);
+      if (existe) {
+        // Apenas redireciona para index de postagens, sem alert
+        return res.redirect('/postagens');
+      }
+    }
+    // Se não existe, cria normalmente
+    await controllers.postagemController.criar(req, res, next);
+  } catch (err) {
+    next(err);
+  }
+});
 router.put('/:id', requireLogin, postagemController.atualizar);
 router.delete('/:id', requireLogin, postagemController.remover);
 

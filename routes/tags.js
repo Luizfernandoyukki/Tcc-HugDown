@@ -44,7 +44,16 @@ router.get('/nome/:nome', requireLogin, async (req, res) => {
   await tagController.buscarPorNome(req.params.nome, res);
 });
 
-router.delete('/delete/:nome', requireLogin, async (req, res) => {
+// Middleware para permitir apenas super_admin excluir tags
+function requireSuperAdmin(req, res, next) {
+  const usuario = req.session.usuario || req.session.user || res.locals.usuario;
+  if (!usuario || usuario.nivel_admin !== 'super_admin') {
+    return res.status(403).json({ error: 'Apenas administradores podem excluir tags.' });
+  }
+  next();
+}
+
+router.delete('/delete/:nome', requireLogin, requireSuperAdmin, async (req, res) => {
   const nome = req.params.nome;
   try {
     const tag = await tagController.buscarPorNome(nome, {});

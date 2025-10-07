@@ -416,9 +416,6 @@ CREATE INDEX idx_postagens_categoria_data ON postagens(id_categoria, data_criaca
 CREATE INDEX idx_amizades_status_data ON amizades(status_amizade, data_solicitacao);
 CREATE INDEX idx_eventos_data_tipo ON eventos(data_inicio, tipo_evento);
 
-ALTER TABLE secoes
-  ADD COLUMN id_grupo INT NULL AFTER ativo,
-  ADD CONSTRAINT fk_secoes_grupo FOREIGN KEY (id_grupo) REFERENCES grupos(id_grupo) ON DELETE CASCADE;
 
 CREATE TABLE reports (
     id_report INT AUTO_INCREMENT PRIMARY KEY,

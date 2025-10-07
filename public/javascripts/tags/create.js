@@ -113,11 +113,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Adiciona evento aos botões de deletar
-  document.querySelectorAll('.delete-tag-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const nomeTag = this.getAttribute('data-nome');
-      const li = this.closest('li');
-      deletarTag(nomeTag, li);
-    });
-  });
+  // Removido: não há mais botão de deletar para usuários comuns
+  // document.querySelectorAll('.delete-tag-btn').forEach(btn => {
+  //   btn.addEventListener('click', function() {
+  //     const nomeTag = this.getAttribute('data-nome');
+  //     const li = this.closest('li');
+  //     deletarTag(nomeTag, li);
+  //   });
+  // });
 });

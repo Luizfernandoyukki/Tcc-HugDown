@@ -1,3 +1,14 @@
+if (typeof window !== 'undefined' && window._blokdepalavroesLoaded) {
+  // Já carregado, não executa novamente
+  // Não faça nada, apenas não execute o resto do arquivo
+  // ...fim do bloco de proteção...
+} else {
+  if (typeof window !== 'undefined') {
+    window._blokdepalavroesLoaded = true;
+    console.log('[blokdepalavroes.js] Iniciando carregamento do filtro de palavrões...');
+  }
+}
+
 // Lista extensiva de palavras ofensivas em português
 const palavrasBase = [
   // ========== PALAVRÕES E OFENSAS GRAVES ==========
@@ -119,6 +130,7 @@ function gerarVariaçõesSimples(palavra) {
 
 // Sistema de detecção otimizado
 function criarExpressoesOfensivas() {
+  console.log('[blokdepalavroes.js] Gerando expressões ofensivas...');
   let todasPalavras = [];
   palavrasBase.forEach(palavra => {
     if (!palavra || palavra.length < 4) return;
@@ -134,30 +146,16 @@ let bloqueioAtivo = false;
 
 // Gera lista em background (não trava a UI)
 function gerarPalavrasOfensivasAssincrono(callback) {
+  console.log('[blokdepalavroes.js] Iniciando geração assíncrona de palavras ofensivas...');
   setTimeout(() => {
     palavrasOfensivas = criarExpressoesOfensivas();
     bloqueioAtivo = true;
+    console.log('[blokdepalavroes.js] Palavras ofensivas geradas:', palavrasOfensivas.length);
     if (typeof callback === 'function') callback();
   }, 0);
 }
 
-// --- ADICIONE ESTE BLOCO PARA NODE.JS ---
-if (typeof module !== 'undefined' && module.exports) {
-  // Gera a lista imediatamente para uso no backend
-  palavrasOfensivas = criarExpressoesOfensivas();
-  bloqueioAtivo = true;
-  module.exports = {
-    palavrasOfensivas,
-    bloquearPalavrasOfensivas,
-    verificarConteudoOfensivo,
-    gerarPalavrasOfensivasAssincrono,
-    criarExpressoesOfensivas
-  };
-  // Não execute o código do navegador!
-  return;
-}
-
-// Sistema de detecção melhorado
+// Sistema de detecção melhorada
 function bloquearPalavrasOfensivas(camposSelector = 'input[type="text"], textarea, [contenteditable="true"]') {
   const campos = document.querySelectorAll(camposSelector);
 
@@ -175,46 +173,25 @@ function bloquearPalavrasOfensivas(camposSelector = 'input[type="text"], textare
 
 function verificarConteudoOfensivo(elemento) {
   if (!bloqueioAtivo) return; // Só bloqueia se a lista estiver pronta
-  const valorOriginal = elemento.value || elemento.textContent;
+  const valorOriginal = elemento.value !== undefined ? elemento.value : elemento.textContent;
   const valor = valorOriginal.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   
   let conteudoModificado = valorOriginal;
-  let ofensasEncontradas = [];
   
-  // Verifica cada palavra ofensiva
+  // Substitui cada palavra ofensiva por ***
   palavrasOfensivas.forEach(palavra => {
     const padrao = palavra.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
     if (padrao.length < 2) return;
-    
-    // Regex para detectar a palavra (considerando limites de palavra)
-    const regex = new RegExp(`\\b${padrao.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'gi');
-    
-    if (regex.test(valor)) {
-      ofensasEncontradas.push(palavra);
-      // Substitui por asteriscos
-      const regexSubstituicao = new RegExp(padrao, 'gi');
-      conteudoModificado = conteudoModificado.replace(regexSubstituicao, '***');
-    }
+    // Regex para detectar a palavra (sem limites de palavra, para pegar no meio)
+    const regex = new RegExp(padrao.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+    conteudoModificado = conteudoModificado.replace(regex, '***');
   });
-  
-  // Se encontrou ofensas, atualiza o campo e mostra alerta
-  if (ofensasEncontradas.length > 0) {
-    if (elemento.value !== undefined) {
-      elemento.value = conteudoModificado;
-    } else {
-      elemento.textContent = conteudoModificado;
-    }
-    
-    // Sistema de alerta melhorado
-    if (ofensasEncontradas.length <= 3) {
-      alert(`Atenção: Linguagem ofensiva detectada! Palavras bloqueadas: ${ofensasEncontradas.join(', ')}`);
-    } else {
-      alert('Atenção: Múltiplas palavras ofensivas detectadas! Conteúdo bloqueado.');
-    }
-    
-    // Foca no campo novamente
-    elemento.focus();
+
+  // Atualiza o campo sem alert
+  if (elemento.value !== undefined) {
+    elemento.value = conteudoModificado;
+  } else {
+    elemento.textContent = conteudoModificado;
   }
 }
 
@@ -235,7 +212,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   // Permite desativar o filtro globalmente
   if (window.bloquearPalavroes === false) {
     // Não ativa o bloqueio de palavrões nesta página
-    return;
+    ;
   }
   document.addEventListener('DOMContentLoaded', function() {
     gerarPalavrasOfensivasAssincrono(function() {
@@ -287,8 +264,12 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   });
 }
 
-// Exporta para uso em outros módulos (Node.js)
-if (typeof module !== 'undefined' && module.exports) {
+// Exporta para Node.js apenas se NÃO estiver no navegador
+if (typeof window === 'undefined' && typeof module !== 'undefined' && module.exports) {
+  console.log('[blokdepalavroes.js] Executando bloco Node.js de exportação...');
+  palavrasOfensivas = criarExpressoesOfensivas();
+  bloqueioAtivo = true;
+  console.log('[blokdepalavroes.js] Palavras ofensivas geradas para Node.js:', palavrasOfensivas.length);
   module.exports = {
     palavrasOfensivas,
     bloquearPalavrasOfensivas,
@@ -296,4 +277,6 @@ if (typeof module !== 'undefined' && module.exports) {
     gerarPalavrasOfensivasAssincrono,
     criarExpressoesOfensivas
   };
+  console.log('[blokdepalavroes.js] Exportação concluída para Node.js');
+  // NÃO coloque return aqui!
 }
