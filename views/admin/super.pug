@@ -5,37 +5,26 @@ block styles
 
 block content
   .container.mt-4
-    // Cabeçalho com estatísticas
+    #admin-msg-box(style="display:none;") // Mensagens do painel admin aparecem aqui
+    // Estatísticas
     .row
-      .col-md-3
+      .col-md-4
         .stats-card
           .stats-number #{usuarios ? usuarios.length : 0}
           .stats-label Usuários Totais
-      .col-md-3
+      .col-md-4
         .stats-card
           .stats-number #{postagens ? postagens.length : 0}
-          .stats-label Postagens
-      .col-md-3
+          .stats-label Postagens Totais
+      .col-md-4
         .stats-card
-          .stats-number#reportCount 0
-          .stats-label Reports Pendentes
-      .col-md-3
-        .stats-card
-          .stats-number#verificationCount 0
-          .stats-label Verificações Pendentes
+          .stats-number #{docsVerificacao ? docsVerificacao.length : 0}
+          .stats-label Documentos de Verificação Pendentes
 
-    // Seção de Usuários
-    h2.mt-4
-      i.fas.fa-users.mr-2
-      | Gerenciamento de Usuários
+    // Usuários
+    h2.mt-4 Usuários
     .search-box
-      input.form-control#userSearch(type="text", placeholder="Buscar usuários...", oninput="filtrarUsuarios()")
-    // Botão de criar categoria (apenas admin)
-    if usuario && usuario.nivel_admin && usuario.nivel_admin !== 'user'
-      a.btn.btn-success.mb-3(href="/categorias/create")
-        i.fas.fa-folder-plus.me-2
-        | Criar Nova Categoria
-    h4.mt-4 Usuários do sistema
+      input.form-control#userSearch(type="text", placeholder="Buscar usuários...")
     .table-scroll(style="max-height:260px; overflow:auto;")
       table.table.table-striped
         thead
@@ -52,24 +41,32 @@ block content
               td= usuario.nome_usuario || ''
               td= usuario.email || ''
               td
-                span.badge.bg-warning= usuario.advertenciasCount || 0
+                span.badge.bg-warning(data-id=usuario.id_usuario)= usuario.advertenciasCount || 0
               td
                 .btn-group
-                  // Botão banir/desbanir
-                  if usuario.bloqueado
-                    button.btn.btn-danger.btn-sm(type="button", data-desbanir-id=usuario.id_usuario) Desbanir
+                  if usuario.bloqueado === true || usuario.bloqueado === 1
+                    button.btn.btn-danger.btn-sm(
+                      type="button",
+                      class="btn-desbanir",
+                      data-id=usuario.id_usuario
+                    ) Desbanir
                   else
-                    button.btn.btn-dark.btn-sm(type="button", data-bloquear-id=usuario.id_usuario) Banir
-                  // Botão advertir
-                  button.btn.btn-warning.btn-sm(type="button", data-advertir-id=usuario.id_usuario, data-advertir-nome=usuario.nome_usuario) Advertir
+                    button.btn.btn-dark.btn-sm(
+                      type="button",
+                      class="btn-banir",
+                      data-id=usuario.id_usuario
+                    ) Banir
+                  button.btn.btn-warning.btn-sm(
+                    type="button",
+                    class="btn-advertir",
+                    data-id=usuario.id_usuario,
+                    data-nome=usuario.nome_usuario
+                  ) Advertir
 
-    // Seção de Postagens
-    h2.mt-5
-      i.fas.fa-file-alt.mr-2
-      | Gerenciamento de Postagens
+    // Postagens
+    h2.mt-5 Postagens
     .search-box
-      input.form-control#postSearch(type="text", placeholder="Buscar postagens...", oninput="filtrarPostagens()")
-    h4.mt-5 Postagens
+      input.form-control#postSearch(type="text", placeholder="Buscar postagens...")
     .table-scroll(style="max-height:260px; overflow:auto;")
       table.table.table-striped
         thead
@@ -85,59 +82,8 @@ block content
               td= post.id_autor
               td
                 a(href="#", data-id=post.id_postagem) #{post.titulo}
-              td
-                form(action=`/admin/super/postagens/${post.id_postagem}/excluir`, method="POST", class="confirm-form", data-confirm="Excluir postagem?")
-                  button.btn.btn-danger.btn-sm(type="submit") Excluir
-
-    // Modal para visualizar postagem
-    div#modalPostagem.modal(style="display:none;")
-      div.modal-dialog
-        div.modal-content
-          div.modal-header
-            h5.modal-title Conteúdo da Postagem
-            // botao close sem onclick inline; data-target aponta para id do modal
-            button(type="button", class="close btn-close-modal", data-target="modalPostagem") &times;
-          div.modal-body
-            p#modalConteudo
-            img#modalImagem(style="max-width:100%;")
-
-    // Seção de Reports
-    h2.mt-5
-      i.fas.fa-flag.mr-2
-      | Postagens Reportadas
-    h4.mt-5(style="margin-top:40px;") Postagens Reportadas
-    .table-scroll(style="max-height:260px; overflow:auto; margin-bottom:32px;")
-      table.table.table-striped
-        thead
-          tr
-            th ID
-            th Motivo
-            th Visualizar
-            th Excluir
-        tbody(id="reportadasTable")
-          // Preenchido via JS (JS ajustado abaixo para inserir class/data-confirm)
-
-    // Modal para visualizar postagem reportada
-    div#modalReportada.modal(style="display:none;")
-      div.modal-dialog
-        div.modal-content
-          div.modal-header
-            h5.modal-title Postagem Reportada
-            button(type="button", class="close btn-close-modal", data-target="modalReportada") &times;
-          div.modal-body
-            p#modalReportadaMotivo
-            div#modalReportadaConteudoBox(style="margin-bottom:10px;")
-              label Título:
-              pre#modalReportadaTitulo(style="white-space:pre-wrap; background:#f8f9fa; padding:8px; border-radius:4px;")
-              label Conteúdo:
-              pre#modalReportadaConteudo(style="white-space:pre-wrap; background:#f8f9fa; padding:8px; border-radius:4px;")
-            div#modalReportadaImagemBox(style="margin-bottom:10px;")
-              label Imagem:
-              img#modalReportadaImagem(style="max-width:100%; border:1px solid #ddd; border-radius:4px; margin-top:4px;")
-            form(id="formExcluirReportada", method="POST")
-              button.btn.btn-danger(type="submit") Excluir
-
-    // Modal para advertir usuário
+      
+    // Modal Advertir
     div#modalAdvertir.modal(style="display:none;")
       div.modal-dialog
         div.modal-content
@@ -155,7 +101,8 @@ block content
           div.modal-footer
             button.btn.btn-secondary(type="button", class="btn-cancel-advertir", data-target="modalAdvertir") Cancelar
             button.btn.btn-warning(type="button", id="btn-enviar-advertencia") Enviar Advertência
-    // Modal banir/desbanir usuário
+
+    // Modal Banir/Desbanir
     div#modalBanir.modal(style="display:none;")
       div.modal-dialog
         div.modal-content
@@ -164,7 +111,13 @@ block content
             button(type="button", class="close btn-close-modal", data-target="modalBanir") &times;
           div.modal-body
             p#modalBanirNome
-            textarea.form-control#modalBanirMotivo(rows="3" placeholder="Motivo do banimento/desbanimento")
+            select.form-select#modalBanirMotivoSelect
+              option(value="Ofensa grave") Ofensa grave
+              option(value="Spam") Spam
+              option(value="Conteúdo impróprio") Conteúdo impróprio
+              option(value="Excesso de advertências") Excesso de advertências
+              option(value="Outro") Outro
+            textarea.form-control#modalBanirMotivo(rows="3" placeholder="Detalhes do motivo")
           div.modal-footer
             button.btn.btn-secondary(type="button", class="btn-cancel-banir", data-target="modalBanir") Cancelar
             button.btn.btn-dark(type="button", id="btn-enviar-banir") Confirmar
@@ -240,26 +193,23 @@ block content
             th ID
             th Motivo
             th Visualizar
+            th Previsualizar
             th Excluir
+            th Ignorar
         tbody(id="comentariosReportadosTable")
-          // Preenchido via JS
-
-    // Modal para visualizar comentário reportado
-    div#modalComentarioReportado.modal(style="display:none;")
-      div.modal-dialog
-        div.modal-content
-          div.modal-header
-            h5.modal-title Comentário Reportado
-            button(type="button", class="close btn-close-modal", data-target="modalComentarioReportado") &times;
-          div.modal-body
-            p#modalComentarioReportadoMotivo
-            div#modalComentarioReportadoConteudoBox(style="margin-bottom:10px;")
-              label Autor:
-              pre#modalComentarioReportadoAutor(style="white-space:pre-wrap; background:#f8f9fa; padding:8px; border-radius:4px;")
-              label Conteúdo:
-              pre#modalComentarioReportadoConteudo(style="white-space:pre-wrap; background:#f8f9fa; padding:8px; border-radius:4px;")
-            form(id="formExcluirComentarioReportado", method="POST")
-              button.btn.btn-danger(type="submit") Excluir
+          if reportsComentarios && reportsComentarios.length
+            each report in reportsComentarios
+              tr
+                td= report.id_report
+                td= report.motivo
+                td
+                  button.btn.btn-info.btn-sm.btn-visualizar-comentario(data-id=report.id_report) Visualizar
+                td
+                  button.btn.btn-secondary.btn-sm.btn-previsualizar-report(data-id=report.id_report, data-tipo="comentario") Previsualizar
+                td
+                  button.btn.btn-danger.btn-sm.btn-excluir-comentario-reportado(data-id=report.id_report) Excluir
+                td
+                  button.btn.btn-secondary.btn-sm.btn-ignorar-report(data-id=report.id_report, data-tipo="comentarios") Ignorar
 
     // Seção de Reports de Grupos
     h2.mt-5
@@ -277,7 +227,9 @@ block content
             th Detalhes
             th Data
             th Status
-            th Ações
+            th Previsualizar
+            th Excluir
+            th Ignorar
         tbody
           if reportsGrupos && reportsGrupos.length
             each report in reportsGrupos
@@ -290,10 +242,11 @@ block content
                 td= report.data_report
                 td= report.status
                 td
-                  form(action=`/admin/super/reports-grupos/${report.id_report}/review`, method="POST")
-                    button.btn.btn-success.btn-sm(type="submit") Marcar como revisado
-                  form(action=`/admin/super/reports-grupos/${report.id_report}/dismiss`, method="POST")
-                    button.btn.btn-secondary.btn-sm(type="submit") Ignorar
+                  button.btn.btn-secondary.btn-sm.btn-previsualizar-report(data-id=report.id_report, data-tipo="grupo") Previsualizar
+                td
+                  button.btn.btn-danger.btn-sm.btn-excluir-grupo-reportado(data-id=report.id_report) Excluir
+                td
+                  button.btn.btn-secondary.btn-sm.btn-ignorar-report(data-id=report.id_report, data-tipo="grupos") Ignorar
 
     // Seção de Reports de Eventos
     h2.mt-5
@@ -311,7 +264,9 @@ block content
             th Detalhes
             th Data
             th Status
-            th Ações
+            th Previsualizar
+            th Excluir
+            th Ignorar
         tbody
           if reportsEventos && reportsEventos.length
             each report in reportsEventos
@@ -324,10 +279,11 @@ block content
                 td= report.data_report
                 td= report.status
                 td
-                  form(action=`/admin/super/reports-eventos/${report.id_report}/review`, method="POST")
-                    button.btn.btn-success.btn-sm(type="submit") Marcar como revisado
-                  form(action=`/admin/super/reports-eventos/${report.id_report}/dismiss`, method="POST")
-                    button.btn.btn-secondary.btn-sm(type="submit") Ignorar
+                  button.btn.btn-secondary.btn-sm.btn-previsualizar-report(data-id=report.id_report, data-tipo="evento") Previsualizar
+                td
+                  button.btn.btn-danger.btn-sm.btn-excluir-evento-reportado(data-id=report.id_report) Excluir
+                td
+                  button.btn.btn-secondary.btn-sm.btn-ignorar-report(data-id=report.id_report, data-tipo="eventos") Ignorar
 
     // Seção de Reports de Usuários
     h2.mt-5
@@ -345,7 +301,9 @@ block content
             th Detalhes
             th Data
             th Status
-            th Ações
+            th Previsualizar
+            th Aceitar
+            th Ignorar
         tbody
           if reportsUsuarios && reportsUsuarios.length
             each report in reportsUsuarios
@@ -358,523 +316,29 @@ block content
                 td= report.data_report
                 td= report.status
                 td
-                  form(action=`/admin/super/reports-usuarios/${report.id_report}/review`, method="POST")
-                    button.btn.btn-success.btn-sm(type="submit") Marcar como revisado
-                  form(action=`/admin/super/reports-usuarios/${report.id_report}/dismiss`, method="POST")
-                    button.btn.btn-secondary.btn-sm(type="submit") Ignorar
+                  button.btn.btn-secondary.btn-sm.btn-previsualizar-report(data-id=report.id_report, data-tipo="usuario") Previsualizar
+                td
+                  button.btn.btn-success.btn-sm.btn-aceitar-report-usuario(
+                    data-id=report.id_report,
+                    data-usuario=report.id_usuario,
+                    data-motivo=report.motivo
+                  ) Aceitar
+                td
+                  button.btn.btn-secondary.btn-sm.btn-ignorar-report(data-id=report.id_report, data-tipo="usuarios") Ignorar
 
+    // Modal de Previsualização Genérico
+    div#modalPrevisualizarReport.modal.fade(tabindex="-1", aria-labelledby="modalPrevisualizarReportLabel", aria-hidden="true")
+      div.modal-dialog
+        div.modal-content
+          div.modal-header
+            h5.modal-title#modalPrevisualizarReportLabel Previsualizar Conteúdo Reportado
+            button.btn-close(type="button", data-bs-dismiss="modal", aria-label="Fechar")
+          div.modal-body
+            // Conteúdo dinâmico via JS
+            div#modalPrevisualizarReportConteudo
+          div.modal-footer
+            button.btn.btn-secondary(type="button", data-bs-dismiss="modal") Fechar
+
+block scripts
   script(src="/blokdepalavroes.js")
-  script.
-    // Filtragem de usuários
-    function filtrarUsuarios() {
-      const q = document.getElementById('userSearch').value.toLowerCase();
-      const rows = document.querySelectorAll('#usuariosTable tr');
-      rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-      });
-    }
-
-    // Filtragem de postagens
-    function filtrarPostagens() {
-      const q = document.getElementById('postSearch').value.toLowerCase();
-      const rows = document.querySelectorAll('#postagensTable tr');
-      rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      // Carrega listas via AJAX
-      carregarReportadas();
-      adicionarEventosAdvertir();
-      carregarPedidosVerificacao();
-      carregarComentariosReportados();
-
-      // Inicializa botões que fecham modais (sem inline)
-      document.querySelectorAll('.btn-close-modal, .btn-cancel-advertir').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          const targetId = this.dataset.target;
-          if (targetId) {
-            const el = document.getElementById(targetId);
-            if (el) el.style.display = 'none';
-          }
-        });
-      });
-
-      // Fecha modal ao clicar no backdrop
-      document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-          if (e.target === this) this.style.display = 'none';
-        });
-      });
-
-      // Confirm prompts para forms que antes usavam onsubmit inline
-      document.querySelectorAll('form.confirm-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-          const msg = this.dataset.confirm || 'Confirmar ação?';
-          if (!confirm(msg)) e.preventDefault();
-        });
-      });
-
-      // Enviar advertência (liga ao botão)
-      const btnEnviar = document.getElementById('btn-enviar-advertencia');
-      if (btnEnviar) {
-        btnEnviar.addEventListener('click', function() {
-          enviarAdvertencia();
-        });
-      }
-
-      // Re-aplica eventos nas linhas carregadas dinamicamente (quando necessário)
-      // observe/reattach: quando carregarReportadas() inserir linhas, ele já cria botões .ver-report que chamam abrirModalReportada
-    });
-
-    // Ajuste no carregamento de reports: crie forms sem onsubmit inline e com data-confirm
-    function carregarReportadas() {
-      fetch('/admin/super/postagens/reportadas')
-        .then(res => {
-          if (!res.ok) throw new Error('Erro ao buscar reports');
-          return res.json();
-        })
-        .then(data => {
-          const tbody = document.getElementById('reportadasTable');
-          tbody.innerHTML = '';
-          data.forEach(report => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${report.id_postagem}</td>
-              <td>${report.motivo}</td>
-              <td><button class="btn btn-info btn-sm ver-report" data-id="${report.id_report}" data-motivo="${report.motivo}" data-postagem="${report.id_postagem}">Ver</button></td>
-              <td>
-                <form action="/admin/super/postagens/${report.id_postagem}/excluir" method="POST" class="confirm-form" data-confirm="Excluir postagem reportada?">
-                  <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
-                </form>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
-
-          // Adiciona eventos aos botões "Ver"
-          document.querySelectorAll('.ver-report').forEach(btn => {
-            btn.addEventListener('click', function() {
-              abrirModalReportada(
-                this.getAttribute('data-id'),
-                this.getAttribute('data-motivo'),
-                this.getAttribute('data-postagem')
-              );
-            });
-          });
-
-          // Reaplica confirmação em forms criados dinamicamente
-          tbody.querySelectorAll('form.confirm-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-              const msg = this.dataset.confirm || 'Confirmar ação?';
-              if (!confirm(msg)) e.preventDefault();
-            });
-          });
-        })
-        .catch(err => {
-          const tbody = document.getElementById('reportadasTable');
-          tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar reports.</td></tr>';
-        });
-    }
-
-    // Adiciona eventos aos links de postagens
-    function adicionarEventosPostagens() {
-      document.querySelectorAll('#postagensTable a[data-id]').forEach(link => {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          abrirModalPostagem(this.getAttribute('data-id'));
-        });
-      });
-    }
-
-    // Renderiza postagens e adiciona eventos
-    function renderizarPostagens() {
-      // ...renderização da tabela de postagens...
-      adicionarEventosPostagens();
-    }
-
-    // Abrir modal de postagem
-    function abrirModalPostagem(id) {
-      fetch(`/admin/super/postagens/${id}/dados`)
-        .then(res => res.json())
-        .then((data) => {
-          document.getElementById('modalConteudo').innerText = data.conteudo;
-          document.getElementById('modalImagem').src = data.imagem || '';
-          document.getElementById('modalPostagem').style.display = 'block';
-        });
-    }
-    function fecharModalPostagem() {
-      document.getElementById('modalPostagem').style.display = 'none';
-    }
-
-    // Abrir modal de postagem reportada
-    function abrirModalReportada(id_report, motivo, id_postagem) {
-      fetch(`/admin/super/reports/${id_report}`)
-        .then(res => {
-          if (!res.ok) throw new Error('Erro ao buscar report');
-          return res.json();
-        })
-        .then(data => {
-          document.getElementById('modalReportadaMotivo').innerText = 'Motivo: ' + motivo;
-          let snapshot = {};
-          try {
-            snapshot = JSON.parse(data.snapshot_post);
-          } catch (e) {
-            snapshot = {};
-          }
-          document.getElementById('modalReportadaTitulo').innerText = snapshot.titulo || '(sem título)';
-          document.getElementById('modalReportadaConteudo').innerText = snapshot.conteudo || '(sem conteúdo)';
-          document.getElementById('modalReportadaImagem').src = snapshot.url_midia || '';
-          document.getElementById('modalReportadaImagemBox').style.display = snapshot.url_midia ? 'block' : 'none';
-          document.getElementById('formExcluirReportada').action = `/admin/super/postagens/${id_postagem}/excluir`;
-          document.getElementById('modalReportada').style.display = 'block';
-        })
-        .catch(() => {
-          alert('Erro ao abrir report.');
-        });
-    }
-    function fecharModalReportada() {
-      document.getElementById('modalReportada').style.display = 'none';
-    }
-
-    // Modal advertir usuário (mesma lógica: remova onclick inline e use evento JS)
-    function adicionarEventosAdvertir() {
-      document.querySelectorAll('.btn-warning[data-advertir-id]').forEach(btn => {
-        btn.addEventListener('click', function() {
-          abrirModalAdvertir(this.getAttribute('data-advertir-id'), this.getAttribute('data-advertir-nome'));
-        });
-      });
-    }
-
-    // Modal advertir usuário
-    let usuarioAdvertirId = null;
-    function abrirModalAdvertir(id, nome) {
-      usuarioAdvertirId = id;
-      document.getElementById('modalAdvertirNome').innerText = `Advertir usuário: ${nome}`;
-      document.getElementById('modalAdvertirMotivo').value = '';
-      document.getElementById('modalAdvertirMsg').value = '';
-      document.getElementById('modalAdvertir').style.display = 'block';
-    }
-    function fecharModalAdvertir() {
-      document.getElementById('modalAdvertir').style.display = 'none';
-      usuarioAdvertirId = null;
-    }
-    document.getElementById('btn-enviar-advertencia').onclick = function() {
-      const motivo = document.getElementById('modalAdvertirMotivo').value;
-      const detalhes = document.getElementById('modalAdvertirMsg').value;
-      fetch(`/admin/super/usuarios/${usuarioAdvertirId}/advertir`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ motivo, detalhes })
-      }).then(() => {
-        alert('Advertência enviada!');
-        fecharModalAdvertir();
-        location.reload();
-      });
-    };
-    // Modal banir/desbanir
-    let usuarioBanirId = null;
-    let isDesbanir = false;
-    function abrirModalBanir(id, desbanir) {
-      usuarioBanirId = id;
-      isDesbanir = desbanir;
-      document.getElementById('modalBanirTitulo').innerText = desbanir ? 'Desbanir Usuário' : 'Banir Usuário';
-      document.getElementById('modalBanirNome').innerText = `Usuário ID: ${id}`;
-      document.getElementById('modalBanirMotivo').value = '';
-      document.getElementById('modalBanir').style.display = 'block';
-    }
-    function fecharModalBanir() {
-      document.getElementById('modalBanir').style.display = 'none';
-      usuarioBanirId = null;
-    }
-    document.getElementById('btn-enviar-banir').onclick = function() {
-      const motivo = document.getElementById('modalBanirMotivo').value;
-      fetch(`/admin/super/usuarios/${usuarioBanirId}/${isDesbanir ? 'desbanir' : 'banir'}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ motivo })
-      }).then(() => {
-        alert(isDesbanir ? 'Usuário desbanido!' : 'Usuário banido!');
-        fecharModalBanir();
-        location.reload();
-      });
-    }
-
-    // Carregar pedidos de verificação (documentos pendentes)
-    function carregarPedidosVerificacao() {
-      fetch('/admin/super/documentos/pendentes')
-        .then(res => {
-          if (!res.ok) throw new Error('Erro ao buscar documentos');
-          return res.json();
-        })
-        .then(data => {
-          const tbody = document.getElementById('verificacaoTable');
-          tbody.innerHTML = '';
-          data.forEach(doc => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${doc.id_documento}</td>
-              <td>${doc.usuario_nome || doc.id_usuario}</td>
-              <td>${doc.tipo_documento}</td>
-              <td>${doc.instituicao || ''}</td>
-              <td>${doc.status}</td>
-              <td>
-                <button class="btn btn-info btn-sm ver-doc" data-id="${doc.id_documento}">Ver</button>
-              </td>
-              <td>
-                <button class="btn btn-success btn-sm aprovar-doc" data-id="${doc.id_documento}">Aprovar</button>
-              </td>
-              <td>
-                <button class="btn btn-danger btn-sm rejeitar-doc" data-id="${doc.id_documento}">Rejeitar</button>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
-
-          // Eventos dos botões
-          document.querySelectorAll('.ver-doc').forEach(btn => {
-            btn.addEventListener('click', function() {
-              abrirModalDocumentoVerificacao(this.getAttribute('data-id'));
-            });
-          });
-          document.querySelectorAll('.aprovar-doc').forEach(btn => {
-            btn.addEventListener('click', function() {
-              aprovarDocumentoVerificacao(this.getAttribute('data-id'));
-            });
-          });
-          document.querySelectorAll('.rejeitar-doc').forEach(btn => {
-            btn.addEventListener('click', function() {
-              rejeitarDocumentoVerificacao(this.getAttribute('data-id'));
-            });
-          });
-        })
-        .catch(err => {
-          const tbody = document.getElementById('verificacaoTable');
-          tbody.innerHTML = '<tr><td colspan="8">Erro ao carregar pedidos de verificação.</td></tr>';
-        });
-    }
-
-    // Abrir modal documento verificação
-    function abrirModalDocumentoVerificacao(id) {
-      fetch(`/admin/super/documentos/${id}`)
-        .then(res => res.json())
-        .then(doc => {
-          document.getElementById('modalDocumentoTipo').innerText = 'Tipo: ' + doc.tipo_documento;
-          document.getElementById('modalDocumentoInstituicao').innerText = 'Instituição: ' + (doc.instituicao || '');
-          document.getElementById('modalDocumentoStatus').innerText = 'Status: ' + doc.status;
-          document.getElementById('modalDocumentoObservacoes').innerText = 'Observações: ' + (doc.observacoes || '');
-          document.getElementById('modalDocumentoArquivo').href = doc.caminho_arquivo;
-          document.getElementById('modalDocumentoArquivo').innerText = 'Ver Arquivo PDF';
-          document.getElementById('modalDocumentoVerificacao').style.display = 'block';
-        });
-    }
-    function fecharModalDocumentoVerificacao() {
-      document.getElementById('modalDocumentoVerificacao').style.display = 'none';
-    }
-
-    // Aprovar documento
-    function aprovarDocumentoVerificacao(id) {
-      if (!confirm('Aprovar este documento?')) return;
-      fetch(`/admin/super/documentos/${id}/aprovar`, { method: 'POST' })
-        .then(() => {
-          alert('Documento aprovado!');
-          carregarPedidosVerificacao();
-        });
-    }
-
-    // Rejeitar documento
-    function rejeitarDocumentoVerificacao(id) {
-      if (!confirm('Rejeitar este documento?')) return;
-      fetch(`/admin/super/documentos/${id}/rejeitar`, { method: 'POST' })
-        .then(() => {
-          alert('Documento rejeitado!');
-          carregarPedidosVerificacao();
-        });
-    }
-
-    // Carregar comentários reportados
-    function carregarComentariosReportados() {
-      fetch('/admin/super/comentarios/reportados')
-        .then(res => {
-          if (!res.ok) throw new Error('Erro ao buscar reports de comentários');
-          return res.json();
-        })
-        .then(data => {
-          const tbody = document.getElementById('comentariosReportadosTable');
-          tbody.innerHTML = '';
-          data.forEach(report => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${report.id_comentario}</td>
-              <td>${report.motivo}</td>
-              <td><button class="btn btn-info btn-sm ver-comentario-report" data-id="${report.id_report}" data-motivo="${report.motivo}" data-comentario="${report.id_comentario}">Ver</button></td>
-              <td>
-                <form action="/admin/super/comentarios/${report.id_comentario}/excluir" method="POST" class="confirm-form" data-confirm="Excluir comentário reportado?">
-                  <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
-                </form>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
-
-          // Adiciona eventos aos botões "Ver"
-          document.querySelectorAll('.ver-comentario-report').forEach(btn => {
-            btn.addEventListener('click', function() {
-              abrirModalComentarioReportado(
-                this.getAttribute('data-id'),
-                this.getAttribute('data-motivo'),
-                this.getAttribute('data-comentario')
-              );
-            });
-          });
-
-          // Reaplica confirmação em forms criados dinamicamente
-          tbody.querySelectorAll('form.confirm-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-              const msg = this.dataset.confirm || 'Confirmar ação?';
-              if (!confirm(msg)) e.preventDefault();
-            });
-          });
-        })
-        .catch(err => {
-          const tbody = document.getElementById('comentariosReportadosTable');
-          tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar reports de comentários.</td></tr>';
-        });
-    }
-
-    // Modal para visualizar comentário reportado
-    function abrirModalComentarioReportado(id_report, motivo, id_comentario) {
-      fetch(`/admin/super/reports-comentarios/${id_report}`)
-        .then(res => {
-          if (!res.ok) throw new Error('Erro ao buscar report');
-          return res.json();
-        })
-        .then(data => {
-          document.getElementById('modalComentarioReportadoMotivo').innerText = 'Motivo: ' + motivo;
-          let snapshot = {};
-          try {
-            snapshot = JSON.parse(data.snapshot_comentario);
-          } catch (e) {
-            snapshot = {};
-          }
-          document.getElementById('modalComentarioReportadoAutor').innerText = snapshot.autor || '(sem autor)';
-          document.getElementById('modalComentarioReportadoConteudo').innerText = snapshot.conteudo || '(sem conteúdo)';
-          document.getElementById('formExcluirComentarioReportado').action = `/admin/super/comentarios/${id_comentario}/excluir`;
-          document.getElementById('modalComentarioReportado').style.display = 'block';
-        })
-        .catch(() => {
-          alert('Erro ao abrir report de comentário.');
-        });
-    }
-    function fecharModalComentarioReportado() {
-      document.getElementById('modalComentarioReportado').style.display = 'none';
-    }
-              abrirModalComentarioReportado(
-                this.getAttribute('data-id'),
-                this.getAttribute('data-motivo'),
-                this.getAttribute('data-comentario')
-              );
-            });
-          });
-
-          // Reaplica confirmação em forms criados dinamicamente
-          tbody.querySelectorAll('form.confirm-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-              const msg = this.dataset.confirm || 'Confirmar ação?';
-              if (!confirm(msg)) e.preventDefault();
-            });
-          });
-        })
-        .catch(err => {
-          const tbody = document.getElementById('comentariosReportadosTable');
-          tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar reports de comentários.</td></tr>';
-        });
-    }
-
-    // Modal para visualizar comentário reportado
-    function abrirModalComentarioReportado(id_report, motivo, id_comentario) {
-      fetch(`/admin/super/reports-comentarios/${id_report}`)
-        .then(res => {
-          if (!res.ok) throw new Error('Erro ao buscar report');
-          return res.json();
-        })
-        .then(data => {
-          document.getElementById('modalComentarioReportadoMotivo').innerText = 'Motivo: ' + motivo;
-          let snapshot = {};
-          try {
-            snapshot = JSON.parse(data.snapshot_comentario);
-          } catch (e) {
-            snapshot = {};
-          }
-          document.getElementById('modalComentarioReportadoAutor').innerText = snapshot.autor || '(sem autor)';
-          document.getElementById('modalComentarioReportadoConteudo').innerText = snapshot.conteudo || '(sem conteúdo)';
-          document.getElementById('formExcluirComentarioReportado').action = `/admin/super/comentarios/${id_comentario}/excluir`;
-          document.getElementById('modalComentarioReportado').style.display = 'block';
-        })
-        .catch(() => {
-          alert('Erro ao abrir report de comentário.');
-        });
-    }
-    function fecharModalComentarioReportado() {
-      document.getElementById('modalComentarioReportado').style.display = 'none';
-    }
-        btnEnviar.addEventListener('click', function() {
-          enviarAdvertencia();
-        });
-      }
-
-      // Re-aplica eventos nas linhas carregadas dinamicamente (quando necessário)
-      // observe/reattach: quando carregarReportadas() inserir linhas, ele já cria botões .ver-report que chamam abrirModalReportada
-    });
-
-    // Ajuste no carregamento de reports: crie forms sem onsubmit inline e com data-confirm
-    function carregarReportadas() {
-      fetch('/admin/super/postagens/reportadas')
-        .then(res => {
-          if (!res.ok) throw new Error('Erro ao buscar reports');
-          return res.json();
-        })
-        .then(data => {
-          const tbody = document.getElementById('reportadasTable');
-          tbody.innerHTML = '';
-          data.forEach(report => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${report.id_postagem}</td>
-              <td>${report.motivo}</td>
-              <td><button class="btn btn-info btn-sm ver-report" data-id="${report.id_report}" data-motivo="${report.motivo}" data-postagem="${report.id_postagem}">Ver</button></td>
-              <td>
-                <form action="/admin/super/postagens/${report.id_postagem}/excluir" method="POST" class="confirm-form" data-confirm="Excluir postagem reportada?">
-                  <button class="btn btn-danger btn-sm" type="submit">Excluir</button>
-                </form>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
-
-          // Adiciona eventos aos botões "Ver"
-          document.querySelectorAll('.ver-report').forEach(btn => {
-            btn.addEventListener('click', function() {
-              abrirModalReportada(
-                this.getAttribute('data-id'),
-                this.getAttribute('data-motivo'),
-                this.getAttribute('data-postagem')
-              );
-            });
-          });
-
-          // Reaplica confirmação em forms criados dinamicamente
-          tbody.querySelectorAll('form.confirm-form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-              const msg = this.dataset.confirm || 'Confirmar ação?';
-              if (!confirm(msg)) e.preventDefault();
-            });
-          });
-        })
-        .catch(err => {
-          const tbody = document.getElementById('reportadasTable');
-          tbody.innerHTML = '<tr><td colspan="4">Erro ao carregar reports.</td></tr>';
-        });
-    }
-
+  script(src="/javascripts/admin/super.js")

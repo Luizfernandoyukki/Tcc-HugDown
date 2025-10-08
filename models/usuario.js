@@ -24,7 +24,28 @@ module.exports = (sequelize, DataTypes) => {
     fuso_horario: DataTypes.STRING(50),
     provider_oauth: DataTypes.STRING(50),
     id_oauth: DataTypes.STRING(100),
-    subscription: { type: DataTypes.TEXT, allowNull: true } // Para armazenar o objeto subscription do push
+    subscription: { type: DataTypes.TEXT, allowNull: true }, // Para armazenar o objeto subscription do push
+    bloqueado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    motivo_bloqueio: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    data_bloqueio: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    motivo_desbloqueio: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    data_desbloqueio: {
+      type: DataTypes.DATE,
+      allowNull: true
+    }
   }, {
     tableName: 'usuarios',
     timestamps: false

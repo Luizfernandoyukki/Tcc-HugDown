@@ -1,214 +1,232 @@
 const express = require('express');
 const router = express.Router();
-const reportsController = require('../controllers/reports');
-const reportComentarioController = require('../controllers/reportComentario');
-const { Report, Postagem, Usuario, Notificacao, DocumentoVerificacao, Administrador, ReportGrupo } = require('../models');
+const { Usuario, Postagem, Notificacao, DocumentoVerificacao, Administrador, Advertencia } = require('../models');
 const fs = require('fs');
 const path = require('path');
 
-// Listar todos os reports para o painel ADM (dados simples)
-router.get('/admin/super/postagens/reportadas', reportsController.listarSimples);
-
-// Visualizar detalhes de um report específico
-router.get('/admin/super/reports/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const report = await Report.findByPk(id);
-    if (!report) return res.status(404).json({ error: 'Report não encontrado' });
-    res.json({ snapshot_post: report.snapshot_post, motivo: report.motivo });
-  } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar report: ' + err.message });
-  }
+// Listar usuários
+router.get('/usuarios', async (req, res) => {
+  const usuarios = await Usuario.findAll();
+  res.json(usuarios);
 });
 
-// Excluir postagem referida (cascata) - agora remove arquivo físico antes
-router.post('/admin/super/postagens/:id/excluir', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const postagem = await Postagem.findByPk(id);
-    if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
+// Listar postagens
+router.get('/postagens', async (req, res) => {
+  const postagens = await Postagem.findAll();
+  res.json(postagens);
+});
 
-    // Remove arquivo de mídia se existir e for local (ex: /post/..., /grupos/..., /perfis/...)
-    try {
-      const midia = postagem.url_midia;
-      if (midia && typeof midia === 'string') {
-        const candidate = midia.replace(/^\//, '');
-        const filePath = path.join(__dirname, '..', candidate);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
+// Listar documentos de verificação pendentes
+router.get('/documentos/pendentes', async (req, res) => {
+  const docs = await DocumentoVerificacao.findAll({
+    where: { status: 'pending' },
+    include: [{ model: Usuario, as: 'usuario' }]
+  });
+  res.json(docs);
+});
+
+// Advertir usuário
+router.post('/usuarios/:id/advertir', async (req, res) => {
+  const { id } = req.params;
+  const { motivo, detalhes } = req.body;
+  await Advertencia.create({ id_usuario: id, motivo, detalhes });
+  await Notificacao.create({
+    id_usuario: id,
+    tipo_notificacao: 'system',
+    titulo: 'Advertência',
+    mensagem: motivo + (detalhes ? ' - ' + detalhes : ''),
+    lida: false
+  });
+  const usuario = await Usuario.findByPk(id);
+  if (usuario && usuario.email) {
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
-    } catch (err) {
-      console.warn('[ADM][EXCLUIR_POSTAGEM] erro ao remover arquivo de mídia:', err.message);
-    }
-
-    await postagem.destroy(); // Remove postagem e tudo que tem ON DELETE CASCADE
-    res.redirect('/admin/super'); // Redireciona para painel após exclusão
-  } catch (err) {
-    res.status(500).json({ error: 'Erro ao excluir postagem: ' + err.message });
+    });
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || '"HugDown" <no-reply@seudominio.com>',
+      to: usuario.email,
+      subject: 'Advertência recebida - HugDown',
+      text: `Você recebeu uma advertência.\nMotivo: ${motivo}${detalhes ? '\nDetalhes: ' + detalhes : ''}\n\nSe tiver dúvidas, entre em contato com SuporteHugDown@gmail.com.`
+    });
   }
+  res.json({ sucesso: true });
 });
 
-// Advertir usuário (enviar notificação)
-router.post('/admin/super/usuarios/:id/advertir', async (req, res) => {
+// Banir usuário
+router.post('/usuarios/:id/banir', async (req, res) => {
   const { id } = req.params;
-  const { mensagem } = req.body;
-  try {
-    const usuario = await Usuario.findByPk(id);
-    if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
-
-    // Cria notificação de advertência
-    await Notificacao.create({
-      id_usuario: usuario.id_usuario,
-      tipo_notificacao: 'system',
-      titulo: 'Advertência',
-      mensagem: mensagem,
-      url_relacionada: '',
-      lida: false
+  const { motivo } = req.body;
+  const usuario = await Usuario.findByPk(id);
+  if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+  if (usuario.bloqueado) return res.json({ sucesso: false, error: 'Usuário já está banido.' });
+  await usuario.update({ bloqueado: true, motivo_bloqueio: motivo, data_bloqueio: new Date() });
+  await Notificacao.create({
+    id_usuario: usuario.id_usuario,
+    tipo_notificacao: 'system',
+    titulo: 'Banimento',
+    mensagem: motivo,
+    lida: false
+  });
+  if (usuario.email) {
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
     });
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Erro ao advertir usuário: ' + err.message });
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || '"HugDown" <no-reply@seudominio.com>',
+      to: usuario.email,
+      subject: 'Conta banida - HugDown',
+      text: `Sua conta foi banida.\nMotivo: ${motivo}\nPara recorrer, entre em contato com SuporteHugDown@gmail.com.`
+    });
   }
+  res.json({ sucesso: true });
 });
 
-// Listar documentos pendentes para painel super admin
-router.get('/admin/super/documentos/pendentes', async (req, res) => {
-  try {
-    const docs = await DocumentoVerificacao.findAll({
-      where: { status: 'pending' },
-      include: [{ model: Usuario, as: 'usuario' }]
+// Desbanir usuário
+router.post('/usuarios/:id/desbanir', async (req, res) => {
+  const { id } = req.params;
+  const { motivo } = req.body;
+  const usuario = await Usuario.findByPk(id);
+  if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+  if (!usuario.bloqueado) return res.json({ sucesso: false, error: 'Usuário já está desbloqueado.' });
+  await usuario.update({ bloqueado: false, motivo_desbloqueio: motivo, data_desbloqueio: new Date() });
+  await Notificacao.create({
+    id_usuario: usuario.id_usuario,
+    tipo_notificacao: 'system',
+    titulo: 'Desbanimento',
+    mensagem: motivo,
+    lida: false
+  });
+  if (usuario.email) {
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
     });
-    // Retorna dados essenciais para o painel
-    res.json(docs.map(doc => ({
-      id_documento: doc.id_documento,
-      id_usuario: doc.id_usuario,
-      usuario_nome: doc.usuario ? doc.usuario.nome_usuario : '',
-      tipo_documento: doc.tipo_documento,
-      instituicao: doc.instituicao,
-      status: doc.status,
-      caminho_arquivo: doc.caminho_arquivo,
-      observacoes: doc.observacoes
-    })));
-  } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar documentos: ' + err.message });
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || '"HugDown" <no-reply@seudominio.com>',
+      to: usuario.email,
+      subject: 'Conta desbanida - HugDown',
+      text: `Sua conta foi desbanida.\nMotivo: ${motivo}\nEm caso de dúvidas, entre em contato com SuporteHugDown@gmail.com.`
+    });
   }
+  res.json({ sucesso: true });
 });
 
-// Visualizar detalhes de um documento
-router.get('/admin/super/documentos/:id', async (req, res) => {
-  try {
-    const doc = await DocumentoVerificacao.findByPk(req.params.id, {
-      include: [{ model: Usuario, as: 'usuario' }]
-    });
-    if (!doc) return res.status(404).json({ error: 'Documento não encontrado' });
-    res.json({
-      id_documento: doc.id_documento,
-      tipo_documento: doc.tipo_documento,
-      instituicao: doc.instituicao,
-      status: doc.status,
-      caminho_arquivo: doc.caminho_arquivo,
-      observacoes: doc.observacoes
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Erro ao buscar documento: ' + err.message });
-  }
+// Excluir postagem
+router.post('/postagens/:id/excluir', async (req, res) => {
+  const { id } = req.params;
+  const postagem = await Postagem.findByPk(id);
+  if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
+  await postagem.destroy();
+  res.json({ sucesso: true });
 });
 
 // Aprovar documento
-router.post('/admin/super/documentos/:id/aprovar', async (req, res) => {
-  try {
-    const doc = await DocumentoVerificacao.findByPk(req.params.id);
-    if (!doc) return res.status(404).json({ error: 'Documento não encontrado' });
+router.post('/documentos/:id/aprovar', async (req, res) => {
+  const doc = await DocumentoVerificacao.findByPk(req.params.id);
+  if (!doc) return res.status(404).json({ error: 'Documento não encontrado' });
 
-    // Cria ProfissionalSaude se não existir
-    const { ProfissionalSaude, Usuario, Administrador } = require('../models');
-    const usuario = await Usuario.findByPk(doc.id_usuario);
-    if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
+  // Cria ProfissionalSaude se não existir
+  const { ProfissionalSaude, Usuario, Administrador } = require('../models');
+  const usuario = await Usuario.findByPk(doc.id_usuario);
+  if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
 
-    // Busca o id_admin do administrador logado
-    const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
-    if (!admin) return res.status(403).json({ error: 'Administrador não encontrado.' });
+  // Busca o id_admin do administrador logado
+  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
+  if (!admin) return res.status(403).json({ error: 'Administrador não encontrado.' });
 
-    // Evita duplicidade
-    const jaExiste = await ProfissionalSaude.findOne({ where: { id_usuario: usuario.id_usuario } });
-    if (!jaExiste) {
-      await ProfissionalSaude.create({
-        id_usuario: usuario.id_usuario,
-        tipo_registro: doc.tipo_documento?.toUpperCase() || 'OUTRO',
-        numero_registro: doc.numero_documento,
-        uf_registro: '', // Não tem no documento, pode pedir para preencher depois
-        especialidade: doc.observacoes,
-        instituicao: doc.instituicao,
-        data_registro: new Date(),
-        status_verificacao: 'aprovado',
-        data_verificacao: new Date(),
-        verificado_por: admin.id_admin, // Corrigido: usa id_admin do admin logado
-      });
-    }
-
-    await doc.update({ status: 'approved', data_verificacao: new Date() });
-    if (!usuario.verificado) await usuario.update({ verificado: true });
-
-    res.json({ success: true, mensagem: 'Documento aprovado com sucesso!' });
-  } catch (err) {
-    // Mensagem amigável para erro de FK
-    if (err.message && err.message.includes('a foreign key constraint fails')) {
-      return res.status(500).json({ error: 'Erro interno: não foi possível aprovar o documento. Verifique se o administrador está cadastrado corretamente.' });
-    }
-    res.status(500).json({ error: 'Erro ao aprovar documento: ' + err.message });
+  // Evita duplicidade
+  const jaExiste = await ProfissionalSaude.findOne({ where: { id_usuario: usuario.id_usuario } });
+  if (!jaExiste) {
+    await ProfissionalSaude.create({
+      id_usuario: usuario.id_usuario,
+      tipo_registro: doc.tipo_documento?.toUpperCase() || 'OUTRO',
+      numero_registro: doc.numero_documento,
+      uf_registro: '', // Não tem no documento, pode pedir para preencher depois
+      especialidade: doc.observacoes,
+      instituicao: doc.instituicao,
+      data_registro: new Date(),
+      status_verificacao: 'aprovado',
+      data_verificacao: new Date(),
+      verificado_por: admin.id_admin, // Corrigido: usa id_admin do admin logado
+    });
   }
+
+  await doc.update({ status: 'approved', data_verificacao: new Date() });
+  if (!usuario.verificado) await usuario.update({ verificado: true });
+
+  res.json({ success: true, mensagem: 'Documento aprovado com sucesso!' });
 });
 
 // Rejeitar documento
-router.post('/admin/super/documentos/:id/rejeitar', async (req, res) => {
-  try {
-    const doc = await DocumentoVerificacao.findByPk(req.params.id);
-    if (!doc) return res.status(404).json({ error: 'Documento não encontrado' });
-    await doc.update({ status: 'rejected', data_verificacao: new Date() });
-    // Mensagem amigável de sucesso
-    res.json({ success: true, mensagem: 'Documento rejeitado com sucesso!' });
-  } catch (err) {
-    // Mensagem amigável de erro
-    res.json({ success: false, mensagem: 'Não foi possível rejeitar o documento. Tente novamente mais tarde.' });
-  }
+router.post('/documentos/:id/rejeitar', async (req, res) => {
+  const doc = await DocumentoVerificacao.findByPk(req.params.id);
+  if (!doc) return res.status(404).json({ error: 'Documento não encontrado' });
+  await doc.update({ status: 'rejected', data_verificacao: new Date() });
+  res.json({ sucesso: true });
 });
 
-// Listar todos os reports de comentários para o painel ADM (dados simples)
-router.get('/admin/super/comentarios/reportados', reportComentarioController.listarSimples);
-
-// Visualizar detalhes de um report de comentário específico
-router.get('/admin/super/reports-comentarios/:id', reportComentarioController.buscarPorId);
-
-// Excluir comentário reportado (exemplo, ajuste conforme sua lógica)
-router.post('/admin/super/comentarios/:id/excluir', async (req, res) => {
-  const { id } = req.params;
-  const { Comentario } = require('../models');
-  const comentario = await Comentario.findByPk(id);
-  if (!comentario) return res.status(404).json({ error: 'Comentário não encontrado' });
-  await comentario.destroy();
-  res.redirect('/admin/super');
+// Dados detalhados de report de evento para previsualização AJAX
+router.get('/reports-eventos/:id/dados', async (req, res) => {
+  const { ReportEvento, Evento } = require('../models');
+  const report = await ReportEvento.findByPk(req.params.id, {
+    include: [{ model: Evento, as: 'evento' }]
+  });
+  if (!report || !report.evento) return res.status(404).json({ error: 'Evento não encontrado' });
+  res.json({
+    titulo_evento: report.evento.titulo_evento,
+    descricao_evento: report.evento.descricao_evento,
+    data_inicio: report.evento.data_inicio,
+    data_fim: report.evento.data_fim,
+    local_evento: report.evento.local_evento,
+    motivo: report.motivo,
+    detalhes: report.detalhes
+  });
 });
 
-// Excluir usuário (verifica se é admin antes)
-router.post('/admin/super/usuarios/:id/excluir', async (req, res) => {
-  const { Administrador, Usuario } = require('../models');
-  const admin = await Administrador.findOne({ where: { id_usuario: req.session.userId } });
-  if (!admin || admin.nivel_admin !== 'super_admin') return res.status(403).render('error', { error: 'Acesso negado.' });
-
-  const alvoId = Number(req.params.id);
-  try {
-    const alvoAdmin = await Administrador.findOne({ where: { id_usuario: alvoId } });
-    if (alvoAdmin) {
-      return res.status(403).render('error', { error: 'Não é permitido excluir contas de administradores.' });
-    }
-    await Usuario.destroy({ where: { id_usuario: alvoId } });
-    res.redirect('/admin/super'); // Redireciona para o painel admin
-  } catch (err) {
-    console.error('[ADMIN][EXCLUIR_USUARIO][ERRO]', err); // Adicione este log para debug
-    res.status(500).render('error', { error: 'Erro ao excluir usuário: ' + err.message });
+// Excluir report de evento e o evento (AJAX) - exclui todos os reports do mesmo evento
+router.post('/reports-eventos/:id/excluir', async (req, res) => {
+  const { ReportEvento, Evento } = require('../models');
+  const report = await ReportEvento.findByPk(req.params.id);
+  if (!report) return res.status(404).json({ error: 'Report não encontrado' });
+  // Exclui o evento relacionado, se existir
+  if (report.id_evento) {
+    const evento = await Evento.findByPk(report.id_evento);
+    if (evento) await evento.destroy();
+    // Exclui todos os reports desse evento
+    await ReportEvento.destroy({ where: { id_evento: report.id_evento } });
+  } else {
+    await report.destroy();
   }
+  res.json({ sucesso: true });
+});
+
+// Ignorar (dismiss) report de evento (AJAX) - exclui todos os reports do mesmo evento se não existir mais evento
+router.post('/reports-eventos/:id/dismiss', async (req, res) => {
+  const { ReportEvento, Evento } = require('../models');
+  const report = await ReportEvento.findByPk(req.params.id);
+  if (!report) return res.status(404).json({ error: 'Report não encontrado' });
+  // Se o evento não existe mais, remove todos os reports desse evento
+  const evento = report.id_evento ? await Evento.findByPk(report.id_evento) : null;
+  if (!evento && report.id_evento) {
+    await ReportEvento.destroy({ where: { id_evento: report.id_evento } });
+  } else {
+    await report.destroy();
+  }
+  res.json({ sucesso: true });
 });
 
 module.exports = router;

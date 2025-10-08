@@ -102,6 +102,7 @@ router.use('/feed', require('./feed'));
 router.use('/advertencias', require('./advertencias'));
 router.use('/report-usuario', require('./reportUsuario'));
 router.use('/report-amigo', require('./reportAmigo'));
+router.use('/admin/super', require('./REPORTSPARAADM.JS'));
 
 // Função utilitária para converter lat/lng em endereço
 async function getLocationFromLatLng(lat, lng) {
