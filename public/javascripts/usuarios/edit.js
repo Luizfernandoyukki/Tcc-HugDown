@@ -9,18 +9,32 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
     const formData = new FormData(form);
     const id = form.action.match(/usuarios\/(\d+)/)[1];
+
+    // LOG dos dados enviados (igual ao cadastro.js)
+    const dadosEnviados = {};
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        dadosEnviados[key] = value.name;
+      } else {
+        dadosEnviados[key] = value;
+      }
+    }
+    console.log('[EDIT][FRONTEND][DADOS ENVIADOS]', dadosEnviados);
+
     try {
       const response = await fetch(`/usuarios/${id}`, {
         method: 'PUT',
         body: formData
       });
       const data = await response.json();
+      // Log do retorno do backend
+      console.log('[EDIT][FRONTEND][RESPONSE]', data);
       if (data.success) {
         alert('Perfil atualizado com sucesso!');
-        // Redireciona sempre para o index do usuário
         window.location.href = `/usuarios/index/${id}`;
       } else {
-        alert(data.error || 'Erro ao atualizar perfil');
+        // Mostra erro detalhado se vier do backend
+        alert(data.error || JSON.stringify(data) || 'Erro ao atualizar perfil');
       }
     } catch (err) {
       alert('Erro de conexão: ' + err.message);

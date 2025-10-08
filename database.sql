@@ -229,6 +229,7 @@ CREATE TABLE      mensagens_diretas (
     tipo_midia VARCHAR(50),
     lida BOOLEAN DEFAULT FALSE,
     data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    emoji VARCHAR(10),
     FOREIGN KEY (id_remetente) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_destinatario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
     INDEX idx_remetente (id_remetente),
@@ -620,4 +621,12 @@ WHERE u.email = 'ADM@HugDown.com'
 AND NOT EXISTS (
     SELECT 1 FROM administradores a JOIN usuarios uu ON a.id_usuario = uu.id_usuario WHERE uu.email = 'ADM@HugDown.com'
 );
+
+INSERT IGNORE INTO temas_conversa (nome_tema, cor_tema, ativo) VALUES
+('padrao', '#ffffff', TRUE),
+('escuro', '#222831', TRUE),
+('azul', '#007bff', TRUE),
+('verde', '#28a745', TRUE),
+('rosa', '#e83e8c', TRUE),
+('amarelo', '#ffc107', TRUE);
 

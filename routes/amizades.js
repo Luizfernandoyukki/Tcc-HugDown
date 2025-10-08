@@ -18,7 +18,9 @@ router.post('/solicitar', requireLogin, async (req, res) => {
   const id_solicitante = req.session.userId;
   const id_destinatario = parseInt(req.body.id_destinatario, 10);
   if (!id_destinatario || id_destinatario === id_solicitante) {
-    return res.redirect('back');
+    // Renderiza a página de amizade novamente (com erro)
+    const amizadeController = require('../controllers/amizade');
+    return amizadeController.listarUsuariosComStatus(req, res);
   }
   // Verifica se já existe amizade
   const existente = await Amizade.findOne({
@@ -42,7 +44,9 @@ router.post('/solicitar', requireLogin, async (req, res) => {
       id_amizade: amizade.id // <-- Adiciona o id da amizade
     });
   }
-  res.redirect('back');
+  // Sempre renderiza a página de amizade após solicitação
+  const amizadeController = require('../controllers/amizade');
+  return amizadeController.listarUsuariosComStatus(req, res);
 });
 
 // Aceitar amizade (corrigido para /aceitar/:id)

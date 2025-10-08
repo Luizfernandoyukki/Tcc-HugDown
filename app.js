@@ -45,7 +45,7 @@ app.use(helmet({
         "https://cdn.jsdelivr.net", 
         "https://cdnjs.cloudflare.com" ,
         "https://unpkg.com/imask",
-        "https://unpkg.com" // <-- Adicionado para permitir Leaflet.js
+        "https://unpkg.com"
       ],
       "style-src": [
         "'self'",
@@ -59,11 +59,12 @@ app.use(helmet({
         "data:",
         "https://*.tile.openstreetmap.org",
         "https://tile.openstreetmap.org",
-        "https://unpkg.com" // <-- Permite ícones do Leaflet
+        "https://unpkg.com"
       ],
       "connect-src": [
         "'self'",
-        "https://nominatim.openstreetmap.org"
+        "https://nominatim.openstreetmap.org",
+        "https://cdn.jsdelivr.net" // <-- Adicionado para liberar fetch do emoji picker
       ]
     },
   },
@@ -74,12 +75,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-// Remova estas linhas:
-// app.use('/perfis', express.static(path.join(__dirname, 'perfis')));
-// app.use('/post', express.static(path.join(__dirname, 'post')));
-// app.use('/images', express.static(path.join(__dirname, 'public/images')));
-// app.use('/docs', express.static(path.join(__dirname, 'docs')));
-// app.use('/grupos', express.static(path.join(__dirname, 'grupos')));
 
 // Configuração de sessão
 app.use(session({
@@ -149,8 +144,6 @@ app.use(async (req, res, next) => {
 // Rotas
 app.use('/', indexRouter);
 app.use('/webpush', require('./routes/webpush'));
-app.use(require('./routes/REPORTSPARAADM.JS'));
-app.use('/postagens', require('./routes/postagens'));
 app.get('/favicon.ico', (req, res) => res.status(204));
 // 404 handler
 app.use((req, res, next) => {

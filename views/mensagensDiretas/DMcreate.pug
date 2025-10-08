@@ -39,22 +39,16 @@ block content
                   | #{m.conteudo}
                   br
                   span.text-muted.small #{new Date(m.data_envio).toLocaleString('pt-BR')}
-    form.mt-3(action=`/mensagens-diretas/conversa/${amigo.id_usuario}` method='POST' enctype="multipart/form-data")
+    form.mt-3#form-dm(action=`/mensagens-diretas/conversa/${amigo.id_usuario}` method='POST' enctype="multipart/form-data" autocomplete="off")
       .input-group
-        input.form-control(type='text', name='conteudo', id='mensagem', placeholder='Digite sua mensagem...' required)
-        select.form-select#emoji-picker(name="emoji")
-          option(value="") Emoji
-          option(value="😀") 😀
-          option(value="😂") 😂
-          option(value="😍") 😍
-          option(value="👍") 👍
-          option(value="🙏") 🙏
-          option(value="🎉") 🎉
-          option(value="❤️") ❤️
-          option(value="😢") 😢
-          option(value="🔥") 🔥
-        input.form-control(type="file", id="imagem-chat", name="imagem_chat", accept="image/*")
-        button.btn.btn-primary(type="submit") Enviar
+        // Botão emoji
+        button.btn.btn-light#btn-emoji(type="button" tabindex="-1" style="font-size:1.5rem;" aria-label="Emoji") 😊
+        input.form-control(type='text', name='conteudo', id='mensagem', placeholder='Digite sua mensagem ou emoji...' autocomplete="off" style="min-width:120px;")
+        // Botão clipe de papel para imagem
+        label.btn.btn-light.mb-0.ms-1#btn-clip(title="Enviar imagem" style="font-size:1.3rem;cursor:pointer;")
+          i.fas.fa-paperclip
+          input.form-control(type="file", id="imagem-chat", name="imagem_chat", accept="image/*" style="display:none;")
+        button.btn.btn-primary(type="submit" id="btn-enviar-msg") Enviar
       input(type="hidden", id="respondendo_id", name="respondendo_id")
     .modal.fade#modalConfigChat(tabindex="-1", aria-labelledby="modalConfigChatLabel", aria-hidden="true")
       .modal-dialog
@@ -76,34 +70,4 @@ block content
           .modal-footer
             button.btn.btn-secondary(type="button", data-bs-dismiss="modal") Fechar
     a.btn.btn-link.mt-2(href='/mensagens-diretas') Voltar para conversas
-  script.
-    // Pesquisa de amigos
-    if (document.getElementById('busca-amigo')) {
-      document.getElementById('busca-amigo').addEventListener('input', function() {
-        const termo = this.value.toLowerCase();
-        document.querySelectorAll('.amigo-item').forEach(item => {
-          const nome = item.querySelector('.fw-bold').textContent.toLowerCase();
-          item.style.display = nome.includes(termo) ? '' : 'none';
-        });
-      });
-      document.querySelectorAll('.amigo-item').forEach(item => {
-        item.addEventListener('click', function() {
-          const id = item.getAttribute('data-id');
-          window.location.href = `/mensagens-diretas/conversa/${id}`;
-        });
-      });
-    }
-    // Tema da conversa
-    if (document.getElementById('tema-chat')) {
-      document.getElementById('tema-chat').addEventListener('change', function() {
-        document.body.className = 'tema-' + this.value;
-      });
-    }
-      });
-    }
-    // Tema da conversa
-    if (document.getElementById('tema-chat')) {
-      document.getElementById('tema-chat').addEventListener('change', function() {
-        document.body.className = 'tema-' + this.value;
-      });
-    }
+  script(src="/javascripts/mensagensDiretas/dm.js")

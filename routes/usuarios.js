@@ -104,6 +104,12 @@ router.get('/edit/:id', requireLogin, podeEditarOuVerPerfil, async (req, res) =>
 // Atualizar usuário (com upload de foto de perfil)
 router.put('/:id', requireLogin, uploadPerfil.single('foto_perfil'), async (req, res) => {
   try {
+    // LOG dos dados recebidos (igual ao cadastro)
+    console.log('[EDIT][BACKEND][REQ.BODY]', req.body);
+    if (req.file) {
+      console.log('[EDIT][BACKEND][REQ.FILE]', req.file);
+    }
+
     const usuario = await Usuario.findByPk(req.params.id);
     if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
 
@@ -121,8 +127,10 @@ router.put('/:id', requireLogin, uploadPerfil.single('foto_perfil'), async (req,
     usuario.biografia = req.body.biografia || usuario.biografia;
 
     await usuario.save();
-    res.json(usuario);
+    // Retorna sucesso explícito para o frontend
+    res.json({ success: true, usuario });
   } catch (err) {
+    console.error('[USUARIOS][PUT/:id][ERRO]', err);
     res.status(500).json({ error: 'Erro ao atualizar usuário: ' + err.message });
   }
 });
@@ -238,4 +246,3 @@ router.post('/solicitar-profissional', requireLogin, uploadDoc.single('documento
 });
 
 module.exports = router;
- 

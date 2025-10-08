@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     url_midia: DataTypes.STRING(500),
     tipo_midia: DataTypes.STRING(50),
     lida: { type: DataTypes.BOOLEAN, defaultValue: false },
-    data_envio: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+    data_envio: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    emoji: DataTypes.STRING(10)
   }, {
     tableName: 'mensagens_diretas',
     timestamps: false
