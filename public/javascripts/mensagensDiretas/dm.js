@@ -78,54 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Envio AJAX da mensagem
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    btnEnviar.disabled = true;
-
-    // Garante que o campo não está desabilitado ou readonly
-    inputMsg.disabled = false;
-    inputMsg.readOnly = false;
-
-    // Log para debug do valor do campo antes do envio
-    console.log('[FRONT][DM] Valor do campo conteudo:', inputMsg.value);
-
-    // Corrige bug de FormData: força atualização do valor do campo antes de criar o FormData
-    // (alguns navegadores podem não pegar o valor atualizado se o campo foi alterado por JS)
-    form.querySelector('[name="conteudo"]').value = inputMsg.value;
-
-    // Cria o FormData após garantir o valor correto
-    const formData = new FormData(form);
-
-    // Log para debug do valor enviado no FormData
-    console.log('[FRONT][DM] FormData conteudo:', formData.get('conteudo'));
-
-    // Permite enviar só emoji, só imagem ou texto não vazio
-    const conteudo = (formData.get('conteudo') || '').trim();
-    const temImagem = inputImg.files.length > 0;
-    if (!conteudo && !temImagem) {
-      btnEnviar.disabled = false;
-      inputMsg.focus();
-      return;
-    }
-    try {
-      const res = await fetch(form.action, {
-        method: 'POST',
-        body: formData
-      });
-      // Limpa o campo de mensagem e o preview do arquivo sempre após o envio
-      inputMsg.value = '';
-      inputImg.value = '';
-      fileNameDiv.textContent = '';
-      if (res.ok) {
-        await atualizarMensagens(true); // força scroll ao enviar
-      }
-    } catch (err) {
-      console.error('Erro ao enviar mensagem:', err);
-    }
-    btnEnviar.disabled = false;
-  });
-
   // Atualização automática das mensagens (polling simples)
   async function atualizarMensagens(scrollToBottom = false) {
     try {
@@ -163,8 +115,11 @@ document.addEventListener('DOMContentLoaded', function() {
   if (window._dmSubmitHandler) {
     form.removeEventListener('submit', window._dmSubmitHandler);
   }
+  // Adicione apenas UMA VEZ o listener de submit
   window._dmSubmitHandler = async function(e) {
     e.preventDefault();
+    if (form.classList.contains('enviando-msg')) return; // já está enviando, ignora
+
     btnEnviar.disabled = true;
     form.classList.add('enviando-msg');
     setTimeout(() => form.classList.remove('enviando-msg'), 1200);
@@ -172,21 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Garante que o campo não está desabilitado ou readonly
     inputMsg.disabled = false;
     inputMsg.readOnly = false;
-
-    // Log para debug do valor do campo antes do envio
-    console.log('[FRONT][DM] Valor do campo conteudo:', inputMsg.value);
-
-    // Corrige bug de FormData: força atualização do valor do campo antes de criar o FormData
-    // (alguns navegadores podem não pegar o valor atualizado se o campo foi alterado por JS)
     form.querySelector('[name="conteudo"]').value = inputMsg.value;
-
-    // Cria o FormData após garantir o valor correto
     const formData = new FormData(form);
-
-    // Log para debug do valor enviado no FormData
-    console.log('[FRONT][DM] FormData conteudo:', formData.get('conteudo'));
-
-    // Permite enviar só emoji, só imagem ou texto não vazio
     const conteudo = (formData.get('conteudo') || '').trim();
     const temImagem = inputImg.files.length > 0;
     if (!conteudo && !temImagem) {
@@ -215,18 +157,96 @@ document.addEventListener('DOMContentLoaded', function() {
   // Carrega mensagens ao abrir a tela e sempre faz scroll para o final
   atualizarMensagens(true);
 
-  // Troca de tema
+  // Troca de tema (carrega CSS diferente)
+  function aplicarTemaChat(tema) {
+    document.body.className = 'tema-' + tema;
+    // Remove CSS antigo
+    document.querySelectorAll('link[data-chat-tema]').forEach(link => link.remove());
+    // Carrega CSS do tema se não for padrão
+    if (tema !== 'padrao') {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `/stylesheets/mensagensDiretas/tema-${tema}.css`;
+      link.setAttribute('data-chat-tema', 'true');
+      document.head.appendChild(link);
+    }
+  }
   if (temaSelect) {
     temaSelect.addEventListener('change', function() {
-      document.body.className = 'tema-' + this.value;
+      aplicarTemaChat(this.value);
       // Salvar tema no backend se quiser persistir
     });
+    // Aplica o tema inicial
+    aplicarTemaChat(temaSelect.value);
+  }
+
+  // Modal denunciar amigo
+  function abrirModalDenunciarAmigo() {
+    // Cria modal se não existir
+    let modal = document.getElementById('modalDenunciarAmigo');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'modalDenunciarAmigo';
+      modal.className = 'modal fade show';
+      modal.style.display = 'block';
+      modal.innerHTML = `
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Denunciar Amigo</h5>
+              <button type="button" class="btn-close" id="fecharModalDenunciarAmigo"></button>
+            </div>
+            <div class="modal-body">
+              <form id="formDenunciarAmigo">
+                <div class="mb-3">
+                  <label for="motivoDenuncia" class="form-label">Motivo</label>
+                  <select class="form-select" id="motivoDenuncia" name="motivo" required>
+                    <option value="spam">Spam</option>
+                    <option value="ofensa">Ofensa</option>
+                    <option value="conteudo_inadequado">Conteúdo inadequado</option>
+                    <option value="outro">Outro</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="detalhesDenuncia" class="form-label">Detalhes</label>
+                  <textarea class="form-control" id="detalhesDenuncia" name="detalhes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger">Enviar denúncia</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      // Fecha modal
+      modal.querySelector('#fecharModalDenunciarAmigo').onclick = () => modal.remove();
+      // Envio AJAX
+      modal.querySelector('#formDenunciarAmigo').onsubmit = async function(e) {
+        e.preventDefault();
+        const motivo = modal.querySelector('#motivoDenuncia').value;
+        const detalhes = modal.querySelector('#detalhesDenuncia').value;
+        try {
+          await fetch('/report-amigo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id_destinatario: amigoId,
+              motivo,
+              detalhes
+            })
+          });
+          modal.remove();
+          alert('Denúncia enviada com sucesso!');
+        } catch (err) {
+          alert('Erro ao enviar denúncia.');
+        }
+      };
+    }
   }
 
   // Botão denunciar amigo
   document.getElementById('btn-denunciar-amigo')?.addEventListener('click', function() {
-    alert('Funcionalidade de denúncia de amigo em breve.');
-    // Aqui pode abrir modal ou enviar AJAX para /report-amigo
+    abrirModalDenunciarAmigo();
   });
 
   // Botão deletar amigo

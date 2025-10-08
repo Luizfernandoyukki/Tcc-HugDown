@@ -1,0 +1,29 @@
+body.tema-verde {
+  background: #e8f5e9 !important;
+}
+.dm-messages {
+  background: #e8f5e9 !important;
+}
+.dm-bubble {
+  background: linear-gradient(135deg, #a5d6a7 0%, #43e97b 100%) !important;
+  color: #1b5e20 !important;
+}
+.justify-content-end .dm-bubble {
+  background: linear-gradient(135deg, #c8e6c9 0%, #388e3c 100%) !important;
+  color: #fff !important;
+}
+.justify-content-start .dm-bubble {
+  background: #e8f5e9 !important;
+  color: #1b5e20 !important;
+}
+.btn-primary {
+  background: linear-gradient(45deg, #43e97b, #388e3c) !important;
+  color: #fff !important;
+}
+input.form-control, .form-control {
+  border-color: #a5d6a7 !important;
+}
+input.form-control:focus, .form-control:focus {
+  border-color: #388e3c !important;
+  box-shadow: 0 0 0 0.25rem rgba(67, 233, 123, 0.1) !important;
+}

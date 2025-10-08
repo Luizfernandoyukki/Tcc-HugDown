@@ -261,6 +261,108 @@ block content
             form(id="formExcluirComentarioReportado", method="POST")
               button.btn.btn-danger(type="submit") Excluir
 
+    // Seção de Reports de Grupos
+    h2.mt-5
+      i.fas.fa-users.mr-2
+      | Grupos Reportados
+    h4.mt-5(style="margin-top:40px;") Grupos Reportados
+    .table-scroll(style="max-height:260px; overflow:auto; margin-bottom:32px;")
+      table.table.table-striped
+        thead
+          tr
+            th ID
+            th Grupo
+            th Usuário
+            th Motivo
+            th Detalhes
+            th Data
+            th Status
+            th Ações
+        tbody
+          if reportsGrupos && reportsGrupos.length
+            each report in reportsGrupos
+              tr
+                td= report.id_report
+                td= report.grupo ? report.grupo.nome_grupo : report.id_grupo
+                td= report.usuario ? report.usuario.nome_usuario : report.id_usuario
+                td= report.motivo
+                td= report.detalhes
+                td= report.data_report
+                td= report.status
+                td
+                  form(action=`/admin/super/reports-grupos/${report.id_report}/review`, method="POST")
+                    button.btn.btn-success.btn-sm(type="submit") Marcar como revisado
+                  form(action=`/admin/super/reports-grupos/${report.id_report}/dismiss`, method="POST")
+                    button.btn.btn-secondary.btn-sm(type="submit") Ignorar
+
+    // Seção de Reports de Eventos
+    h2.mt-5
+      i.fas.fa-calendar-alt.mr-2
+      | Eventos Reportados
+    h4.mt-5(style="margin-top:40px;") Eventos Reportados
+    .table-scroll(style="max-height:260px; overflow:auto; margin-bottom:32px;")
+      table.table.table-striped
+        thead
+          tr
+            th ID
+            th Evento
+            th Usuário
+            th Motivo
+            th Detalhes
+            th Data
+            th Status
+            th Ações
+        tbody
+          if reportsEventos && reportsEventos.length
+            each report in reportsEventos
+              tr
+                td= report.id_report
+                td= report.evento ? report.evento.titulo_evento : report.id_evento
+                td= report.usuario ? report.usuario.nome_usuario : report.id_usuario
+                td= report.motivo
+                td= report.detalhes
+                td= report.data_report
+                td= report.status
+                td
+                  form(action=`/admin/super/reports-eventos/${report.id_report}/review`, method="POST")
+                    button.btn.btn-success.btn-sm(type="submit") Marcar como revisado
+                  form(action=`/admin/super/reports-eventos/${report.id_report}/dismiss`, method="POST")
+                    button.btn.btn-secondary.btn-sm(type="submit") Ignorar
+
+    // Seção de Reports de Usuários
+    h2.mt-5
+      i.fas.fa-user.mr-2
+      | Usuários Reportados
+    h4.mt-5(style="margin-top:40px;") Usuários Reportados
+    .table-scroll(style="max-height:260px; overflow:auto; margin-bottom:32px;")
+      table.table.table-striped
+        thead
+          tr
+            th ID
+            th Usuário Denunciado
+            th Denunciante
+            th Motivo
+            th Detalhes
+            th Data
+            th Status
+            th Ações
+        tbody
+          if reportsUsuarios && reportsUsuarios.length
+            each report in reportsUsuarios
+              tr
+                td= report.id_report
+                td= report.usuario ? report.usuario.nome_usuario : report.id_usuario
+                td= report.denunciante ? report.denunciante.nome_usuario : report.id_denunciante
+                td= report.motivo
+                td= report.detalhes
+                td= report.data_report
+                td= report.status
+                td
+                  form(action=`/admin/super/reports-usuarios/${report.id_report}/review`, method="POST")
+                    button.btn.btn-success.btn-sm(type="submit") Marcar como revisado
+                  form(action=`/admin/super/reports-usuarios/${report.id_report}/dismiss`, method="POST")
+                    button.btn.btn-secondary.btn-sm(type="submit") Ignorar
+
   script(src="/blokdepalavroes.js")
   script.
     // Filtragem de usuários

@@ -1,0 +1,37 @@
+/* Tema azul para chat */
+body.tema-azul {
+  background: #e3f2fd !important;
+}
+
+.dm-messages {
+  background: #e3f2fd !important;
+}
+
+.dm-bubble {
+  background: linear-gradient(135deg, #90caf9 0%, #42a5f5 100%) !important;
+  color: #0d47a1 !important;
+}
+
+.justify-content-end .dm-bubble {
+  background: linear-gradient(135deg, #bbdefb 0%, #1976d2 100%) !important;
+  color: #fff !important;
+}
+
+.justify-content-start .dm-bubble {
+  background: #e3f2fd !important;
+  color: #0d47a1 !important;
+}
+
+.btn-primary {
+  background: linear-gradient(45deg, #1976d2, #42a5f5) !important;
+  color: #fff !important;
+}
+
+input.form-control, .form-control {
+  border-color: #90caf9 !important;
+}
+
+input.form-control:focus, .form-control:focus {
+  border-color: #1976d2 !important;
+  box-shadow: 0 0 0 0.25rem rgba(33, 150, 243, 0.1) !important;
+}

@@ -1,0 +1,32 @@
+body.tema-escuro {
+  background: #222831 !important;
+  color: #eee !important;
+}
+.dm-messages {
+  background: #222831 !important;
+}
+.dm-bubble {
+  background: linear-gradient(135deg, #393e46 0%, #222831 100%) !important;
+  color: #fff !important;
+}
+.justify-content-end .dm-bubble {
+  background: linear-gradient(135deg, #393e46 0%, #00adb5 100%) !important;
+  color: #fff !important;
+}
+.justify-content-start .dm-bubble {
+  background: #222831 !important;
+  color: #eee !important;
+}
+.btn-primary {
+  background: linear-gradient(45deg, #00adb5, #393e46) !important;
+  color: #fff !important;
+}
+input.form-control, .form-control {
+  border-color: #393e46 !important;
+  background: #393e46 !important;
+  color: #fff !important;
+}
+input.form-control:focus, .form-control:focus {
+  border-color: #00adb5 !important;
+  box-shadow: 0 0 0 0.25rem rgba(0, 173, 181, 0.1) !important;
+}

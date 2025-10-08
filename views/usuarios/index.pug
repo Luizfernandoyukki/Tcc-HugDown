@@ -62,13 +62,40 @@ block content
                 .card.mb-3
                   .card-body
                     if post.url_midia
-                      img.img-fluid.mb-2(src=post.url_midia, alt=post.titulo, style="max-width:100%;height:auto;", onerror="this.src='/images/default-post.png'")
+                      - var ext = (post.url_midia || '').split('.').pop().toLowerCase();
+                      if post.tipo_postagem === 'video' || (post.tipo_midia && post.tipo_midia.startsWith('video')) || ['mp4','webm','ogg'].includes(ext)
+                        video.img-fluid.mb-2(controls, style="max-width:100%;height:auto;")
+                          source(src=post.url_midia, type=post.tipo_midia || `video/${ext}`)
+                          | Seu navegador não suporta vídeo.
+                      else if post.tipo_postagem === 'article' && post.url_midia.endsWith('.pdf')
+                        a.btn.btn-outline-primary.mb-2(href=post.url_midia, target="_blank")
+                          i.fas.fa-file-pdf.me-2
+                          | Visualizar PDF
+                      else
+                        img.img-fluid.mb-2(src=post.url_midia, alt=post.titulo, style="max-width:100%;height:auto;", onerror="this.src='/images/default-post.png'")
                     h6= post.titulo || 'Sem título'
                     p.text-muted= post.resumo || ''
                     small.text-muted
                       | Criado em: #{post.data_criacao ? (post.data_criacao.toLocaleString ? post.data_criacao.toLocaleString() : post.data_criacao) : 'N/A'}
             else
               p.text-muted Nenhuma postagem encontrada.
+            if usuario && usuario.arquivos && usuario.arquivos.length
+              each arquivo in usuario.arquivos
+                - var ext = arquivo.caminho.split('.').pop().toLowerCase();
+                if ['jpg','jpeg','png','gif','bmp','webp'].includes(ext)
+                  img(src=arquivo.caminho, alt="Imagem", class="img-fluid mb-2", style="max-width:300px;")
+                else if ['mp4','webm','ogg'].includes(ext)
+                  video(controls, class="mb-2", style="max-width:300px;")
+                    source(src=arquivo.caminho, type=`video/${ext}`)
+                    | Seu navegador não suporta vídeo.
+                else if ext === 'pdf'
+                  a(href=arquivo.caminho, target="_blank", class="btn btn-outline-primary mb-2")
+                    i.fas.fa-file-pdf.me-2
+                    | Visualizar PDF
+                else
+                  a(href=arquivo.caminho, target="_blank", class="btn btn-outline-secondary mb-2")
+                    i.fas.fa-file.me-2
+                    | Baixar arquivo
 
 block scripts
   script(src="/javascripts/usuarios/index.js")

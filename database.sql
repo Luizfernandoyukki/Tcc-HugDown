@@ -364,17 +364,26 @@ CREATE TABLE      documentos_verificacao (
 CREATE TABLE      notificacoes (
     id_notificacao INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
-    tipo_notificacao ENUM('like', 'comment', 'share', 'friendship', 'message', 'event', 'system') NOT NULL,
+    tipo_notificacao ENUM('like', 'comment', 'share', 'friendship', 'message', 'event', 'system', 'group_invite', 'advertencia') NOT NULL,
     titulo VARCHAR(200) NOT NULL,
     mensagem TEXT,
     url_relacionada VARCHAR(500),
     lida BOOLEAN DEFAULT FALSE,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_amizade INT NULL,
+    id_grupo INT NULL,
+    id_evento INT NULL,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_amizade) REFERENCES amizades(id_amizade) ON DELETE SET NULL,
+    FOREIGN KEY (id_grupo) REFERENCES grupos(id_grupo) ON DELETE SET NULL,
+    FOREIGN KEY (id_evento) REFERENCES eventos(id_evento) ON DELETE SET NULL,
     INDEX idx_usuario (id_usuario),
     INDEX idx_tipo (tipo_notificacao),
     INDEX idx_lida (lida),
-    INDEX idx_data_criacao (data_criacao)
+    INDEX idx_data_criacao (data_criacao),
+    INDEX idx_amizade (id_amizade),
+    INDEX idx_grupo (id_grupo),
+    INDEX idx_evento (id_evento)
 );
 
 -- ======================================================

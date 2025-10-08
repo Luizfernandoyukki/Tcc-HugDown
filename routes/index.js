@@ -391,19 +391,42 @@ router.get('/admin/super', asyncHandler(async (req, res) => {
       include: [{ model: Usuario, as: 'usuario', required: false }]
     });
 
-    // LOGS DE DEPURAÇÃO ANTES DO RENDER
-    console.log('[DEBUG][PUG] typeof usuarios:', typeof usuarios, '| Array:', Array.isArray(usuarios), '| length:', usuarios ? usuarios.length : 'undefined');
-    console.log('[DEBUG][PUG] typeof postagens:', typeof postagens, '| Array:', Array.isArray(postagens), '| length:', postagens ? postagens.length : 'undefined');
-    console.log('[DEBUG][PUG] typeof docsVerificacao:', typeof docsVerificacao, '| Array:', Array.isArray(docsVerificacao) ? 'sim' : 'não', '| length:', docsVerificacao ? docsVerificacao.length : 'undefined');
-    const usuarioComNivel = res.locals.usuario ? { ...res.locals.usuario.dataValues, nivel_admin: admin.nivel_admin } : null;
-    console.log('[DEBUG][PUG] usuario:', usuarioComNivel ? usuarioComNivel.nome_usuario : 'undefined', '| id:', usuarioComNivel ? usuarioComNivel.id_usuario : 'undefined', '| nivel_admin:', usuarioComNivel ? usuarioComNivel.nivel_admin : 'undefined');
-    console.log('[DEBUG][PUG] isLoggedIn:', res.locals.isLoggedIn);
+    // Novos reports
+    const { ReportGrupo, ReportEvento, ReportUsuario } = require('../models');
+    const reportsGrupos = await ReportGrupo.findAll({
+      include: [
+        { model: Grupo, as: 'grupo' },
+        { model: Usuario, as: 'usuario' }
+      ],
+      order: [['data_report', 'DESC']]
+    });
+    const reportsEventos = await ReportEvento.findAll({
+      include: [
+        { model: Evento, as: 'evento' },
+        { model: Usuario, as: 'usuario' }
+      ],
+      order: [['data_report', 'DESC']]
+    });
+    const reportsUsuarios = await ReportUsuario.findAll({
+      include: [
+        { model: Usuario, as: 'usuarioDenunciado' },
+        { model: Usuario, as: 'denunciante' }
+      ],
+      order: [['data_report', 'DESC']]
+    });
+
+    // Corrige: define usuarioComNivel como o admin logado
+    const usuarioComNivel = admin;
+
     res.render('admin/super', {
       usuarios,
       postagens,
       docsVerificacao,
       usuario: usuarioComNivel,
-      isLoggedIn: res.locals.isLoggedIn
+      isLoggedIn: res.locals.isLoggedIn,
+      reportsGrupos,
+      reportsEventos,
+      reportsUsuarios
     });
   } catch (err) {
     console.error('[ADMIN/SUPER][ERRO]', err);

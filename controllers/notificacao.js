@@ -51,7 +51,8 @@ exports.criarNotificacao = async ({
   mensagem,
   url_relacionada = null,
   id_amizade = null,
-  id_grupo = null
+  id_grupo = null,
+  id_evento = null
 }) => {
   const { Notificacao } = require('../models');
   const data = {
@@ -59,10 +60,11 @@ exports.criarNotificacao = async ({
     tipo_notificacao,
     titulo,
     mensagem,
-    url_relacionada
+    url_relacionada,
+    id_amizade,
+    id_grupo,
+    id_evento
   };
-  if (id_amizade) data.id_amizade = id_amizade;
-  if (id_grupo) data.id_grupo = id_grupo;
   await Notificacao.create(data);
   // ...push notification se necessário...
 };
