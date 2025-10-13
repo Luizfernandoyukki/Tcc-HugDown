@@ -154,7 +154,7 @@ exports.criar = async (req, res) => {
     }
 
     // Cadastro realizado com sucesso
-    return res.redirect('/login');
+    return res.redirect('/');
   } catch (err) {
     // Tratamento de erro de validação do Sequelize
     let mensagemErro = 'Erro ao criar usuário';
