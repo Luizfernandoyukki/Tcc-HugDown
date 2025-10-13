@@ -606,7 +606,8 @@ INSERT INTO categorias (nome_categoria, descricao, cor_categoria, ativo)
 VALUES
   ('Dicas', 'Categoria para sugestões e dicas práticas.', '#28a745', TRUE),
   ('Relatos', 'Categoria para histórias e relatos pessoais.', '#17a2b8', TRUE),
-  ('Artigos Científicos', 'Categoria para publicações e resumos científicos.', '#6f42c1', TRUE)
+  ('Artigos Científicos', 'Categoria para publicações e resumos científicos.', '#6f42c1', TRUE),
+  ('Discussões', 'Categoria para publicações e resumos científicos.', '#6f42c1', TRUE)
 AS new
 ON DUPLICATE KEY UPDATE
   nome_categoria = new.nome_categoria,

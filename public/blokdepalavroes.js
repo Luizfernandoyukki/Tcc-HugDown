@@ -18,45 +18,81 @@ if (typeof window === 'undefined' || !window._blokdepalavroesSkip) {
     'caralho', 'porra', 'merda', 'bosta', 'cocô', 'cagar', 'foder', 'fodido',
     'foda', 'cu', 'buceta', 'xoxota', 'pau', 'rola', 'pica', 'piroca', 'pinto',
     'punheta', 'masturbar', 'orgia', 'anal', 'oral', 'vaginal', 'cuzão', 
-    'cusão', 'cusinho', 'bucetão', 'xota', 'piru', 'gozar', 'gozada',
+    'cusão', 'cusinho', 'bucetão', 'xota', 'piru', 'gozar', 'gozada', 'porra',
+    'cacetada', 'cacetão', 'caralhada', 'caralhinho', 'caralhões', 'pirocada',
+    'pirocona', 'roluda', 'roludão', 'pausudo', 'pentelhada', 'pentelho',
     
     // ========== OFENSAS PESSOAIS GRAVES ==========
     'filho da puta', 'fdp', 'arrombado', 'desgraçado', 'vadia', 'piranha', 
     'puta', 'prostituta', 'vagabunda', 'cachorra', 'biscate', 'meretriz',
-    'corna', 'corno', 'cornudo', 'filho de uma égua',
+    'corna', 'corno', 'cornudo', 'filho de uma égua', 'filho da mãe',
+    'mãe é puta', 'sua mãe', 'tua mãe', 'mãe dele', 'mãe dela', 'mãe da puta',
+    'pariu uma égua', 'pariu um burro', 'retardado', 'debil mental',
     
     // ========== TERMOS PEJORATIVOS GRAVES ==========
     'escória', 'lixoso', 'asqueroso', 'degenerado', 'pervertido', 'tarado',
     'depravado', 'desprezível', 'abjeto', 'repulsivo', 'nojento', 'repugnante',
+    'imbecil', 'idiota', 'estúpido', 'burro', 'animal', 'bestão', 'ignorante',
+    'incapaz', 'inútil', 'imprestável', 'merdinha', 'lixão humano',
     
     // ========== OFENSAS DISCRIMINATÓRIAS GRAVES ==========
     'veado', 'bicha', 'sapatão', 'traveco', 'travesti', 'quenga', 'mulata',
+    'viado', 'baitola', 'fresco', 'boiola', 'sapatão', 'sapatao', 'sapatão',
+    'traveco', 'travequinho', 'travecão',
     
     // ========== PALAVRÕES EM INGLÊS ==========
     'fuck', 'shit', 'asshole', 'bitch', 'bastard', 'motherfucker', 'dick',
     'pussy', 'cunt', 'whore', 'slut', 'fag', 'faggot', 'cock', 'wanker', 'twat',
+    'bullshit', 'damn', 'hell', 'piss', 'piss off', 'son of a bitch', 'dickhead',
+    'ass', 'smartass', 'dumbass', 'jackass',
     
     // ========== PALAVRÕES EM ESPANHOL ==========
     'puta', 'mierda', 'coño', 'carajo', 'joder', 'maricón', 'puto', 'zorra',
-    'verga', 'picha', 'culero',
+    'verga', 'picha', 'culero', 'cabrón', 'gilipollas', 'hijo de puta',
+    'madre mía', 'hostia', 'jodido', 'concha', 'pendejo', 'boludo',
     
     // ========== ABREVIAÇÕES OFENSIVAS ==========
     'vtmnc', 'vtnc', 'pqp', 'fdps', 'cpg', 'vsf', 'vsfd', 'fdc', 'tnc',
     'vai se fuder', 'vai tomar no cu', 'vai se foder', 'vai tomar no seu cu',
-    'vai pra puta que pariu',
+    'vai pra puta que pariu', 'vai pra pqp', 'vtnc', 'vsfd', 'vsf',
+    'foda-se', 'fodase', 'foda se', 'que se foda', 'quese foda',
     
     // ========== OFENSAS RELIGIOSAS GRAVES ==========
     'satânico', 'demoníaco', 'herege', 'deus do caralho', 'jesus do caralho',
-    'bíblia do caralho', 'allah do caralho',
+    'bíblia do caralho', 'allah do caralho', 'deus é mais', 'jesus amado',
+    'virgem santa', 'santa virgem', 'puta que pariu', 'pqp',
     
     // ========== VARIANTES DISFARÇADAS ==========
     'c*ralho', 'p*rra', 'm*rda', 'b*sta', 'c*', 'b*ceta', 'p*u', 'r*la',
     'p*ca', 'p*nto', 'p*nheta', 'f*der', 'f*dido', 'arr*bado', 'desgr*çado',
+    'c4r4lh0', 'p0rr4', 'm3rd4', 'b0st4', 'f0d4', 'f0d3r', '4rr0mb4d0',
+    'car@lho', 'p@rr@', 'm@rd@', 'b@st@', 'f@der',
     
     // ========== OFENSAS VIOLENTAS ==========
-    'estuprador', 'abusador', 'pedófilo', 'estuprar', 'violar', 'abusar', 'molestar'
-  ];
-
+    'estuprador', 'abusador', 'pedófilo', 'estuprar', 'violar', 'abusar', 'molestar',
+    'assassino', 'matar', 'morrer', 'se mata', 'se matar', 'suicídio', 'suicida',
+    'bater', 'espancar', 'agredir', 'violência', 'ameaçar', 'amarrar', 'sequestrar',
+    
+    // ========== OFENSAS RACIAIS E XENÓFOBAS ==========
+    'macaco', 'preto noia', 'negão burro', 'judeu ladrão', 'árabe terrorista',
+    'japa', 'china', 'alemão nazista', 'português burro', 'baiano preguiçoso',
+    'paulista metido', 'carioca malandro', 'mineiro mão de vaca',
+    
+    // ========== OFENSAS SEXUAIS EXPLÍCITAS ==========
+    'chupar', 'mamar', 'chupada', 'mamada', 'meter', 'comer o cu', 'dar o cu',
+    'dar o rabo', 'dar a bunda', 'dar a xota', 'transar', 'trepar', 'foder',
+    'sexo oral', 'boquete', 'punhetão', 'punhetinha', 'gozada', 'porrada',
+    
+    // ========== TERMOS DE ÓDIO E INTOLERÂNCIA ==========
+    'odeio você', 'te odeio', 'odeio gente', 'odeio mulher', 'odeio homem',
+    'odeio gay', 'odeio negro', 'odeio judeu', 'morte aos', 'morram todos',
+    'espero que morra', 'quero que morra', 'vai morrer', 'vai se foder',
+    
+    // ========== OFENSAS CORPORAIS ==========
+    'gordo nojento', 'gorda fedida', 'magrelo', 'feio pra caralho', 'fedorento',
+    'bafo de onça', 'cara de cavalo', 'orelha de abano', 'nariz de palhaço',
+    'boca de siri', 'perna de pau', 'olho torto', 'careca', 'calvo', 'barrigudo'
+];
   // Mapa de substituições comuns para disfarçar palavrões
   const substituicoes = [
     ['a', ['@', '4']],
