@@ -146,35 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
       errorAlert.classList.add('d-none');
       errorAlert.innerHTML = '';
 
-      // Filtro de palavrões (usa blokdepalavroes.js) com debounce
-      let debounceTimeout;
-      const camposTexto = form.querySelectorAll('input[type="text"], textarea, [contenteditable="true"]');
-      camposTexto.forEach(campo => {
-        campo.addEventListener('input', function() {
-          clearTimeout(debounceTimeout);
-          debounceTimeout = setTimeout(() => {
-            if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
-              window.verificarConteudoOfensivo(campo);
-            }
-          }, 200); // 200ms debounce
-        });
-      });
-      let encontrouOfensiva = false;
-      camposTexto.forEach(campo => {
-        if (window.verificarConteudoOfensivo && typeof window.verificarConteudoOfensivo === 'function') {
-          window.verificarConteudoOfensivo(campo);
-          if ((campo.value && campo.value.includes('***')) || (campo.textContent && campo.textContent.includes('***'))) {
-            encontrouOfensiva = true;
-          }
-        }
-      });
-      if (encontrouOfensiva) {
-        errorAlert.textContent = 'Remova palavras ofensivas dos campos antes de enviar.';
-        errorAlert.classList.remove('d-none');
-        return;
-      }
-
-      // Validação dos campos obrigatórios
+      // Validação dos campos obrigatórios ANTES de enviar (ao clicar avançar)
       const camposObrigatorios = [
         'nome_real', 'sobrenome_real', 'nome_usuario', 'email', 'senha', 'confirma_senha',
         'telefone', 'endereco', 'cidade', 'estado', 'cep', 'data_nascimento', 'genero'
@@ -186,6 +158,12 @@ document.addEventListener('DOMContentLoaded', function() {
           camposFaltando.push(nome);
         }
       });
+      if (camposFaltando.length > 0) {
+        errorAlert.innerHTML = 'Preencha todos os campos obrigatórios:<br>' +
+          camposFaltando.map(c => `<b>${c}</b>`).join(', ');
+        errorAlert.classList.remove('d-none');
+        return;
+      }
 
       // Se for profissional de saúde, valida campos extras
       if (profissionalCheck && profissionalCheck.checked) {
@@ -246,19 +224,6 @@ document.querySelector('input[name="fuso_horario"]').value =
     // Enviar formulário
     try {
       const formData = new FormData(form);
-
-      // LOG dos dados enviados
-      const dadosEnviados = {};
-      for (let [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          dadosEnviados[key] = value.name;
-        } else {
-          dadosEnviados[key] = value;
-        }
-      }
-      console.log('[CADASTRO][FRONTEND][DADOS ENVIADOS]', dadosEnviados);
-
-      
       const response = await fetch('/usuarios', {
         method: 'POST',
         body: formData
@@ -269,27 +234,24 @@ document.querySelector('input[name="fuso_horario"]').value =
       if (isJson) {
         data = await response.json();
       } else {
-        // Se não for JSON, tenta extrair mensagem de erro do HTML
         const html = await response.text();
-        // Tenta extrair mensagem de erro do HTML (simples)
         const match = html.match(/<div[^>]*id=["']errorAlert["'][^>]*>(.*?)<\/div>/i);
         if (match && match[1]) {
           errorAlert.innerHTML = match[1];
           errorAlert.classList.remove('d-none');
           return;
         }
-        // Se não encontrar, mostra erro genérico
         errorAlert.textContent = 'Erro ao realizar cadastro. Verifique os campos e tente novamente.';
         errorAlert.classList.remove('d-none');
         return;
       }
 
       if (data.success) {
-        let message = 'Cadastro realizado com sucesso!';
-        if (formData.get('profissional_saude')) {
-          message += '\nSua solicitação de verificação como profissional de saúde está pendente de aprovação.';
+        if (data.msg) {
+          localStorage.setItem('msgCadastro', data.msg);
         }
-        alert(message);
+        window.location.href = '/login';
+        return;
       } else {
         errorAlert.textContent = data.error || 'Erro ao realizar cadastro';
         errorAlert.classList.remove('d-none');
@@ -298,7 +260,6 @@ document.querySelector('input[name="fuso_horario"]').value =
       errorAlert.textContent = 'Erro de conexão ou envio: ' + err.message;
       errorAlert.classList.remove('d-none');
     } finally {
-      // Reabilita todos os campos após submit (para navegação entre steps)
       document.querySelectorAll('.step-section input, .step-section select, .step-section textarea').forEach(el => {
         el.disabled = false;
       });

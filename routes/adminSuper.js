@@ -24,14 +24,30 @@ router.get('/reports-grupos', requireSuperAdmin, async (req, res) => {
 
 // Marcar report de grupo como revisado
 router.post('/reports-grupos/:id/review', requireSuperAdmin, async (req, res) => {
-  await ReportGrupo.update({ status: 'reviewed' }, { where: { id_report: req.params.id } });
-  res.redirect('/admin/super');
+  try {
+    const updated = await ReportGrupo.update(
+      { status: 'reviewed' },
+      { where: { id_report: req.params.id } }
+    );
+    if (!updated) return res.status(404).json({ sucesso: false, error: 'Report não encontrado.' });
+    res.json({ sucesso: true, mensagem: 'Report de grupo marcado como revisado.' });
+  } catch (err) {
+    res.status(500).json({ sucesso: false, error: err.message });
+  }
 });
 
 // Ignorar report de grupo
 router.post('/reports-grupos/:id/dismiss', requireSuperAdmin, async (req, res) => {
-  await ReportGrupo.update({ status: 'dismissed' }, { where: { id_report: req.params.id } });
-  res.redirect('/admin/super');
+  try {
+    const updated = await ReportGrupo.update(
+      { status: 'dismissed' },
+      { where: { id_report: req.params.id } }
+    );
+    if (!updated) return res.status(404).json({ sucesso: false, error: 'Report não encontrado.' });
+    res.json({ sucesso: true, mensagem: 'Report de grupo ignorado.' });
+  } catch (err) {
+    res.status(500).json({ sucesso: false, error: err.message });
+  }
 });
 
 // Listar reports de eventos
@@ -48,14 +64,30 @@ router.get('/reports-eventos', requireSuperAdmin, async (req, res) => {
 
 // Marcar report de evento como revisado
 router.post('/reports-eventos/:id/review', requireSuperAdmin, async (req, res) => {
-  await ReportEvento.update({ status: 'reviewed' }, { where: { id_report: req.params.id } });
-  res.redirect('/admin/super');
+  try {
+    const updated = await ReportEvento.update(
+      { status: 'reviewed' },
+      { where: { id_report: req.params.id } }
+    );
+    if (!updated) return res.status(404).json({ sucesso: false, error: 'Report não encontrado.' });
+    res.json({ sucesso: true, mensagem: 'Report de evento marcado como revisado.' });
+  } catch (err) {
+    res.status(500).json({ sucesso: false, error: err.message });
+  }
 });
 
 // Ignorar report de evento
 router.post('/reports-eventos/:id/dismiss', requireSuperAdmin, async (req, res) => {
-  await ReportEvento.update({ status: 'dismissed' }, { where: { id_report: req.params.id } });
-  res.redirect('/admin/super');
+  try {
+    const updated = await ReportEvento.update(
+      { status: 'dismissed' },
+      { where: { id_report: req.params.id } }
+    );
+    if (!updated) return res.status(404).json({ sucesso: false, error: 'Report não encontrado.' });
+    res.json({ sucesso: true, mensagem: 'Report de evento ignorado.' });
+  } catch (err) {
+    res.status(500).json({ sucesso: false, error: err.message });
+  }
 });
 
 // Listar reports de usuários
@@ -72,14 +104,30 @@ router.get('/reports-usuarios', requireSuperAdmin, async (req, res) => {
 
 // Marcar report de usuário como revisado
 router.post('/reports-usuarios/:id/review', requireSuperAdmin, async (req, res) => {
-  await ReportUsuario.update({ status: 'reviewed' }, { where: { id_report: req.params.id } });
-  res.redirect('/admin/super');
+  try {
+    const updated = await ReportUsuario.update(
+      { status: 'reviewed' },
+      { where: { id_report: req.params.id } }
+    );
+    if (!updated) return res.status(404).json({ sucesso: false, error: 'Report não encontrado.' });
+    res.json({ sucesso: true, mensagem: 'Report de usuário marcado como revisado.' });
+  } catch (err) {
+    res.status(500).json({ sucesso: false, error: err.message });
+  }
 });
 
 // Ignorar report de usuário
 router.post('/reports-usuarios/:id/dismiss', requireSuperAdmin, async (req, res) => {
-  await ReportUsuario.update({ status: 'dismissed' }, { where: { id_report: req.params.id } });
-  res.redirect('/admin/super');
+  try {
+    const updated = await ReportUsuario.update(
+      { status: 'dismissed' },
+      { where: { id_report: req.params.id } }
+    );
+    if (!updated) return res.status(404).json({ sucesso: false, error: 'Report não encontrado.' });
+    res.json({ sucesso: true, mensagem: 'Report de usuário ignorado.' });
+  } catch (err) {
+    res.status(500).json({ sucesso: false, error: err.message });
+  }
 });
 
 module.exports = router;

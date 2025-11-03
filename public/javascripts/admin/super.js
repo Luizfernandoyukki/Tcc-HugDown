@@ -195,25 +195,101 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Aprovar documento (AJAX, sem alert)
+  // Aprovar documento (AJAX, sem alert) - tratar resposta JSON e mostrar mensagem amigável
   document.querySelectorAll('.aprovar-doc').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', async function(e) {
+      e.preventDefault();
       const id = this.dataset.id;
       const tr = this.closest('tr');
-      fetch(`/admin/super/documentos/${id}/aprovar`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => { if (data.success && tr) tr.remove(); });
+      this.disabled = true;
+      try {
+        const res = await fetch(`/admin/super/documentos/${id}/aprovar`, { method: 'POST' });
+        const data = await res.json().catch(() => ({ error: 'Resposta inválida do servidor' }));
+        if (res.ok && (data.success || data.sucesso || data.mensagem)) {
+          const msg = data.mensagem || data.msg || 'Documento aprovado com sucesso!';
+          // Mensagem inline acima da tabela
+          let rowMsg = tr.querySelector('.row-msg');
+          if (!rowMsg) {
+            rowMsg = document.createElement('div');
+            rowMsg.className = 'row-msg alert alert-success mt-2';
+            tr.parentElement.insertBefore(rowMsg, tr);
+          }
+          rowMsg.textContent = msg;
+          // remove a linha depois de curto delay para dar tempo de ver a mensagem
+          setTimeout(() => { if (tr) tr.remove(); }, 900);
+          mostrarMensagemAdmin(msg, 'success');
+        } else {
+          const errMsg = data.error || data.mensagem || 'Erro ao aprovar documento.';
+          let rowMsg = tr.querySelector('.row-msg');
+          if (!rowMsg) {
+            rowMsg = document.createElement('div');
+            rowMsg.className = 'row-msg alert alert-danger mt-2';
+            tr.parentElement.insertBefore(rowMsg, tr);
+          }
+          rowMsg.textContent = errMsg;
+          mostrarMensagemAdmin(errMsg, 'danger');
+        }
+      } catch (err) {
+        const errMsg = 'Erro de conexão: ' + (err.message || err);
+        let rowMsg = tr.querySelector('.row-msg');
+        if (!rowMsg) {
+          rowMsg = document.createElement('div');
+          rowMsg.className = 'row-msg alert alert-danger mt-2';
+          tr.parentElement.insertBefore(rowMsg, tr);
+        }
+        rowMsg.textContent = errMsg;
+        mostrarMensagemAdmin(errMsg, 'danger');
+      } finally {
+        this.disabled = false;
+      }
     });
   });
 
-  // Rejeitar documento (AJAX, sem alert)
+  // Rejeitar documento (AJAX, tratar resposta JSON e mostrar mensagem)
   document.querySelectorAll('.rejeitar-doc').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', async function(e) {
+      e.preventDefault();
       const id = this.dataset.id;
       const tr = this.closest('tr');
-      fetch(`/admin/super/documentos/${id}/rejeitar`, { method: 'POST' })
-        .then(res => res.json())
-        .then(data => { if (data.sucesso && tr) tr.remove(); });
+      this.disabled = true;
+      try {
+        const res = await fetch(`/admin/super/documentos/${id}/rejeitar`, { method: 'POST' });
+        const data = await res.json().catch(() => ({ error: 'Resposta inválida do servidor' }));
+        if (res.ok && (data.success || data.sucesso || data.mensagem)) {
+          const msg = data.mensagem || data.msg || 'Documento rejeitado com sucesso!';
+          let rowMsg = tr.querySelector('.row-msg');
+          if (!rowMsg) {
+            rowMsg = document.createElement('div');
+            rowMsg.className = 'row-msg alert alert-warning mt-2';
+            tr.parentElement.insertBefore(rowMsg, tr);
+          }
+          rowMsg.textContent = msg;
+          setTimeout(() => { if (tr) tr.remove(); }, 900);
+          mostrarMensagemAdmin(msg, 'warning');
+        } else {
+          const errMsg = data.error || data.mensagem || 'Erro ao rejeitar documento.';
+          let rowMsg = tr.querySelector('.row-msg');
+          if (!rowMsg) {
+            rowMsg = document.createElement('div');
+            rowMsg.className = 'row-msg alert alert-danger mt-2';
+            tr.parentElement.insertBefore(rowMsg, tr);
+          }
+          rowMsg.textContent = errMsg;
+          mostrarMensagemAdmin(errMsg, 'danger');
+        }
+      } catch (err) {
+        const errMsg = 'Erro de conexão: ' + (err.message || err);
+        let rowMsg = tr.querySelector('.row-msg');
+        if (!rowMsg) {
+          rowMsg = document.createElement('div');
+          rowMsg.className = 'row-msg alert alert-danger mt-2';
+          tr.parentElement.insertBefore(rowMsg, tr);
+        }
+        rowMsg.textContent = errMsg;
+        mostrarMensagemAdmin(errMsg, 'danger');
+      } finally {
+        this.disabled = false;
+      }
     });
   });
 

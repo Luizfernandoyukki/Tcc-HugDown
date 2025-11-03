@@ -1,5 +1,6 @@
 const { Postagem, Usuario, Categoria, Tag } = require('../models');
 const { criarNotificacao } = require('./notificacao');
+const { deletePublicFile } = require('../utils/fileCleaner'); // adiciona no topo junto com os requires existentes
 
 
 // Listar todas as postagens
@@ -136,6 +137,16 @@ exports.remover = async (req, res) => {
   console.log('[LOG] postagemController.remover chamado para id:', req.params.id);
   const postagem = await Postagem.findByPk(req.params.id);
   if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
+
+  try {
+    // Apaga arquivo de mídia local se existir
+    if (postagem.url_midia) {
+      deletePublicFile(postagem.url_midia);
+    }
+  } catch (err) {
+    console.warn('[POSTAGEM][REMOVER] erro ao remover arquivo de mídia:', err.message || err);
+  }
+
   await postagem.destroy();
   res.json({ mensagem: 'Postagem removida com sucesso' });
 };

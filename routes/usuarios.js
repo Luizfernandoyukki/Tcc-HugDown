@@ -46,8 +46,41 @@ const { podeEditarOuVerPerfil } = require('../middlewares/auth');
 
 router.use(express.urlencoded({ extended: true }));
 
-// Cadastro de usuário (com upload de foto de perfil)
-router.post('/', uploadPerfil.single('foto_perfil'), usuarioController.criar);
+// Cadastro de usuário (com upload de foto de perfil E documento de verificação)
+router.post(
+  '/',
+  multer({
+    storage: storagePerfil,
+    // Aceita ambos campos: foto_perfil (imagem) e documento_comprobatorio (pdf)
+    fileFilter: (req, file, cb) => {
+      if (file.fieldname === 'foto_perfil') {
+        // Aceita qualquer imagem
+        if (file.mimetype.startsWith('image/')) return cb(null, true);
+        return cb(null, false);
+      }
+      if (file.fieldname === 'documento_comprobatorio') {
+        // Aceita apenas PDF
+        if (file.mimetype === 'application/pdf') return cb(null, true);
+        return cb(null, false);
+      }
+      cb(null, false);
+    }
+  }).fields([
+    { name: 'foto_perfil', maxCount: 1 },
+    { name: 'documento_comprobatorio', maxCount: 1 }
+  ]),
+  async (req, res, next) => {
+    // Ajusta req.file e req.body para o controller
+    if (req.files && req.files['foto_perfil']) {
+      req.file = req.files['foto_perfil'][0];
+    }
+    if (req.files && req.files['documento_comprobatorio']) {
+      req.body.documento_comprobatorio = req.files['documento_comprobatorio'][0].filename;
+    }
+    // Chama o controller normalmente
+    controllers.usuarioController.criar(req, res, next);
+  }
+);
 
 // Login
 router.post('/login', usuarioController.login);

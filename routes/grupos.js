@@ -15,8 +15,9 @@ const { Grupo, Usuario, MembroGrupo, Secao, PostagemSecao, Postagem } = models;
 // Configuração do Multer para salvar imagens em subpastas conforme privacidade
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    // Usa o tipo_privacidade do formulário ou 'public' como padrão
     let tipo = req.body.tipo_privacidade || 'public';
-    let pasta = path.join(__dirname, '..', 'grupos', tipo);
+    let pasta = path.join(__dirname, '..', 'public', 'images', 'grupos', tipo);
     fs.mkdirSync(pasta, { recursive: true });
     cb(null, pasta);
   },
@@ -34,7 +35,7 @@ const storagePost = multer.diskStorage({
     // Descobre o tipo de privacidade do grupo
     const grupo = await Grupo.findByPk(req.params.id);
     let tipo = grupo ? grupo.tipo_privacidade : 'public';
-    let pasta = path.join(__dirname, '..', 'grupos', tipo);
+    let pasta = path.join(__dirname, '..', 'public', 'images', 'grupos', tipo);
     fs.mkdirSync(pasta, { recursive: true });
     cb(null, pasta);
   },
@@ -164,7 +165,7 @@ router.post('/', requireLogin, upload.single('foto_grupo'), async (req, res) => 
     let fotoPath = null;
     if (req.file) {
       fotoPath = path.join(
-        '/grupos',
+        '/images/grupos',
         req.body.tipo_privacidade || 'public',
         req.file.filename
       ).replace(/\\/g, '/');
@@ -179,7 +180,6 @@ router.post('/', requireLogin, upload.single('foto_grupo'), async (req, res) => 
       tipo_privacidade: req.body.tipo_privacidade,
       id_administrador: id_administrador,
       ativo: true
-      // data_criacao é automática
     });
     console.log('[GRUPOS] Grupo criado:', grupo.id_grupo);
 
@@ -310,9 +310,8 @@ router.post('/:id/criarpostagemsecao', requireLogin, uploadPost.single('arquivo_
     // Caminho do arquivo salvo
     let url_midia = null;
     if (req.file) {
-      // Exemplo: /grupos/public/arquivo.png
       url_midia = path.join(
-        '/grupos',
+        '/images/grupos',
         req.body.tipo_privacidade || 'public',
         req.file.filename
       ).replace(/\\/g, '/');

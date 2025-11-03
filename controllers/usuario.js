@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
+const { deletePublicFile } = require('../utils/fileCleaner'); // adicione entre os requires no topo
 
 // Listar todos os usuários
 exports.listar = async (req, res) => {
@@ -96,11 +97,40 @@ exports.criar = async (req, res) => {
     if (cep) cep = cep.replace(/\D/g, '');
 
     // Validação dos campos obrigatórios (apenas os do formulário principal)
-    if (!email || !nome_real || !sobrenome_real || !nome_usuario || !telefone || !endereco || !cidade || !estado || !cep || !senha || !genero || !data_nascimento || !idioma_preferido || !pais) {
-      console.log('[CADASTRO][ERRO] Campos obrigatórios ausentes:', {
-        email, nome_real, sobrenome_real, nome_usuario, telefone, endereco, cidade, estado, cep, senha, genero, data_nascimento, idioma_preferido, pais
-      });
-      return res.render('cadastro', { error: 'Preencha todos os campos obrigatórios.' });
+    const camposObrigatorios = [
+      'email', 'nome_real', 'sobrenome_real', 'nome_usuario', 'telefone', 'endereco',
+      'cidade', 'estado', 'cep', 'senha', 'genero', 'data_nascimento', 'idioma_preferido', 'pais'
+    ];
+    let camposFaltando = [];
+    camposObrigatorios.forEach(campo => {
+      if (!req.body[campo] || !String(req.body[campo]).trim()) {
+        camposFaltando.push(campo);
+      }
+    });
+    if (camposFaltando.length > 0) {
+      const msg = 'Preencha todos os campos obrigatórios: ' + camposFaltando.join(', ');
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(400).json({ error: msg });
+      }
+      return res.render('cadastro', { error: msg });
+    }
+
+    // Checa duplicidade de email e nome_usuario
+    const emailExistente = await Usuario.findOne({ where: { email: req.body.email } });
+    if (emailExistente) {
+      const msg = 'Já existe um usuário com este e-mail.';
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(400).json({ error: msg });
+      }
+      return res.render('cadastro', { error: msg });
+    }
+    const usuarioExistente = await Usuario.findOne({ where: { nome_usuario: req.body.nome_usuario } });
+    if (usuarioExistente) {
+      const msg = 'Já existe um usuário com este nome de usuário.';
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(400).json({ error: msg });
+      }
+      return res.render('cadastro', { error: msg });
     }
 
     // Criptografa a senha antes de salvar
@@ -153,8 +183,8 @@ exports.criar = async (req, res) => {
       });
     }
 
-    // Cadastro realizado com sucesso
-    return res.redirect('/');
+    // Sempre responde JSON de sucesso, nunca faz redirect
+    return res.json({ success: true, msg: 'Cadastro realizado com sucesso! Faça login para continuar.' });
   } catch (err) {
     // Tratamento de erro de validação do Sequelize
     let mensagemErro = 'Erro ao criar usuário';
@@ -163,7 +193,9 @@ exports.criar = async (req, res) => {
     } else if (err.message) {
       mensagemErro = err.message;
     }
-    console.log('[CADASTRO][ERRO]', mensagemErro);
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(400).json({ error: mensagemErro });
+    }
     return res.status(500).render('cadastro', { error: mensagemErro });
   }
 };
@@ -197,9 +229,8 @@ exports.remover = async (req, res) => {
     // Apaga foto de perfil física se existir localmente
     try {
       const foto = usuario.foto_perfil;
-      if (foto && (foto.startsWith('/perfis') || foto.startsWith('perfis'))) {
-        const fotoPath = path.join(__dirname, '..', foto.replace(/^\//, ''));
-        if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+      if (foto) {
+        deletePublicFile(foto);
       }
     } catch (err) {
       console.warn('[USUARIO][REMOVER] erro ao remover foto de perfil:', err.message);
@@ -211,12 +242,7 @@ exports.remover = async (req, res) => {
       for (const post of postagens) {
         const midia = post.url_midia;
         if (midia && typeof midia === 'string') {
-          // suporta caminhos que começam com /post, /grupos ou /perfis
-          const candidate = midia.replace(/^\//, ''); // remove barra inicial
-          const midiaPath = path.join(__dirname, '..', candidate);
-          if (fs.existsSync(midiaPath)) {
-            fs.unlinkSync(midiaPath);
-          }
+          deletePublicFile(midia);
         }
       }
     } catch (err) {
@@ -273,6 +299,17 @@ exports.login = async (req, res) => {
     const usuario = await Usuario.findOne({ where: { email } });
     if (!usuario) {
       return res.render('login', { error: 'Usuário não encontrado!', isLoggedIn: false });
+    }
+
+    // Nova checagem: usuário bloqueado
+    if (usuario.bloqueado) {
+      // Monta mensagem com motivo e data se disponível
+      let motivo = usuario.motivo_bloqueio ? `Motivo: ${usuario.motivo_bloqueio}. ` : '';
+      let infoData = usuario.data_bloqueio ? `Data do bloqueio: ${usuario.data_bloqueio}` : '';
+      const msg = `Conta bloqueada. ${motivo}${infoData}`.trim();
+      // Log breve
+      console.warn(`[LOGIN] Tentativa de login bloqueada para usuário ${usuario.email} (id ${usuario.id_usuario})`);
+      return res.render('login', { error: msg || 'Conta bloqueada.', isLoggedIn: false });
     }
 
     // Verifica se a senha está correta

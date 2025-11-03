@@ -3,6 +3,7 @@ const router = express.Router();
 const { Usuario, Postagem, Notificacao, DocumentoVerificacao, Administrador, Advertencia } = require('../models');
 const fs = require('fs');
 const path = require('path');
+const { deletePublicFile } = require('../utils/fileCleaner'); // << adiciona require
 
 // Listar usuários
 router.get('/usuarios', async (req, res) => {
@@ -130,6 +131,16 @@ router.post('/postagens/:id/excluir', async (req, res) => {
   const { id } = req.params;
   const postagem = await Postagem.findByPk(id);
   if (!postagem) return res.status(404).json({ error: 'Postagem não encontrada' });
+
+  // Apaga arquivo de mídia se existir localmente
+  try {
+    if (postagem.url_midia) {
+      deletePublicFile(postagem.url_midia);
+    }
+  } catch (err) {
+    console.warn('[REPORTS ADM] erro ao remover arquivo da postagem:', err && err.message ? err.message : err);
+  }
+
   await postagem.destroy();
   res.json({ sucesso: true });
 });

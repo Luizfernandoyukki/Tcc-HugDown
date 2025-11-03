@@ -16,44 +16,34 @@ block content
           i.fas.fa-plus.me-2
           | Criar novo grupo
 
-    // Listagem de todos os grupos por categoria
+    // Barra de pesquisa de grupos
+    .search-box.mb-4
+      input.form-control#search-grupo(type="text", placeholder="Pesquisar grupos por nome...")
+
+    // Listagem de todos os grupos
     if grupos && grupos.length
-      // Agrupar por categoria
-      - var gruposPorCategoria = {};
-      - grupos.forEach(function(g) {
-      -   var cat = g.categoria ? g.categoria.nome_categoria : 'Sem Categoria';
-      -   if (!gruposPorCategoria[cat]) gruposPorCategoria[cat] = [];
-      -   gruposPorCategoria[cat].push(g);
-      - });
-      
-      each categoria in Object.keys(gruposPorCategoria).sort()
-        h4.mt-4.mb-3= categoria
-        .row.g-4.mb-5
-          each g in gruposPorCategoria[categoria]
-            .col-md-6.col-lg-4
-              .card.grupo-card
-                if g.foto_grupo
-                  img.card-img-top.grupo-image(src=g.foto_grupo, alt=g.nome_grupo)
-                else
-                  img.card-img-top.grupo-image(src="/images/default-group.png", alt="Grupo padrão")
-                
-                if g.tipo_privacidade !== 'public'
-                  span.badge.bg-secondary.grupo-badge
-                    i.fas.fa-lock.me-1
-                    = g.tipo_privacidade
-                
-                .grupo-details
-                  h5.card-title= g.nome_grupo
-                  if g.descricao_grupo
-                    p.text-muted= g.descricao_grupo.substring(0, 100) + (g.descricao_grupo.length > 100 ? '...' : '')
-                  .grupo-members
-                    i.fas.fa-users.me-2
-                    | #{g.membros ? g.membros.length : 0}
-                    if g.max_participantes
-                      |  / #{g.max_participantes}
-                  if g.categoria
-                    span.badge.bg-primary= g.categoria.nome_categoria
-                  a.stretched-link(href=`/grupos/${g.id_grupo}`)
+      .row.g-4.mb-5
+        each g in grupos
+          .col-md-6.col-lg-4
+            .card.grupo-card(data-nome-grupo=g.nome_grupo.toLowerCase())
+              if g.foto_grupo
+                img.card-img-top.grupo-image(src=g.foto_grupo, alt=g.nome_grupo)
+              else
+                img.card-img-top.grupo-image(src="/images/default-group.png", alt="Grupo padrão")
+              if g.tipo_privacidade !== 'public'
+                span.badge.bg-secondary.grupo-badge
+                  i.fas.fa-lock.me-1
+                  = g.tipo_privacidade
+              .grupo-details
+                h5.card-title= g.nome_grupo
+                if g.descricao_grupo
+                  p.text-muted= g.descricao_grupo.substring(0, 100) + (g.descricao_grupo.length > 100 ? '...' : '')
+                .grupo-members
+                  i.fas.fa-users.me-2
+                  | #{g.membros ? g.membros.length : 0}
+                  if g.max_participantes
+                    |  / #{g.max_participantes}
+                a.stretched-link(href=`/grupos/${g.id_grupo}`)
     else
       p.text-muted Nenhum grupo encontrado.
 
@@ -93,55 +83,26 @@ block content
                   button.btn.btn-success.btn-lg(type="submit")
                     i.fas.fa-user-plus.me-2
                     | Participar do grupo
-              // if usuario
-                // button.btn.btn-danger.mt-3(type="button", onclick=`abrirModalReportGrupo(${grupo.id_grupo}, '${grupo.nome_grupo}')`) Reportar Grupo
-
-    // Modal para reportar grupo
-    // div#modalReportGrupo.modal(style="display:none;")
-    //   div.modal-dialog
-    //     div.modal-content
-    //       div.modal-header
-    //         h5.modal-title Reportar Grupo
-    //         button(type="button", class="close btn-close-modal", data-target="modalReportGrupo") &times;
-    //       div.modal-body
-    //         p#modalReportGrupoNome
-    //         textarea.form-control#modalReportGrupoMotivo(rows="3" placeholder="Descreva o motivo do report")
-    //       div.modal-footer
-    //         button.btn.btn-secondary(type="button", class="btn-cancel-report-grupo", data-target="modalReportGrupo") Cancelar
-    //         button.btn.btn-danger(type="button", id="btn-enviar-report-grupo") Enviar Report
-
-  // script.
-  //   let grupoReportId = null;
-  //   function abrirModalReportGrupo(id, nome) {
-  //     grupoReportId = id;
-  //     document.getElementById('modalReportGrupoNome').innerText = `Reportar grupo: ${nome}`;
-  //     document.getElementById('modalReportGrupoMotivo').value = '';
-  //     document.getElementById('modalReportGrupo').style.display = 'block';
-  //   }
-  //   function fecharModalReportGrupo() {
-  //     document.getElementById('modalReportGrupo').style.display = 'none';
-  //     grupoReportId = null;
-  //   }
-  //   document.getElementById('btn-enviar-report-grupo').onclick = function() {
-  //     const motivo = document.getElementById('modalReportGrupoMotivo').value;
-  //     if (!motivo) return alert('Informe o motivo.');
-  //     fetch('/admin/super/grupos/reportar', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ id_grupo: grupoReportId, motivo })
-  //     }).then(res => {
-  //       if (res.ok) {
-  //         alert('Report enviado!');
-  //         fecharModalReportGrupo();
-  //       } else {
-  //         alert('Erro ao enviar report.');
-  //       }
-  //     });
-  //   };
-  //   document.querySelectorAll('.btn-cancel-report-grupo, .btn-close-modal').forEach(btn => {
-  //     btn.addEventListener('click', fecharModalReportGrupo);
-  //   });
-
-
 block scripts
   script(src="/javascripts/grupos/show.js")
+  script.
+    // Filtro de pesquisa de grupos por nome (funciona para cards)
+    document.addEventListener('DOMContentLoaded', function() {
+      const input = document.getElementById('search-grupo');
+      if (!input) return;
+      input.addEventListener('input', function() {
+        const termo = input.value.trim().toLowerCase();
+        let algum = false;
+        document.querySelectorAll('.card.grupo-card').forEach(card => {
+          const nome = card.querySelector('.card-title')?.textContent.trim().toLowerCase() || '';
+          const show = nome.includes(termo);
+          card.parentElement.style.display = show ? '' : 'none';
+          if (show) algum = true;
+        });
+        // Opcional: mostrar mensagem se nenhum grupo encontrado
+        const emptyMsg = document.querySelector('.no-grupos-msg');
+        if (emptyMsg) emptyMsg.style.display = algum ? 'none' : '';
+      });
+    });
+  // Adiciona o search.js global para barra de pesquisa funcionar
+  script(src="/javascripts/search.js")
