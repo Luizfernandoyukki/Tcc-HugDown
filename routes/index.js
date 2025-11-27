@@ -415,6 +415,14 @@ router.get('/admin/super', asyncHandler(async (req, res) => {
       ],
       order: [['data_report', 'DESC']]
     });
+    const { Report } = require('../models');
+    const reportsPostagens = await Report.findAll({
+      include: [
+        { model: Postagem, as: 'postagem', required: false },
+        { model: Usuario, as: 'usuario', required: false }
+      ],
+      order: [['data_report', 'DESC']]
+    });
 
     // Corrige: define usuarioComNivel como o admin logado
     const usuarioComNivel = admin;
@@ -427,7 +435,8 @@ router.get('/admin/super', asyncHandler(async (req, res) => {
       isLoggedIn: res.locals.isLoggedIn,
       reportsGrupos,
       reportsEventos,
-      reportsUsuarios
+      reportsUsuarios,
+      reportsPostagens
     });
   } catch (err) {
     console.error('[ADMIN/SUPER][ERRO]', err);

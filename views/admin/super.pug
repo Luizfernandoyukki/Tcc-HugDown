@@ -153,12 +153,11 @@ block content
                   else if doc.caminho_arquivo
                     a(href=doc.caminho_arquivo, target="_blank")
                       img(src=doc.caminho_arquivo, alt="Documento", style="max-width:80px;max-height:80px;")
+                // trocado form por botões que acionam AJAX no frontend
                 td
-                  form.d-inline(method="POST", action=`/admin/super/documentos/${doc.id_documento}/aprovar`)
-                    button.btn.btn-success.btn-sm(type="submit") Aprovar
+                  button.btn.btn-success.btn-sm.aprovar-doc(type="button", data-id=doc.id_documento) Aprovar
                 td
-                  form.d-inline(method="POST", action=`/admin/super/documentos/${doc.id_documento}/rejeitar`)
-                    button.btn.btn-danger.btn-sm(type="submit") Rejeitar
+                  button.btn.btn-danger.btn-sm.rejeitar-doc(type="button", data-id=doc.id_documento) Rejeitar
           else
             tr
               td(colspan="8") Nenhum documento de verificação pendente.
@@ -325,6 +324,41 @@ block content
                   ) Aceitar
                 td
                   button.btn.btn-secondary.btn-sm.btn-ignorar-report(data-id=report.id_report, data-tipo="usuarios") Ignorar
+
+    // Seção de Postagens Reportadas (nova)
+    h2.mt-5
+      i.fas.fa-exclamation-triangle.mr-2
+      | Postagens Reportadas
+    .table-scroll(style="max-height:260px; overflow:auto; margin-bottom:32px;")
+      table.table.table-striped
+        thead
+          tr
+            th ID Report
+            th Postagem
+            th Autor
+            th Motivo
+            th Data
+            th Visualizar
+            th Excluir
+            th Ignorar
+        tbody
+          if reportsPostagens && reportsPostagens.length
+            each report in reportsPostagens
+              tr
+                td= report.id_report
+                td= report.postagem ? report.postagem.titulo : report.id_postagem
+                td= report.usuario ? report.usuario.nome_usuario : report.id_usuario
+                td= report.motivo
+                td= report.data_report
+                td
+                  button.btn.btn-secondary.btn-sm.btn-previsualizar-report(data-id=report.id_report, data-tipo="postagem") Previsualizar
+                td
+                  button.btn.btn-danger.btn-sm.btn-excluir-postagem-reportado(data-id=report.id_report) Excluir
+                td
+                  button.btn.btn-secondary.btn-sm.btn-ignorar-report(data-id=report.id_report, data-tipo="postagens") Ignorar
+          else
+            tr
+              td(colspan="8") Nenhuma postagem reportada.
 
     // Modal de Previsualização Genérico
     div#modalPrevisualizarReport.modal.fade(tabindex="-1", aria-labelledby="modalPrevisualizarReportLabel", aria-hidden="true")

@@ -199,10 +199,30 @@ body {
 }
 .foto-post {
   border-radius: 12px;
-  width: 100%;
-  max-height: 400px;
-  object-fit: cover;
+  display: block;
+  max-width: 100%;
+  width: auto;    /* permite largura natural, limitada pelo container */
+  height: auto;   /* preserva proporção */
+  object-fit: unset; /* não forçar crop */
   margin: 1rem 0;
+}
+
+/* Container que centraliza a mídia e respeita seu tamanho natural */
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+/* garante que videos também respeitem proporção e não ultrapassem o container */
+.image-container video,
+.image-container img {
+  max-width: 100%;
+  height: auto;
+  width: auto;
+  border-radius: 12px;
 }
 .conteudo-post {
   color: #495057;

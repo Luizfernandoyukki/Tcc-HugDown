@@ -79,7 +79,10 @@ exports.criar = async (req, res) => {
     // Garante que id_autor seja do usuário logado
     const id_autor = req.session?.userId || (res.locals.usuario && res.locals.usuario.id_usuario);
     if (!id_autor) {
-      return res.status(401).json({ error: 'Usuário não autenticado.' });
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(401).json({ error: 'Usuário não autenticado.' });
+      }
+      return res.status(401).render('error', { error: 'Usuário não autenticado.' });
     }
 
     // Corrige caminho da imagem se houver arquivo
@@ -91,9 +94,18 @@ exports.criar = async (req, res) => {
     req.body.id_autor = id_autor;
 
     const novaPostagem = await Postagem.create(req.body);
-    res.status(201).json(novaPostagem);
+
+    // Se a requisição for AJAX/JSON, retorna JSON; caso contrário redireciona para o painel de postagens
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(201).json(novaPostagem);
+    }
+    return res.redirect('/postagens');
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao criar postagem: ' + err.message });
+    console.error('[POSTAGEM][CRIAR][ERRO]', err);
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(500).json({ error: 'Erro ao criar postagem: ' + err.message });
+    }
+    return res.status(500).render('error', { error: 'Erro ao criar postagem: ' + err.message });
   }
 };
 

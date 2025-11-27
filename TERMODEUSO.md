@@ -79,4 +79,4 @@ Podemos alterar estes Termos de Uso a qualquer momento. Mudanças relevantes ser
 
 Em caso de dúvidas ou denúncias: SuporteHugDown@gmail.com
 
- Última atualização: 03/10/2025
+ Última atualização: 03/11/2025

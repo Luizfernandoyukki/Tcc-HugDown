@@ -68,6 +68,6 @@ O HugDown pode atualizar esta Política de Privacidade. Alterações significati
 
 9. Encarregado de Proteção de Dados (DPO)
 
- privacidadehugdown@gmail.com
+ SuporteHugDown@gmail.com
 
- Última atualização: 03/10/2025
+ Última atualização: 03/11/2025

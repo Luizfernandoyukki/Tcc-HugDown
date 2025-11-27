@@ -130,13 +130,13 @@ router.get('/:id/edit', requireLogin, podeEditarOuVerPostagem, async (req, res) 
 // Criação, edição, remoção (POST, PUT, DELETE)
 router.post('/', requireLogin, uploadPostagem.single('arquivo_post'), async (req, res, next) => {
   try {
-    // Verifica se já existe postagem igual (exemplo: pelo título e autor)
+    // Verifica se já existe postagem igual
     const { titulo } = req.body;
     const id_autor = res.locals.usuario?.id_usuario;
     if (titulo && id_autor) {
       const existe = await controllers.postagemController.buscarPorTituloAutor(titulo, id_autor);
       if (existe) {
-        // Apenas redireciona para index de postagens, sem alert
+        // Use caminho relativo
         return res.redirect('/postagens');
       }
     }

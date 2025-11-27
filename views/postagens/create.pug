@@ -10,7 +10,7 @@ block content
       span.ms-2.text-success(title="Usuário verificado")
         i.fas.fa-check-circle
 
-    form#form-postagem(method="POST" enctype="multipart/form-data")
+    form#form-postagem(method="POST" action="/postagens" enctype="multipart/form-data")
       .mb-3
         label(for="titulo") Título *
         input.form-control(type="text", id="titulo", name="titulo", required, maxlength="200")

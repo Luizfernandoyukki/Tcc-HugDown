@@ -24,10 +24,10 @@ const storagePerfil = multer.diskStorage({
 });
 const uploadPerfil = multer({ storage: storagePerfil });
 
-// Storage para documento de verificação
+// Storage para documento de verificação (agora salva em public/docs)
 const storageDoc = multer.diskStorage({
   destination: function (req, file, cb) {
-    const dir = path.join(__dirname, '../public/images/docs');
+    const dir = path.join(__dirname, '../public/docs');
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -40,6 +40,41 @@ const storageDoc = multer.diskStorage({
 });
 const uploadDoc = multer({ storage: storageDoc });
 
+// Storage unificado: roteia por fieldname
+const storageMulti = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === 'foto_perfil') {
+      const dir = path.join(__dirname, '../public/images/perfis');
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    } else if (file.fieldname === 'documento_comprobatorio' || file.fieldname === 'documento') {
+      const dir = path.join(__dirname, '../public/docs');
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    } else {
+      // fallback
+      const dir = path.join(__dirname, '../public/uploads');
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    }
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + ext);
+  }
+});
+const uploadMulti = multer({ storage: storageMulti, fileFilter: (req, file, cb) => {
+  // aceita imagem para foto_perfil e PDF/imagem para documento
+  if (file.fieldname === 'foto_perfil') {
+    return file.mimetype.startsWith('image/') ? cb(null, true) : cb(null, false);
+  }
+  if (file.fieldname === 'documento_comprobatorio' || file.fieldname === 'documento') {
+    const ok = file.mimetype === 'application/pdf' || file.mimetype.startsWith('image/');
+    return ok ? cb(null, true) : cb(new Error('Documento deve ser PDF ou imagem.'));
+  }
+  cb(null, false);
+}});
+
 const { Usuario, DocumentoVerificacao } = require('../models');
 const { usuarioController } = controllers;
 const { podeEditarOuVerPerfil } = require('../middlewares/auth');
@@ -49,23 +84,7 @@ router.use(express.urlencoded({ extended: true }));
 // Cadastro de usuário (com upload de foto de perfil E documento de verificação)
 router.post(
   '/',
-  multer({
-    storage: storagePerfil,
-    // Aceita ambos campos: foto_perfil (imagem) e documento_comprobatorio (pdf)
-    fileFilter: (req, file, cb) => {
-      if (file.fieldname === 'foto_perfil') {
-        // Aceita qualquer imagem
-        if (file.mimetype.startsWith('image/')) return cb(null, true);
-        return cb(null, false);
-      }
-      if (file.fieldname === 'documento_comprobatorio') {
-        // Aceita apenas PDF
-        if (file.mimetype === 'application/pdf') return cb(null, true);
-        return cb(null, false);
-      }
-      cb(null, false);
-    }
-  }).fields([
+  uploadMulti.fields([
     { name: 'foto_perfil', maxCount: 1 },
     { name: 'documento_comprobatorio', maxCount: 1 }
   ]),
@@ -75,6 +94,7 @@ router.post(
       req.file = req.files['foto_perfil'][0];
     }
     if (req.files && req.files['documento_comprobatorio']) {
+      // envia o filename para o controller; controller agora tratará como '/docs/<filename>'
       req.body.documento_comprobatorio = req.files['documento_comprobatorio'][0].filename;
     }
     // Chama o controller normalmente

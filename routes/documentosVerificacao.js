@@ -5,10 +5,10 @@ const multer = require('multer');
 const { DocumentoVerificacao } = require('../models');
 const requireLogin = require('../middlewares/auth');
 
-// storage para documentos (pasta c:\...HugDown\docs)
+// storage para documentos (agora em /public/docs)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '..', 'docs'));
+    cb(null, path.join(__dirname, '..', 'public', 'docs'));
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);

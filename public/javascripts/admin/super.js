@@ -374,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (previsualizarModalAberto) return;
       previsualizarModalAberto = true;
       const id = this.dataset.id;
-      const tipo = this.dataset.tipo; // comentario, grupo, evento, usuario
+      const tipo = this.dataset.tipo; // comentario, grupo, evento, usuario, postagem
       const modalEl = document.getElementById('modalPrevisualizarReport');
       const conteudo = document.getElementById('modalPrevisualizarReportConteudo');
       conteudo.innerHTML = '<div class="text-center text-muted">Carregando...</div>';
@@ -383,6 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
       else if (tipo === 'grupo') url = `/admin/super/reports-grupos/${id}/dados`;
       else if (tipo === 'evento') url = `/admin/super/reports-eventos/${id}/dados`;
       else if (tipo === 'usuario') url = `/admin/super/reports-usuarios/${id}/dados`;
+      else if (tipo === 'postagem') url = `/admin/super/reports-postagens/${id}/dados`;
       else url = `/admin/super/reports/${id}/dados`;
       try {
         const res = await fetch(url);
@@ -396,6 +397,9 @@ document.addEventListener('DOMContentLoaded', function() {
           html = `<b>Evento:</b> ${data.titulo_evento || ''}<br><b>Descrição:</b><br><div style="white-space:pre-line">${data.descricao_evento || ''}</div>`;
         } else if (tipo === 'usuario') {
           html = `<b>Usuário:</b> ${data.nome_usuario || ''}<br><b>Motivo:</b> ${data.motivo || ''}<br><b>Detalhes:</b> ${data.detalhes || ''}`;
+        } else if (tipo === 'postagem') {
+          html = `<b>Postagem:</b> ${data.titulo || ''}<br><b>Conteúdo:</b><br><div style="white-space:pre-line">${data.conteudo || ''}</div>`;
+          if (data.url_midia) html += `<br><a href="${data.url_midia}" target="_blank">Mídia</a>`;
         } else {
           html = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
         }
@@ -416,6 +420,25 @@ document.addEventListener('DOMContentLoaded', function() {
         previsualizarModalAberto = false;
         modalEl.removeEventListener('hidden.bs.modal', handler);
       });
+    });
+  });
+
+  // Excluir postagem reportada (AJAX, sem alert)
+  document.querySelectorAll('.btn-excluir-postagem-reportado').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id = this.dataset.id;
+      const tr = this.closest('tr');
+      if (!confirm('Excluir a postagem reportada (e remover todos os reports relacionados)?')) return;
+      fetch(`/admin/super/reports-postagens/${id}/excluir`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.sucesso && tr) {
+            tr.remove();
+            mostrarMensagemAdmin('Postagem removida com sucesso.', 'success');
+          } else {
+            mostrarMensagemAdmin(data.error || 'Erro ao excluir postagem reportada.', 'danger');
+          }
+        }).catch(() => mostrarMensagemAdmin('Erro ao excluir postagem reportada.', 'danger'));
     });
   });
 

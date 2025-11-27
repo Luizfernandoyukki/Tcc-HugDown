@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Usuario, Postagem, Notificacao, DocumentoVerificacao, Administrador, Advertencia } = require('../models');
+const { Usuario, Postagem, Notificacao, DocumentoVerificacao, Administrador, Advertencia, Report } = require('../models');
 const fs = require('fs');
 const path = require('path');
 const { deletePublicFile } = require('../utils/fileCleaner'); // << adiciona require
@@ -238,6 +238,77 @@ router.post('/reports-eventos/:id/dismiss', async (req, res) => {
     await report.destroy();
   }
   res.json({ sucesso: true });
+});
+
+// Dados detalhados de report de postagem para previsualização AJAX
+router.get('/reports-postagens/:id/dados', async (req, res) => {
+  try {
+    const report = await Report.findByPk(req.params.id, {
+      include: [{ model: Postagem, as: 'postagem' }, { model: Usuario, as: 'usuario' }]
+    });
+    if (!report) return res.status(404).json({ error: 'Report de postagem não encontrado' });
+    // tenta usar snapshot se existir
+    let snapshot = {};
+    try { snapshot = report.snapshot_post ? JSON.parse(report.snapshot_post) : {}; } catch { snapshot = {}; }
+    return res.json({
+      titulo: snapshot.titulo || (report.postagem ? report.postagem.titulo : ''),
+      conteudo: snapshot.conteudo || (report.postagem ? report.postagem.conteudo : ''),
+      url_midia: snapshot.url_midia || (report.postagem ? report.postagem.url_midia : ''),
+      motivo: report.motivo,
+      detalhes: report.detalhes || ''
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Excluir postagem reportada (e o report) - AJAX
+router.post('/reports-postagens/:id/excluir', async (req, res) => {
+  try {
+    const report = await Report.findByPk(req.params.id);
+    if (!report) return res.status(404).json({ sucesso: false, error: 'Report não encontrado' });
+    if (report.id_postagem) {
+      const postagem = await Postagem.findByPk(report.id_postagem);
+      if (postagem) {
+        // remove arquivo relacionado se houver (usa utilitário se presente)
+        try { if (postagem.url_midia) { const { deletePublicFile } = require('../utils/fileCleaner'); deletePublicFile(postagem.url_midia); } } catch(e) {}
+        await postagem.destroy();
+      }
+      // remove todos reports do mesmo post
+      await Report.destroy({ where: { id_postagem: report.id_postagem } });
+    } else {
+      await report.destroy();
+    }
+    return res.json({ sucesso: true });
+  } catch (err) {
+    return res.status(500).json({ sucesso: false, error: err.message });
+  }
+});
+
+// Ignorar (dismiss) report de postagem (AJAX)
+router.post('/reports-postagens/:id/dismiss', async (req, res) => {
+  try {
+    const report = await Report.findByPk(req.params.id);
+    if (!report) return res.status(404).json({ sucesso: false, error: 'Report não encontrado' });
+    // marca apenas este report como dismissed
+    await report.update({ status: 'dismissed' });
+    return res.json({ sucesso: true });
+  } catch (err) {
+    return res.status(500).json({ sucesso: false, error: err.message });
+  }
+});
+
+// Listar reports de postagens (JSON) — útil para consumo AJAX (opcional)
+router.get('/reports-postagens', async (req, res) => {
+  try {
+    const reports = await Report.findAll({
+      include: [{ model: Postagem, as: 'postagem' }, { model: Usuario, as: 'usuario' }],
+      order: [['data_report', 'DESC']]
+    });
+    res.json(reports);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

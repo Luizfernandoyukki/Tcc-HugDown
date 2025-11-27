@@ -169,8 +169,10 @@ exports.criar = async (req, res) => {
     if (req.body.profissional_saude === '1') {
       const { DocumentoVerificacao } = require('../models');
       let caminho_arquivo = null;
+      // antes: '/images/docs/' + req.body.documento_comprobatorio
+      // agora: documentos ficam em /docs/
       if (req.body.documento_comprobatorio) {
-        caminho_arquivo = '/images/docs/' + req.body.documento_comprobatorio;
+        caminho_arquivo = '/docs/' + req.body.documento_comprobatorio;
       }
       await DocumentoVerificacao.create({
         id_usuario: novoUsuario.id_usuario,
@@ -226,6 +228,44 @@ exports.remover = async (req, res) => {
     const usuario = await Usuario.findByPk(id);
     if (!usuario) return res.status(404).json({ error: 'Usuário não encontrado' });
 
+    // Garante existência da conta placeholder (usuário deletado)
+    const placeholderNome = 'usuario_deletado';
+    const placeholderEmail = 'deleted@hugdown.local';
+    const senhaTemp = Math.random().toString(36).slice(2);
+
+    const [placeholder, created] = await Usuario.findOrCreate({
+      where: { nome_usuario: placeholderNome },
+      defaults: {
+        email: placeholderEmail,
+        senha_hash: await bcrypt.hash(senhaTemp, 10),
+        nome_real: 'Usuário',
+        sobrenome_real: 'Deletado',
+        nome_usuario: placeholderNome,
+        telefone: '0000000000',
+        endereco: '',
+        cidade: '',
+        estado: '',
+        cep: '',
+        pais: 'Brasil',
+        verificado: false,
+        foto_perfil: '/images/default-avatar.png',
+        biografia: 'Conta padrão para conteúdos de usuários excluídos',
+        ativo: false,
+        idioma_preferido: 'pt-BR'
+      }
+    });
+
+    // Reatribui postagens do usuário para a conta placeholder
+    try {
+      await Postagem.update(
+        { id_autor: placeholder.id_usuario },
+        { where: { id_autor: usuario.id_usuario } }
+      );
+      console.log(`[USUARIO][REMOVER] Postagens de ${usuario.id_usuario} reassinadas para ${placeholder.id_usuario}`);
+    } catch (err) {
+      console.warn('[USUARIO][REMOVER] falha ao reatribuir postagens:', err && err.message ? err.message : err);
+    }
+
     // Apaga foto de perfil física se existir localmente
     try {
       const foto = usuario.foto_perfil;
@@ -236,22 +276,18 @@ exports.remover = async (req, res) => {
       console.warn('[USUARIO][REMOVER] erro ao remover foto de perfil:', err.message);
     }
 
-    // Remove mídias associadas às postagens deste usuário (se houver)
+    // Remove mídias associadas às postagens (já reassinadas; removemos apenas arquivos vinculados ao usuário original se ainda existirem caminhos exclusivos)
     try {
-      const postagens = await Postagem.findAll({ where: { id_autor: id } });
-      for (const post of postagens) {
-        const midia = post.url_midia;
-        if (midia && typeof midia === 'string') {
-          deletePublicFile(midia);
-        }
-      }
+      const postagens = await Postagem.findAll({ where: { id_autor: placeholder.id_usuario } });
+      // Não remove arquivos das postagens reassinadas; somente limpa arquivos que apontem explicitamente para pasta de usuário excluído (opcional)
+      // (manter comportamento seguro: não remover mídias reassinadas)
     } catch (err) {
-      console.warn('[USUARIO][REMOVER] erro ao remover mídias de postagens:', err.message);
+      console.warn('[USUARIO][REMOVER] erro ao processar mídias de postagens:', err.message);
     }
 
-    // Agora remove o usuário (CASCATA deve remover postagens/relacionados no DB)
+    // Agora remove o usuário (sem afetar postagens, pois já foram reassinadas)
     await usuario.destroy();
-    res.json({ mensagem: 'Usuário removido com sucesso' });
+    res.json({ mensagem: 'Usuário removido com sucesso. Postagens transferidas para usuário_deletado.' });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao remover usuário: ' + err.message });
   }

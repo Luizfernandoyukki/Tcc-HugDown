@@ -103,4 +103,4 @@ Este manual foi criado para ajudar todos os usuários a entenderem como utilizar
 **Acesse este manual sempre que precisar!**  
 O HugDown está aqui para facilitar sua experiência, garantir inclusão e promover conexões seguras.
 
- Última atualização: 03/10/2025
+ Última atualização: 03/11/2025

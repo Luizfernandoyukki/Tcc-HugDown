@@ -60,6 +60,9 @@ block content
                   if post.autor.profissionalSaude
                     span.ms-2.text-primary(title="Profissional de Saúde")
                       i.fas.fa-user-md
+                  // badge para usuário banido
+                  if post.autor.bloqueado
+                    span.ms-2.badge.bg-danger(title="Usuário banido") Banido
               h3.titulo-post= post.titulo
               .resumo-post= post.resumo
               .datas-post
@@ -74,17 +77,18 @@ block content
               if post.conteudo
                 .conteudo-post(style="white-space:pre-line")= post.conteudo
               if post.url_midia
-                if post.tipo_postagem === 'video' || (post.tipo_midia && post.tipo_midia.startsWith('video'))
-                  video.foto-post(controls, style="width:100%;max-height:400px;object-fit:cover;margin:1rem 0;")
-                    source(src=post.url_midia, type=post.tipo_midia || 'video/mp4')
-                    | Seu navegador não suporta vídeo.
-                else if post.tipo_postagem === 'article' && post.url_midia.endsWith('.pdf')
-                  // Prévia do PDF usando PDF.js
-                  .pdf-preview-box(style="margin:1rem 0;")
-                    canvas.pdf-preview-canvas(data-pdf=post.url_midia, style="width:100%;max-width:400px;height:auto;border-radius:8px;box-shadow:0 2px 8px #0001;")
-                    a.btn.btn-outline-primary.mt-2(href=post.url_midia, target="_blank") Abrir PDF Completo
-                else
-                  img.foto-post(src=post.url_midia, alt="Foto da postagem")
+                .image-container
+                  if post.tipo_postagem === 'video' || (post.tipo_midia && post.tipo_midia.startsWith('video'))
+                    video.foto-post(controls)
+                      source(src=post.url_midia, type=post.tipo_midia || 'video/mp4')
+                      | Seu navegador não suporta vídeo.
+                  else if post.tipo_postagem === 'article' && post.url_midia.endsWith('.pdf')
+                    // Prévia do PDF usando PDF.js
+                    .pdf-preview-box
+                      canvas.pdf-preview-canvas(data-pdf=post.url_midia)
+                      a.btn.btn-outline-primary.mt-2(href=post.url_midia, target="_blank") Abrir PDF Completo
+                  else
+                    img.foto-post(src=post.url_midia, alt="Foto da postagem")
               // Rodapé do card: botões e contadores
               .card-footer.d-flex.justify-content-between.align-items-center(style="background:transparent;border:none;padding:0;margin-top:1rem;")
                 .acoes-post.d-flex.gap-2
